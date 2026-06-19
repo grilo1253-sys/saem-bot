@@ -311,7 +311,10 @@ if (body.fromMe) return res.sendStatus(200);
 const phone = body.phone;
 const message = body.text?.message || body.text || '';
 
-if (!phone || !message) return res.sendStatus(200);
+const isImage = body.image || body.mimetype?.includes('image');
+if (!phone || (!message && !isImage)) return res.sendStatus(200);
+if (!message && isImage) message = '[Cliente enviou uma imagem]';
+
 
 console.log(`📱 Mensagem de ${phone}: ${message}`);
 
