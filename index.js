@@ -398,7 +398,7 @@ const t = fs.readFileSync('tabela.txt', 'utf8');
 res.send(t);
 } catch {
 res.send('');
-}v
+});
 
 app.post('/salvar-tabela', (req, res) => {
 fs.writeFileSync('tabela.txt', req.body.tabela);
