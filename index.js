@@ -349,6 +349,7 @@ const body = req.body;
 // Ignora mensagens do próprio bot
 if (body.fromMe) return res.sendStatus(200);
 
+console.log('BODY:', JSON.stringify(body).substring(0, 300));
 const phone = body.phone;
 const message = body.text?.message || body.text || '';
 
