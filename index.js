@@ -383,6 +383,28 @@ res.sendStatus(500);
 // ==========================================
 // INICIA O SERVIDOR
 // ==========================================
+
+// ADMIN PAINEL
+const fs = require('fs');
+const path = require('path');
+
+app.get('/admin', (req, res) => {
+res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+app.get('/tabela', (req, res) => {
+try {
+const t = fs.readFileSync('tabela.txt', 'utf8');
+res.send(t);
+} catch {
+res.send('');
+}v
+
+app.post('/salvar-tabela', (req, res) => {
+fs.writeFileSync('tabela.txt', req.body.tabela);
+res.json({ok: true});
+});
+
 app.listen(3000, () => {
 console.log('✅ Bot Saem Celulares rodando na porta 3000!');
 });
