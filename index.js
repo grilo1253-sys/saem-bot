@@ -350,6 +350,16 @@ const body = req.body;
 if (body.fromMe) return res.sendStatus(200);
 
 console.log('BODY:', JSON.stringify(body).substring(0, 300));
+const isGroup = body.isGroup || body.phone?.includes('-group');
+if (isGroup) {
+const msgGrupo = body.text?.message || body.text || '';
+const isImagem = body.image || body.mimetype?.includes('image');
+if (isImagem) return res.sendStatus(200);
+if (!msgGrupo) return res.sendStatus(200);
+const assuntosPermitidos = ['troca', 'valor', 'preco', 'manutencao', 'conserto', 'cliente', 'venda', 'negoc', 'quanto', 'aparelho'];
+const temAssunto = assuntosPermitidos.some(a => msgGrupo.toLowerCase().includes(a));
+if (!temAssunto) return res.sendStatus(200);
+}
 const phone = body.phone;
 const message = body.text?.message || body.text || '';
 
