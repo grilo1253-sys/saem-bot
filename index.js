@@ -167,7 +167,7 @@ TABELA DE PREÇOS ATUAL
 
 ✨ TABELA SAEM CELULARES ✨
 (Cobrança de taxas em cartão débito/crédito conforme Lei 13.455/2017)
-Site: https://www.saemcelulares.net/pagina-inicial
+Site: https://www.www.saemcelulares.net
 
 🔥 OFERTAS:
 iPhone 13 Pro 128GB (Tela trocada e câmera genuína) - R$2.099 → 10x R$237,96 / 12x R$199,45 ✅ branco
@@ -441,3 +441,5 @@ res.json({ok: true});
 app.listen(3000, () => {
 console.log('✅ Bot Saem Celulares rodando na porta 3000!');
 });
+
+// site correto
