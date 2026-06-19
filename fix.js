@@ -1,0 +1,7 @@
+const fs = require('fs');
+let c = fs.readFileSync('index.js', 'utf8');
+const antigo = "if (!message && isImage) message = '[Cliente enviou uma imagem]';";
+const novo = "if(isImage){const imageUrl=body.image?.imageUrl||body.image?.url||body.imageUrl;if(imageUrl){try{const imgResp=await axios.get(imageUrl,{responseType:'arraybuffer'});const imgBase64=Buffer.from(imgResp.data).toString('base64');const imgMime=body.mimetype||'image/jpeg';if(!conversas[phone])conversas[phone]=[];const visionResp=await axios.post('https://api.anthropic.com/v1/messages',{model:'claude-sonnet-4-6',max_tokens:1024,system:SYSTEM_PROMPT,messages:[...conversas[phone],{role:'user',content:[{type:'image',source:{type:'base64',media_type:imgMime,data:imgBase64}},{type:'text',text:body.text?.message||'Descreva esta imagem.'}]}]},{headers:{'x-api-key':ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01','content-type':'application/json'}});const reply=visionResp.data.content[0].text;await axios.post('https://api.z-api.io/instances/'+ZAPI_INSTANCE+'/token/'+ZAPI_TOKEN+'/send-text',{phone,message:reply},{headers:{'client-token':ZAPI_CLIENT_TOKEN}});return res.sendStatus(200);}catch(e){console.log(e.message);}}}";
+c = c.replace(antigo, novo);
+fs.writeFileSync('index.js', c);
+console.log('OK');
