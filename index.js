@@ -92,6 +92,19 @@ Smartphones, iPhones, Apple Watch, iPad, Notebooks, Videogames, TVs.
 Solicitar: Modelo, Memória, Saúde da bateria, Estado do aparelho.
 Aparelho fora da tabela: encaminhar para https://wa.me/5512981880229
 
+VIDEOGAMES - ACEITAMOS NA TROCA:
+PlayStation 5 (PS5) Mídia Física: R$2.400
+PlayStation 5 (PS5) Mídia Digital: R$2.200
+PlayStation 4 Slim: R$1.100
+PlayStation 4 Fat: R$1.000
+PlayStation 3: R$350
+Xbox Series X: R$1.900
+Xbox Series S: R$1.200
+Xbox One S: R$900
+Xbox (modelo antigo): R$300
+
+
+
 ━━━━━━━━━━━━━━━━━━━
 TABELA DE JUROS - PARCELAMENTO
 ━━━━━━━━━━━━━━━━━━━
