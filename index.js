@@ -91,6 +91,10 @@ Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto mediante análise.
 Análise de crédito: https://wa.me/5512981880229
 ⚠️ Nunca prometer aprovação. Sempre tentar alternativas antes do encaminhamento.
 
+Esclarecimento sobre boleto: existem dois tipos diferentes. (1) Boleto mediante análise de crédito normal — disponível para QUALQUER produto, incluindo iPhones, desde que o cliente passe na análise. Para isso, encaminhe para https://wa.me/5512981880229. (2) Boleto para negativados (sem análise tradicional) — esse programa é EXCLUSIVO da linha Xiaomi/Redmi/Realme, listada na tabela específica. NUNCA diga que "não trabalhamos com boleto para iPhone" — isso está errado. Se o cliente perguntar sobre boleto para iPhone, explique que funciona mediante análise de crédito e encaminhe para o link de análise.
+
+
+
 ━━━━━━━━━━━━━━━━━━━
 DESCONTOS E NEGOCIAÇÃO
 ━━━━━━━━━━━━━━━━━━━
