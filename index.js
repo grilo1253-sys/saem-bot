@@ -223,11 +223,6 @@ https://www.saemcelulares.net/pagina-inicial
 
 🔥*Ofertas Saem Celulares*🔥
 
-iPhone 13 Pro 128GB
-(Tela trocada e câmera genuína )
-💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-✅ branco 88%
-
 iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅ Azul 80%
@@ -253,7 +248,6 @@ iPhone 16 128Gb
 iPhone 17 256Gb
 💰 R$5.299,00 → 10x R$ 600,75 / 12x R$ 503,52
 ⤴️preto
-⤴️branco
 
 iPhone 17 Pro 256Gb
 💰 R$7.499,00 → 10x R$ 850,17/ 12x R$ 712,56
@@ -549,10 +543,6 @@ Moto G15 256GB
 💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
 ✅Verde
 
-Redmi 13 256gb 
-💰 R$699,00 → 10x R$ 79,25 | 12x R$ 66,42
-✅ Azul
-
 Moto G31 5g 128gb 
 💰 R$699,00 → 10x R$ 79,25 | 12x R$ 66,42
 ✅ preto 
@@ -617,7 +607,6 @@ Redmi Note 15 Pro 256GB 8Ram 4G
 Caixa de som JBL GO 4 
 (original)
 💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
-
 ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
 
 ━━━━━━━━━━━━━━━━━━━
