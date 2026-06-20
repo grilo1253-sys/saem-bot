@@ -207,29 +207,25 @@ https://www.saemcelulares.net/pagina-inicial
 iPhone 13 Pro 128GB
 (Tela trocada e câmera genuína )
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-✅ branco 88%
+✅ branco 
 
 iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-✅ Azul 80%
+✅ Azul
 
 iPhone 13 128GB (Tela trocada)
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-⤴️ Rosa 73%
+⤴️ Rosa 
 
 iPhone 13 128Gb
 💰 R$1.899,00 → 10x R$ 215,29 | 12x R$180,44
-✅ Azul 88% 
+✅ Azul
 
 iPhone 12 128Gb
 💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
-⤴️Preto 74%
+⤴️Preto 
 
 🍏📱 *iPhones Novos*
-
-iPhone 16 128Gb
-💰 R$4.499,00 → 10x R$ 510,05 / 12x R$ 427,50
-⤴️Rosa
 
 iPhone 17 256Gb
 💰 R$5.299,00 → 10x R$ 600,75 / 12x R$ 503,52
@@ -247,217 +243,209 @@ iPhone 17 Pro 256Gb
 
 iPhone 17 Pro max 256Gb
 💰 R$7.399,00 → 10x R$ 838,83 / 12x R$ 703,06
-✅laranja 100%
+✅laranja
 
 iPhone 16 Pro 128Gb
 💰 R$4699,00 → 10x R$ 532,73| 12x R$ 446,50
-✅ Preto 94%
+✅ Preto 
 
 iPhone 15 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
-✅Azul 73%
-✅Azul 78%
-✅Rosa 77%
-✅Preto 89%
-
-iPhone 15 Pro Max 256Gb
-💰 R$3.999,00 → 10x R$464,71 | 12x R$389,49
-⤴️ Azul 80%
+✅Azul
+✅Azul
+✅Rosa
+✅Preto 
 
 iPhone 14 Pro Max 512Gb
 💰 R$3.999,00 → 10x R$464,71 | 12x R$389,49
-⤴️ Preto 92%
-⤴️ Branco 89%
+⤴️ Preto
+⤴️ Branco 
 
 iPhone 14 Pro max 128GB
 💰 R$3.599,00 → 10x R$ 408,02 | 12x R$341,90
-⤴️ roxo 85%
-✅ branco 76%
-✅ Preto 91%
-✅ Roxo 86%
+⤴️ roxo 
+✅ branco 
+✅ Preto 
+✅ Roxo
 
 iPhone 14 Pro 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
-⤴️ roxo 78%
+⤴️ roxo 
 
 iPhone 14 Plus 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
-⤴️ Branco 84%
-⤴️ Branco 85%
+⤴️ Branco
+⤴️ Branco 
 
 iPhone 14 128GB
 (Caixa + cabo)
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 71%
+✅ preto 
 
 iPhone 14 128GB
 (Caixa + cabo)
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 87%
+✅ preto  
 
 iPhone 14 128GB
 💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
-⤴️ preto 98% 
-⤴️ preto 98%
-⤴️ preto 99%
-⤴️ Red 100%
-⤴️ Azul 87%
-⤴️ Azul 100%
-✅ Red 87%
-✅ azul 87%
-✅ azul 100
-✅ azul 100
-✅ Preto 100%
-✅ Preto 90%
-✅ Preto 100%
-✅ Preto 100%
-✅ Preto 100%
-✅ Preto 88%
-✅ Preto 100
+⤴️ preto
+⤴️ preto 
+⤴️ preto 
+⤴️ Red
+⤴️ Azul 
+⤴️ Azul 
+✅ Red
+✅ azul 
+✅ azul 
+✅ azul 
+✅ azul 
+✅ Preto
+✅ Preto
+✅ Preto
+✅ Preto
+✅ Preto
+✅ Preto
+✅ Preto
 
 iPhone 14 128Gb
 (Câmera genuína)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-⤴️ vermelho  86%
-⤴️ vermelho 94%
+⤴️ vermelho  
+⤴️ vermelho 
 
 iPhone 14 128Gb
 (Tela e bateria genuína)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-⤴️ preto 100%
+⤴️ preto
 
 iPhone 14 128GB
 (Tela trocada)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-✅ branco 96%
+✅ branco 
 
 iPhone 13 Pro Max 128GB
 💰 R$3.099,00 → 10x R$ 351,34 | 12x R$294,47
-⤴️ Branco 100%
-⤴️ dourado 74%
+⤴️ Branco 
+⤴️ dourado
 
 iPhone 13 Pro 256gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
-✅ dourado 87%
+✅ dourado 
 
 iPhone 13 Pro 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
-⤴️Branco 100%
-⤴️Azul 78%
+⤴️Branco
+⤴️Azul
 
 iPhone 13 128GB
 💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
-⤴️ Verde 88% 
-✅ rosa 82%
-✅ branco 85%
+⤴️ Verde  
+✅ rosa 
+✅ branco 
 
 iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-✅ Azul 86%
-✅Vermelho 72%
+✅ Azul
+✅Vermelho
 
 iPhone 12 Pro max 128gb 
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ branco 88%
+✅ branco    
 
 iPhone 12 Pro Max 128Gb
  (câmera traseira 1x tremendo)
 💰 R$1.899,00 → 10x R$ 215,29 | 12x R$180,44
-⤴️ Dourado 81%
+⤴️ Dourado 
 
 iPhone 12 128Gb
 (Tela trocada)
 💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
-⤴️Branco 91%
+⤴️Branco
 
 iPhone 12 64gb 
 💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-✅ preto 74%
+✅ preto 
 
 iPhone 12 64GB 
 💰 R$1.499,00→ 10x R$ 169,94 | 12x R$ 142,44
-⤴️Branco 71%
-✅Branco 84%
+⤴️Branco
+✅Branco
 
 iPhone 12 64Gb
 (bateria trocada)
 💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-⤴️ Preto 100%
+⤴️ Preto 
 
 iPhone 12 64GB
 (bateria trocada)
 💰 R$1.299,00→ 10x R$ 147,27| 12x R$ 123,43
-✅ preto 100%
+✅ preto  
 
 iPhone 12 mini 64Gb
 (bateria trocada)
 💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-✅Vermelho 100%
+✅Vermelho
 
 iPhone 11 Pro Max 512Gb
 💰 R$1.799,00 → 10x R$ 203,95 | 12x R$ 170,94
-✅ Dourado 76%
+✅ Dourado
 
 iPhone 11 Pro Max 256gb (Camera 1x tremendo) 
 💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-⤴️ Preto 69%
+⤴️ Preto 
 
 iPhone 11 Pro Max 64gb 
 (Tela e bateria trocada, Face ID off)
 💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-⤴️ Preto 100%
+⤴️ Preto    
 
 iPhone 11 Pro Max 64gb
 💰 R$1.499,00 → 10x R$ 169,94 | 12x R$ 142,44
-✅ Preto 96%
+✅ Preto
 
 IPhone 11 128gb
 (tela trocada, Face ID off, câmera frontal embaçada)
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ verde 73%
+⤴️ verde  
 
 iPhone 11 128GB
 (tela trocada)
 💰 R$1.099,00→ 10x R$ 124,59| 12x R$ 104,43
-✅ Preto 82%
+✅ Preto
 
 iPhone 11 64GB
 ( tela trocada)
 💰 R$1.099,00→ 10x R$ 124,59| 12x R$ 104,43
-⤴️ Preto 72%
+⤴️ Preto
 
 iPhone 11 64GB
 (Vibra off)
 💰 R$999,00→ 10x R$ 113,26 | 12x R$ 94,93
-✅Preto 77%
-
-IPhone 11 64gb
-(tela trocada, Face ID off)
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ branco 69%
+✅Preto
 
 IPhone XR 128Gb
 (NFC off)
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅Preto 73%
+✅Preto 
 
 IPhone XR 64gb
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅  branco 84%
+✅  branco 
 
 IPhone XR 64gb
 (Sem Face ID) 
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ azul 75%
+⤴️ azul  
 
 IPhone SE 2 geração 64gb 
 💰 R$799,00 → 10x R$90,58 / 12x R$75,92
-✅ Preto 100%
+✅ Preto
 
 iPhone 8 64GB 
  (camera traseira off)
 💰R$399,00 → 10x R$ 45,23 | 12x R$ 37,91
-⤴️ Red 100%
+⤴️ Red
 
 📱 *APARELHOS DISPONÍVEIS PARA PARCELAMENTO EM BOLETO PARA NEGATIVADOS:*
 
