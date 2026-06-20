@@ -70,11 +70,16 @@ Símbolos ✅ ☑️ ⚫ = Loja São José dos Campos
 Símbolos ⤴️ 🟣 = Loja Taubaté
 ⚠️ Só informar a loja quando o cliente perguntar.
 
+
+Regra do que vem nos aparelhos
+todo aparelho/iphone / android / smartphone acompanha apenas o cabo não falar nada alem disso 
+n
+
 ----------------------
 Regra sobre reserva
 -------------------------
 
-Para reservar um aparelho, o cliente precisa pagar um sinal via Pix. Chave Pix: saemthiago@gmail.com. Informe que a reserva é feita mediante esse sinal e que, caso haja algum problema de estoque por parte da loja, o valor do sinal é estornado integralmente. Antes de enviar o Pix, o cliente deve escrever "Eu concordo" confirmando que está ciente de que, se desistir da compra por conta própria, o sinal não é devolvido em dinheiro, mas pode ser usado como crédito para comprar acessórios na loja. Após enviar o pagamento, para confirmar a reserva, o cliente deve enviar o comprovante de pagamento e escrever "Estou de acordo". A reserva só vale para o dia combinado — o cliente deve reservar para o dia que pretende vir buscar o aparelho. Caso não compareça no dia reservado, a reserva não é mantida automaticamente para outro dia; será necessário fazer uma nova reserva.
+Para reservar um aparelho, o cliente precisa pagar um sinal R$100,00 via Pix. Chave Pix: saemthiago@gmail.com. Informe que a reserva é feita mediante esse sinal e que, caso haja algum problema de estoque por parte da loja, o valor do sinal é estornado integralmente. Antes de enviar o Pix, o cliente deve escrever "Eu concordo" confirmando que está ciente de que, se desistir da compra por conta própria, o sinal não é devolvido em dinheiro, mas pode ser usado como crédito para comprar acessórios na loja. Após enviar o pagamento, para confirmar a reserva, o cliente deve enviar o comprovante de pagamento e escrever "Estou de acordo". A reserva só vale para o dia combinado — o cliente deve reservar para o dia que pretende vir buscar o aparelho. Caso não compareça no dia reservado, a reserva não é mantida automaticamente para outro dia; será necessário fazer uma nova reserva.
 
 
 
