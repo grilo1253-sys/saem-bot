@@ -604,6 +604,9 @@ Redmi Note 15 Pro 256GB 8Ram 4G
 Caixa de som JBL GO 4 
 (original)
 💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
+
+ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
+
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA (PRINCIPAIS MODELOS)
 ━━━━━━━━━━━━━━━━━━━
