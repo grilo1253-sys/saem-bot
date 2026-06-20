@@ -752,9 +752,10 @@ system: [
   {
     type: "text",
     text: SYSTEM_PROMPT,
-    cache_control: { type: "ephemeral" }
+    cache_control: { type: "ephemeral", ttl: "1h" }
   }
 ],
+
 
 messages: conversas[phone]
 },
