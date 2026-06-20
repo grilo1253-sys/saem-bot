@@ -319,12 +319,10 @@ iPhone 14 128GB
 ✅ azul 100
 ✅ azul 100
 ✅ Preto 100%
-✅ Preto 90%
 ✅ Preto 100%
 ✅ Preto 100%
 ✅ Preto 100%
 ✅ Preto 88%
-✅ Preto 100
 
 iPhone 14 128Gb
 (Câmera genuína)
