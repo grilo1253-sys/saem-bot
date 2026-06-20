@@ -651,6 +651,125 @@ Aparelho não listado ou condição não encontrada na tabela: informar ao clien
 
 ━━━━━━━━━━━━━━━━━━━
 
+━━━━━━━━━━━━━━━━━━━
+VALORES DE TROCA - ANDROID
+━━━━━━━━━━━━━━━━━━━
+
+IMPORTANTE: os valores abaixo são exclusivamente para TROCA (aparelho do cliente como entrada), NÃO são preços de venda. São aparelhos Android.
+
+SAMSUNG
+
+Linha Galaxy S (aceita 128GB, 256GB ou 512GB pelo mesmo valor):
+Galaxy S20: R$350 | S20+: R$400 | S20 Ultra: R$550
+Galaxy S21: R$400 | S21+: R$450 | S21 Ultra: R$650
+Galaxy S22: R$500 | S22+: R$600 | S22 Ultra: R$900
+Galaxy S23: R$800 | S23+: R$900 | S23 Ultra: R$1.600 | S23 FE: R$1.000
+Galaxy S24: R$1.900 | S24+: R$2.000 | S24 Ultra: R$2.900 | S24 FE: R$2.000
+Galaxy S25: R$2.200 | S25+: R$2.400 | S25 Ultra: R$4.000
+
+Linha Galaxy A — 128GB: R$300 | 256GB: R$400
+A03, A03s, A04, A04s, A05, A05s, A12, A13, A14, A15, A16, A22, A23, A24, A32, A33
+
+Linha Galaxy A — 128GB: R$400 | 256GB: R$500
+A25, A26, A34, A35, A36
+
+Linha Galaxy A — 128GB: R$300 | 256GB: R$400
+A52, A53, A54
+
+A55: R$600 (128GB ou 256GB)
+A56: R$800 (128GB ou 256GB)
+A72, A73: R$400 (128GB ou 256GB)
+
+Dobráveis (NÃO aceitamos na troca):
+Galaxy Z Flip 3, 4, 5, 6, 7
+Galaxy Z Fold 3, 4, 5, 6, 7
+
+━━━━━━━━━━━━━━━━━━━
+
+XIAOMI
+
+Linha Xiaomi Number (modelo não listado: consultar equipe):
+Xiaomi 11, 11T, 11T Pro: R$300 (128GB ou 256GB)
+Xiaomi 12, 12 Pro, 12T, 12T Pro: R$400 (128GB ou 256GB)
+
+Linha Redmi Note (valor igual independente de 128/256/512GB):
+Redmi Note 10, 10 Pro: R$300
+Redmi Note 11, 11 Pro, 11 Pro+: R$400
+Redmi Note 12, 12 Pro, 12 Pro+: R$400
+Redmi Note 13: R$400 | Redmi Note 13 Pro: R$500 | Redmi Note 13 Pro+: R$600
+Redmi Note 14: R$600 | Redmi Note 14 Pro: R$800 | Redmi Note 14 Pro Max: R$1.100
+
+━━━━━━━━━━━━━━━━━━━
+
+MOTOROLA - Linha Moto G
+
+Modelo | 128GB | 256GB
+Moto G31 | R$300 | R$400
+Moto G32 | R$300 | R$400
+Moto G41 | R$350 | R$400
+Moto G42 | R$400 | R$500
+Moto G51 | R$400 | R$500
+Moto G52 | R$400 | R$500
+Moto G53 | R$450 | R$550
+Moto G54 | R$500 | R$600
+Moto G55 | R$500 | R$600
+Moto G56 | R$600 | R$700
+Moto G62 | R$500 | R$550
+Moto G64 | R$450 | R$550
+Moto G65 | R$450 | R$550
+Moto G71 | R$400 | R$500
+Moto G72 | R$500 | R$550
+Moto G73 | R$400 | R$450
+Moto G75 | R$500 | R$550
+Moto G82 | R$500 | R$550
+Moto G84 | R$600 | R$700
+Moto G85 | R$650 | R$700
+Moto G86 | R$1.200 | R$1.300
+Moto G96 | R$1.400 | R$1.500
+
+MOTOROLA - Linha Edge
+
+Modelo | 128GB | 256GB
+Edge 20 | R$600 | R$500
+Edge 20 Pro | R$600 | R$600
+Edge 30 | R$700 | R$600
+Edge 30 Neo | R$700 | R$700
+Edge 30 Fusion | R$700 | R$1.000
+Edge 30 Ultra | — | R$1.400
+Edge 40 | R$1.000 | R$1.000
+Edge 40 Neo | R$1.000 | R$900
+Edge 40 Pro | — | R$1.800
+Edge 50 | R$900 | R$950
+Edge 50 Fusion | R$700 | R$1.200
+Edge 50 Neo | R$1.200 | R$1.600
+Edge 50 Pro | R$1.700 | R$2.000
+Edge 50 Ultra | — | R$2.400
+Edge 60 | R$1.700 | R$1.800
+Edge 60 Fusion | R$1.300 | R$1.700
+Edge 60 Pro | — | R$2.300
+Edge 60 Stylus | R$1.300 | R$1.500
+
+━━━━━━━━━━━━━━━━━━━
+
+REALME (modelo não listado: consultar equipe)
+
+Modelo | 64GB | 128GB
+C30 | R$200 | —
+C30s | R$200 | —
+C31 | R$300 | —
+C33 | R$300 | R$400
+C35 | R$350 | R$400
+C51 | R$300 | R$400
+C53 | R$400 | R$500
+C55 | R$400 | R$500
+C61 | R$450 | R$550
+C63 | R$500 | R$600
+C67 | R$600 | R$700
+C75 | R$800 | R$900
+
+ATENÇÃO: se o modelo Android que o cliente mencionar não estiver EXATAMENTE listado nas tabelas acima (Samsung, Xiaomi, Motorola ou Realme), NÃO invente um valor nem estime por aproximação com um modelo parecido. Diga que esse modelo específico precisa ser avaliado presencialmente na loja, e que o valor será informado depois de verificado pela equipe.
+
+
 ——————————————
 
 TÉCNICAS DE VENDAS
