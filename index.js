@@ -221,7 +221,7 @@ TABELA DE PREÇOS ATUAL
 
 (Conforme Lei 13.455/2017 no Diário Oficial da União é permitida a cobrança de taxas em cartão débito/crédito)
 
-📷 Site Saem Celulares 
+📷 Site Saem Celulares 
 
 https://www.saemcelulares.net/pagina-inicial
 *(fotos e saúde de baterias)*
@@ -232,11 +232,15 @@ iPhone 14 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅Preto 78%
 
-iPhone 13 128GB 
+iPhone 13 Pro Max 128gb  
+💰 R$2.799,00 → 10x R$317,32 / 12x R$265,96
+✅Azul 77%
+
+iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅ Azul 80%
 
-iPhone 13 128GB (Tela trocada)
+iPhone 13 128GB (Tela trocada)
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ⤴️ Rosa 73%
 
@@ -285,13 +289,13 @@ iPhone 14 Pro Max 512Gb
 
 iPhone 14 Pro max 128GB
 💰 R$3.599,00 → 10x R$ 408,02 | 12x R$341,90
-⤴️ roxo 85%
+⤴️ roxo 85%
 ✅ branco 76%
 ✅ Roxo 86%
 
 iPhone 14 Pro 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
-⤴️ roxo 78%
+⤴️ roxo 78%
 
 iPhone 14 Plus 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
@@ -301,12 +305,12 @@ iPhone 14 Plus 128gb
 iPhone 14 128GB
 (Caixa + cabo)
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 71%
+✅ preto 71%
 
 iPhone 14 128GB
 (Caixa + cabo)
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 87%
+✅ preto 87%
 
 iPhone 14 128GB
 💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
@@ -329,7 +333,7 @@ iPhone 14 128GB
 iPhone 14 128Gb
 (Câmera genuína)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-⤴️ vermelho  86%
+⤴️ vermelho  86%
 ⤴️ vermelho 94%
 
 iPhone 14 128Gb
@@ -340,13 +344,12 @@ iPhone 14 128Gb
 iPhone 14 128GB
 (Tela trocada)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-✅ branco 96%
+✅ branco 96%
 
 iPhone 13 Pro Max 128GB
 💰 R$3.099,00 → 10x R$ 351,34 | 12x R$294,47
-⤴️ Branco 100%
+⤴️ Branco 100%
 ⤴️ dourado 74%
-
 
 iPhone 13 Pro 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
@@ -355,11 +358,11 @@ iPhone 13 Pro 128gb
 
 iPhone 13 128GB
 💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
-⤴️ Verde 88% 
+⤴️ Verde 88% 
 ✅ rosa 82%
 ✅ branco 85%
 
-iPhone 13 128GB 
+iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅ Azul 86%
 ✅Vermelho 72%
@@ -369,23 +372,21 @@ iPhone 13 128Gb
 💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
 ✅Branco 91%
 
-
-
 iPhone 12 Pro Max 128Gb
- (câmera traseira 1x tremendo)
+ (câmera traseira 1x tremendo)
 💰 R$1.899,00 → 10x R$ 215,29 | 12x R$180,44
-⤴️ Dourado 81%
+⤴️ Dourado 81%
 
 iPhone 12 128Gb
 (Tela trocada)
 💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
 ⤴️Branco 91%
 
-iPhone 12 64gb 
+iPhone 12 64gb 
 💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-✅ preto 74%
+✅ preto 74%
 
-iPhone 12 64GB 
+iPhone 12 64GB 
 💰 R$1.499,00→ 10x R$ 169,94 | 12x R$ 142,44
 ⤴️Branco 71%
 ✅Branco 84%
@@ -409,14 +410,14 @@ iPhone 11 Pro Max 512Gb
 💰 R$1.799,00 → 10x R$ 203,95 | 12x R$ 170,94
 ✅ Dourado 76%
 
-iPhone 11 Pro Max 256gb (Camera 1x tremendo) 
+iPhone 11 Pro Max 256gb (Camera 1x tremendo) 
 💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-⤴️ Preto 69%
+⤴️ Preto 69%
 
-iPhone 11 Pro Max 64gb 
+iPhone 11 Pro Max 64gb 
 (Tela e bateria trocada, Face ID off)
 💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-⤴️ Preto 100%
+⤴️ Preto 100%
 
 iPhone 11 Pro Max 64gb
 💰 R$1.499,00 → 10x R$ 169,94 | 12x R$ 142,44
@@ -445,7 +446,7 @@ iPhone 11 64GB
 IPhone 11 64gb
 (tela trocada, Face ID off)
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ branco 69%
+⤴️ branco 69%
 
 iPhone 11 64GB
 (Tela e bateria trocada)
@@ -459,21 +460,21 @@ IPhone XR 128Gb
 
 IPhone XR 64gb
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅  branco 84%
+✅  branco 84%
 
 IPhone XR 64gb
-(Sem Face ID) 
+(Sem Face ID) 
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ azul 75%
+⤴️ azul 75%
 
-IPhone SE 2 geração 64gb 
+IPhone SE 2 geração 64gb 
 💰 R$799,00 → 10x R$90,58 / 12x R$75,92
 ✅ Preto 100%
 
-iPhone 8 64GB 
- (camera traseira off)
+iPhone 8 64GB 
+ (camera traseira off)
 💰R$399,00 → 10x R$ 45,23 | 12x R$ 37,91
-⤴️ Red 100% 
+⤴️ Red 100%
 
 
 📲*Poco/Xiaomi Novos*
@@ -490,29 +491,32 @@ Redmi A5 64gb
 ✅Preto
 
 Redmi 15C 256/8
-💰R$1299,00 → 10x R$146,25 | 12x R$122,58 
+💰R$1299,00 → 10x R$146,25 | 12x R$122,58 
 ☑️ azul
 
-Redmi 15 256/8 
+Redmi 15 256/8 
 💰R$ 1.499,00 → 10x R$169,94| 12x R$142,44
 ☑️ lilás
-☑️ cinza 
+☑️ cinza 
 
- Redmi Note 14 Pro 256/8 5G
+ Redmi Note 14 Pro 256/8 5G
 💰 R$ 2.199,00 → 10x R$249,30| 12x R$208,95
-☑️Roxo 
+☑️Roxo 
 
-Redmi Note 14  256/8 
+Redmi Note 14  256/8 
 💰R$ 1.499,00 → 10x R$169,94| 12x R$142,44
-☑️ azul 
+☑️ azul 
 
 📱 *Android's Seminovos*
 
 Galaxy S21 ultra 256gb
  (Tela e traseira trincada e linha verde na tela e câmera traseira embaçada)
 💰 R$699,00 → 10x R$79,25 / 12x R$66,42
-✅Preto   
+✅Preto   
 
+Galaxy A17 128gb
+💰R$899,00 → 10x R$101,92 | 12x R$85,42
+✅ Preto 
 
 Moto one action 128GB 
 💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
@@ -526,71 +530,70 @@ Moto G15 256GB
 💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
 ✅Verde
 
-Moto G31 5g 128gb 
+Moto G31 5g 128gb 
 💰 R$699,00 → 10x R$ 79,25 | 12x R$ 66,42
-✅ preto 
+✅ preto 
 
 Galaxy A13 128GB
- ( tela trincada e lente da camera traseira trincada)
+ ( tela trincada e lente da camera traseira trincada)
 💰R$499,00 → 10x R$ 56,57 | 12x R$ 47,42
 ✅ Branco
 
 📱 *Xiaomis Encomendas*
 
-Poco X8 Pro 512GB 8Ram 5g 
-💰 R$2.699,00 
+Poco X8 Pro 512GB 8Ram 5g 
+💰 R$2.699,00 
 ☑️ Verde
 ☑️ Preto
 ☑️ Branco
 
-Poco X8 Pro 256GB 8Ram 5g 
-💰 R$2.399,00 
+Poco X8 Pro 256GB 8Ram 5g 
+💰 R$2.399,00 
 ☑️ Verde
 
 Poco X7 Pro 256GB 8Ram 5G
-💰 R$2.499,00 
+💰 R$2.499,00 
 ☑️ Amarelo
 ☑️ Preto
 
 Poco X7 512GB 12Ram 5G
-💰 R$2.499,00 
+💰 R$2.499,00 
 ☑️ Verde
 ☑️ Preto
 
 Poco X7 256GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Verde
 ☑️ Preto
 
 Redmi Note 15 Pro 512GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Branco
 
 Redmi Note 15 Pro 512GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Branco
 ☑️ Preto
 ☑️ Azul
 ☑️ CInza
 
 Redmi Note 15 Pro 256GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Preto
 ☑️ Cinza
 ☑️ Azul
 
 Redmi Note 15 Pro 256GB 8Ram 4G
-💰 R$2.299,00 
+💰 R$2.299,00 
 ☑️ Azul
 ☑️ Cinza
 ☑️ Preto
 
-📢  *Caixa de som*
+📢  *Caixa de som*
 
-Caixa de som JBL GO 4 
+Caixa de som JBL GO 4 
 (original)
 💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
-
 ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
 
 ━━━━━━━━━━━━━━━━━━━
