@@ -267,11 +267,6 @@ iPhone 17 Pro max 256Gb
 💰 R$7.399,00 → 10x R$ 838,83 / 12x R$ 703,06
 ✅laranja 100%
 
-Phone 16 Pro Max 256gb
-💰 R$4699,00 → 10x R$ 532,73| 12x R$ 446,50
-✅ Desert 96%
-
-
 iPhone 15 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
 ✅Azul 73%
@@ -288,7 +283,6 @@ iPhone 14 Pro max 128GB
 💰 R$3.599,00 → 10x R$ 408,02 | 12x R$341,90
 ⤴️ roxo 85%
 ✅ branco 76%
-✅ Preto 91%
 ✅ Roxo 86%
 
 iPhone 14 Pro 128GB
@@ -349,9 +343,6 @@ iPhone 13 Pro Max 128GB
 ⤴️ Branco 100%
 ⤴️ dourado 74%
 
-iPhone 13 Pro 256gb 
-💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
-✅ dourado 87%
 
 iPhone 13 Pro 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
@@ -374,9 +365,7 @@ iPhone 13 128Gb
 💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
 ✅Branco 91%
 
-iPhone 12 Pro max 128gb 
-💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ branco 88%
+
 
 iPhone 12 Pro Max 128Gb
  (câmera traseira 1x tremendo)
