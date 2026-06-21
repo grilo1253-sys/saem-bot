@@ -267,9 +267,6 @@ Phone 16 Pro Max 256gb
 💰 R$4699,00 → 10x R$ 532,73| 12x R$ 446,50
 ✅ Desert 96%
 
-iPhone 16 Pro 128Gb
-💰 R$4699,00 → 10x R$ 532,73| 12x R$ 446,50
-✅ Preto 94%
 
 iPhone 15 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
