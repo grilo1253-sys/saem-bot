@@ -296,6 +296,7 @@ iPhone 14 Pro max 128GB
 iPhone 14 Pro 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
 ⤴️ roxo 78%
+✅ roxo 84%
 
 iPhone 14 Plus 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
@@ -594,6 +595,7 @@ Redmi Note 15 Pro 256GB 8Ram 4G
 Caixa de som JBL GO 4 
 (original)
 💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
+
 ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
 
 ━━━━━━━━━━━━━━━━━━━
