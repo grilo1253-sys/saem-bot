@@ -147,6 +147,7 @@ TABELA DE JUROS - PARCELAMENTO
 
 Regra: Descontar troca + entrada primeiro, depois aplicar juros sobre o saldo restante.
 Não informar porcentagens ao cliente. Mostrar apenas valores finais.
+Para calcular qualquer valor de parcela, SEMPRE use a ferramenta calcular_parcelamento. Nunca calcule manualmente.
 
 ━━━━━━━━━━━━━━━━━━━
 ASSISTÊNCIA TÉCNICA
@@ -220,18 +221,18 @@ TABELA DE PREÇOS ATUAL
 
 (Conforme Lei 13.455/2017 no Diário Oficial da União é permitida a cobrança de taxas em cartão débito/crédito)
 
-📷 Site Saem Celulares 
+📷 Site Saem Celulares 
 
 https://www.saemcelulares.net/pagina-inicial
 *(fotos e saúde de baterias)*
 
 🔥*Ofertas Saem Celulares*🔥
 
-iPhone 13 128GB 
+iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅ Azul 80%
 
-iPhone 13 128GB (Tela trocada)
+iPhone 13 128GB (Tela trocada)
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ⤴️ Rosa 73%
 
@@ -285,14 +286,14 @@ iPhone 14 Pro Max 512Gb
 
 iPhone 14 Pro max 128GB
 💰 R$3.599,00 → 10x R$ 408,02 | 12x R$341,90
-⤴️ roxo 85%
+⤴️ roxo 85%
 ✅ branco 76%
 ✅ Preto 91%
 ✅ Roxo 86%
 
 iPhone 14 Pro 128GB
 💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
-⤴️ roxo 78%
+⤴️ roxo 78%
 
 iPhone 14 Plus 128gb 
 💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
@@ -302,12 +303,12 @@ iPhone 14 Plus 128gb
 iPhone 14 128GB
 (Caixa + cabo)
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 71%
+✅ preto 71%
 
 iPhone 14 128GB
 (Caixa + cabo)
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 87%
+✅ preto 87%
 
 iPhone 14 128GB
 💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
@@ -330,7 +331,7 @@ iPhone 14 128GB
 iPhone 14 128Gb
 (Câmera genuína)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-⤴️ vermelho  86%
+⤴️ vermelho  86%
 ⤴️ vermelho 94%
 
 iPhone 14 128Gb
@@ -341,11 +342,11 @@ iPhone 14 128Gb
 iPhone 14 128GB
 (Tela trocada)
 💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-✅ branco 96%
+✅ branco 96%
 
 iPhone 13 Pro Max 128GB
 💰 R$3.099,00 → 10x R$ 351,34 | 12x R$294,47
-⤴️ Branco 100%
+⤴️ Branco 100%
 ⤴️ dourado 74%
 
 iPhone 13 Pro 256gb 
@@ -359,11 +360,11 @@ iPhone 13 Pro 128gb
 
 iPhone 13 128GB
 💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
-⤴️ Verde 88% 
+⤴️ Verde 88% 
 ✅ rosa 82%
 ✅ branco 85%
 
-iPhone 13 128GB 
+iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅ Azul 86%
 ✅Vermelho 72%
@@ -375,23 +376,23 @@ iPhone 13 128Gb
 
 iPhone 12 Pro max 128gb 
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ branco 88%
+✅ branco 88%
 
 iPhone 12 Pro Max 128Gb
- (câmera traseira 1x tremendo)
+ (câmera traseira 1x tremendo)
 💰 R$1.899,00 → 10x R$ 215,29 | 12x R$180,44
-⤴️ Dourado 81%
+⤴️ Dourado 81%
 
 iPhone 12 128Gb
 (Tela trocada)
 💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
 ⤴️Branco 91%
 
-iPhone 12 64gb 
+iPhone 12 64gb 
 💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-✅ preto 74%
+✅ preto 74%
 
-iPhone 12 64GB 
+iPhone 12 64GB 
 💰 R$1.499,00→ 10x R$ 169,94 | 12x R$ 142,44
 ⤴️Branco 71%
 ✅Branco 84%
@@ -415,14 +416,14 @@ iPhone 11 Pro Max 512Gb
 💰 R$1.799,00 → 10x R$ 203,95 | 12x R$ 170,94
 ✅ Dourado 76%
 
-iPhone 11 Pro Max 256gb (Camera 1x tremendo) 
+iPhone 11 Pro Max 256gb (Camera 1x tremendo) 
 💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-⤴️ Preto 69%
+⤴️ Preto 69%
 
-iPhone 11 Pro Max 64gb 
+iPhone 11 Pro Max 64gb 
 (Tela e bateria trocada, Face ID off)
 💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-⤴️ Preto 100%
+⤴️ Preto 100%
 
 iPhone 11 Pro Max 64gb
 💰 R$1.499,00 → 10x R$ 169,94 | 12x R$ 142,44
@@ -451,7 +452,7 @@ iPhone 11 64GB
 IPhone 11 64gb
 (tela trocada, Face ID off)
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ branco 69%
+⤴️ branco 69%
 
 iPhone 11 64GB
 (Tela e bateria trocada)
@@ -465,21 +466,21 @@ IPhone XR 128Gb
 
 IPhone XR 64gb
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅  branco 84%
+✅  branco 84%
 
 IPhone XR 64gb
-(Sem Face ID) 
+(Sem Face ID) 
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ azul 75%
+⤴️ azul 75%
 
-IPhone SE 2 geração 64gb 
+IPhone SE 2 geração 64gb 
 💰 R$799,00 → 10x R$90,58 / 12x R$75,92
 ✅ Preto 100%
 
-iPhone 8 64GB 
- (camera traseira off)
+iPhone 8 64GB 
+ (camera traseira off)
 💰R$399,00 → 10x R$ 45,23 | 12x R$ 37,91
-⤴️ Red 100% 
+⤴️ Red 100% 
 
 
 📲*Poco/Xiaomi Novos*
@@ -496,28 +497,28 @@ Redmi A5 64gb
 ✅Preto
 
 Redmi 15C 256/8
-💰R$1299,00 → 10x R$146,25 | 12x R$122,58 
+💰R$1299,00 → 10x R$146,25 | 12x R$122,58 
 ☑️ azul
 
-Redmi 15 256/8 
+Redmi 15 256/8 
 💰R$ 1.499,00 → 10x R$169,94| 12x R$142,44
 ☑️ lilás
-☑️ cinza 
+☑️ cinza 
 
- Redmi Note 14 Pro 256/8 5G
+ Redmi Note 14 Pro 256/8 5G
 💰 R$ 2.199,00 → 10x R$249,30| 12x R$208,95
-☑️Roxo 
+☑️Roxo 
 
-Redmi Note 14  256/8 
+Redmi Note 14  256/8 
 💰R$ 1.499,00 → 10x R$169,94| 12x R$142,44
-☑️ azul 
+☑️ azul 
 
 📱 *Android's Seminovos*
 
 Galaxy S21 ultra 256gb
  (Tela e traseira trincada e linha verde na tela e câmera traseira embaçada)
 💰 R$699,00 → 10x R$79,25 / 12x R$66,42
-✅Preto   
+✅Preto   
 
 Galaxy A17 128gb
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
@@ -535,68 +536,68 @@ Moto G15 256GB
 💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
 ✅Verde
 
-Moto G31 5g 128gb 
+Moto G31 5g 128gb 
 💰 R$699,00 → 10x R$ 79,25 | 12x R$ 66,42
-✅ preto 
+✅ preto 
 
 Galaxy A13 128GB
- ( tela trincada e lente da camera traseira trincada)
+ ( tela trincada e lente da camera traseira trincada)
 💰R$499,00 → 10x R$ 56,57 | 12x R$ 47,42
 ✅ Branco
 
 📱 *Xiaomis Encomendas*
 
-Poco X8 Pro 512GB 8Ram 5g 
-💰 R$2.699,00 
+Poco X8 Pro 512GB 8Ram 5g 
+💰 R$2.699,00 
 ☑️ Verde
 ☑️ Preto
 ☑️ Branco
 
-Poco X8 Pro 256GB 8Ram 5g 
-💰 R$2.399,00 
+Poco X8 Pro 256GB 8Ram 5g 
+💰 R$2.399,00 
 ☑️ Verde
 
 Poco X7 Pro 256GB 8Ram 5G
-💰 R$2.499,00 
+💰 R$2.499,00 
 ☑️ Amarelo
 ☑️ Preto
 
 Poco X7 512GB 12Ram 5G
-💰 R$2.499,00 
+💰 R$2.499,00 
 ☑️ Verde
 ☑️ Preto
 
 Poco X7 256GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Verde
 ☑️ Preto
 
 Redmi Note 15 Pro 512GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Branco
 
 Redmi Note 15 Pro 512GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Branco
 ☑️ Preto
 ☑️ Azul
 ☑️ CInza
 
 Redmi Note 15 Pro 256GB 8Ram 5G
-💰 R$2.399,00 
+💰 R$2.399,00 
 ☑️ Preto
 ☑️ Cinza
 ☑️ Azul
 
 Redmi Note 15 Pro 256GB 8Ram 4G
-💰 R$2.299,00 
+💰 R$2.299,00 
 ☑️ Azul
 ☑️ Cinza
 ☑️ Preto
 
-📢  *Caixa de som*
+📢  *Caixa de som*
 
-Caixa de som JBL GO 4 
+Caixa de som JBL GO 4 
 (original)
 💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
 
@@ -812,6 +813,72 @@ Nunca inventar preços, estoque, valores de troca, garantias ou parcelamentos.
 Em caso de dúvida, informar que será necessário verificar com a equipe.`;
 
 // ==========================================
+// CÁLCULO DE PARCELAMENTO (à prova de erro)
+// ==========================================
+const TAXAS_JUROS = {
+  1: 0.0497, 2: 0.0553, 3: 0.0637, 4: 0.0802, 5: 0.0872, 6: 0.0947,
+  7: 0.1059, 8: 0.1160, 9: 0.1243, 10: 0.1337, 11: 0.1385, 12: 0.1403,
+  13: 0.1681, 14: 0.1810, 15: 0.1940, 16: 0.2072, 17: 0.2172, 18: 0.2193
+};
+
+function calcularParcelamento(saldo, parcelasDesejadas) {
+  const parcelasParaCalcular = parcelasDesejadas && parcelasDesejadas.length > 0
+    ? parcelasDesejadas
+    : Object.keys(TAXAS_JUROS).map(Number);
+
+  const resultado = {};
+  for (const parcelas of parcelasParaCalcular) {
+    const taxa = TAXAS_JUROS[parcelas];
+    if (!taxa) continue;
+    const valorComJuros = saldo * (1 + taxa);
+    const valorParcela = valorComJuros / parcelas;
+    resultado[`${parcelas}x`] = `R$${valorParcela.toFixed(2).replace('.', ',')}`;
+  }
+  return resultado;
+}
+
+const FERRAMENTA_PARCELAMENTO = {
+  name: "calcular_parcelamento",
+  description: "Calcula os valores EXATOS de parcelamento de um saldo, usando a tabela oficial de juros da loja. SEMPRE use esta ferramenta para informar valores de parcela ao cliente — nunca calcule de cabeça.",
+  input_schema: {
+    type: "object",
+    properties: {
+      saldo: { type: "number", description: "Valor a ser parcelado, já descontado entrada e/ou troca" },
+      parcelas: { type: "array", items: { type: "number" }, description: "Quantidades de parcelas a calcular, ex: [6] ou [10,12]. Se vazio, calcula um resumo padrão." }
+    },
+    required: ["saldo"]
+  }
+};
+
+async function chamarClaude(mensagens) {
+  const corpo = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral", ttl: "1h" } }],
+    tools: [FERRAMENTA_PARCELAMENTO],
+    messages: mensagens
+  };
+  const headers = { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' };
+
+  let response = await axios.post('https://api.anthropic.com/v1/messages', corpo, { headers });
+
+  while (response.data.stop_reason === 'tool_use') {
+    const toolUseBlock = response.data.content.find(b => b.type === 'tool_use');
+    let resultadoFerramenta = {};
+    if (toolUseBlock.name === 'calcular_parcelamento') {
+      const { saldo, parcelas } = toolUseBlock.input;
+      resultadoFerramenta = calcularParcelamento(saldo, parcelas);
+    }
+    mensagens.push({ role: 'assistant', content: response.data.content });
+    mensagens.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) }] });
+    response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: mensagens }, { headers });
+  }
+
+  const textBlock = response.data.content.find(b => b.type === 'text');
+  return textBlock ? textBlock.text : '';
+}
+
+// ==========================================
 // WEBHOOK - RECEBE MENSAGENS DO WHATSAPP
 // ==========================================
 app.post('/webhook', async (req, res) => {
@@ -858,33 +925,8 @@ if (conversas[phone].length > 20) {
 conversas[phone] = conversas[phone].slice(-20);
 }
 
-// Chama a API do Claude
-const response = await axios.post(
-'https://api.anthropic.com/v1/messages',
-{
-model: 'claude-sonnet-4-6',
-max_tokens: 1024,
-system: [
-  {
-    type: "text",
-    text: SYSTEM_PROMPT,
-    cache_control: { type: "ephemeral", ttl: "1h" }
-  }
-],
-
-
-messages: conversas[phone]
-},
-{
-headers: {
-'x-api-key': ANTHROPIC_API_KEY,
-'anthropic-version': '2023-06-01',
-'content-type': 'application/json'
-}
-}
-);
-
-const reply = response.data.content[0].text;
+// Chama a API do Claude (com suporte à ferramenta de cálculo de parcelamento)
+const reply = await chamarClaude(conversas[phone]);
 console.log(`🤖 Resposta: ${reply}`);
 
 // Adiciona resposta ao histórico
