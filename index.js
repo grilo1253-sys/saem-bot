@@ -513,9 +513,6 @@ Galaxy S21 ultra 256gb
 💰 R$699,00 → 10x R$79,25 / 12x R$66,42
 ✅Preto   
 
-Galaxy A17 128gb
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅ Preto 
 
 Moto one action 128GB 
 💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
