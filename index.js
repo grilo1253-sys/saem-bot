@@ -228,6 +228,10 @@ https://www.saemcelulares.net/pagina-inicial
 
 🔥*Ofertas Saem Celulares*🔥
 
+iPhone 14 128GB 
+💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
+✅Preto 78%
+
 iPhone 13 128GB 
 💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
 ✅ Azul 80%
