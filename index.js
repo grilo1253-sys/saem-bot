@@ -95,7 +95,8 @@ Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto mediante análise.
 Análise de crédito: https://wa.me/5512981880229
 ⚠️ Nunca prometer aprovação. Sempre tentar alternativas antes do encaminhamento.
 
-Esclarecimento sobre boleto: existem dois tipos diferentes. (1) Boleto mediante análise de crédito normal — disponível para QUALQUER produto, incluindo iPhones, desde que o cliente passe na análise. Para isso, encaminhe para https://wa.me/5512981880229. (2) Boleto para negativados (sem análise tradicional) — esse programa é EXCLUSIVO da linha Xiaomi/Redmi/Realme, listada na tabela específica. NUNCA diga que "não trabalhamos com boleto para iPhone" — isso está errado. Se o cliente perguntar sobre boleto para iPhone, explique que funciona mediante análise de crédito e encaminhe para o link de análise.
+Esclarecimento sobre boleto: existe apenas uma modalidade de boleto, válida para QUALQUER produto (iPhone, Android, qualquer marca) e qualquer cliente, incluindo quem está negativado. Todo boleto passa por análise de crédito — não existe boleto sem análise. Para iniciar a análise, encaminhe para https://wa.me/5512981880229. NUNCA diga que existe um boleto "sem análise" ou "exclusivo para negativados sem análise tradicional". Se o cliente perguntar se consegue boleto mesmo estando negativado, explique que ele pode tentar a análise normalmente pelo link, pois a aprovação depende da análise e não é garantida antecipadamente.
+
 
 
 
@@ -262,6 +263,10 @@ iPhone 17 Pro max 256Gb
 💰 R$7.399,00 → 10x R$ 838,83 / 12x R$ 703,06
 ✅laranja 100%
 
+Phone 16 Pro Max 256gb
+💰 R$4699,00 → 10x R$ 532,73| 12x R$ 446,50
+✅ Desert 96%
+
 iPhone 16 Pro 128Gb
 💰 R$4699,00 → 10x R$ 532,73| 12x R$ 446,50
 ✅ Preto 94%
@@ -363,6 +368,11 @@ iPhone 13 128GB 
 ✅ Azul 86%
 ✅Vermelho 72%
 
+iPhone 13 128Gb
+(Tela trocada)
+💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
+✅Branco 91%
+
 iPhone 12 Pro max 128gb 
 💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
 ✅ branco 88%
@@ -443,6 +453,11 @@ IPhone 11 64gb
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
 ⤴️ branco 69%
 
+iPhone 11 64GB
+(Tela e bateria trocada)
+💰 R$999,00→ 10x R$ 113,26 | 12x R$ 94,93
+✅Amarelo 100%
+
 IPhone XR 128Gb
 (NFC off)
 💰R$899,00 → 10x R$101,92 | 12x R$85,42
@@ -464,31 +479,8 @@ IPhone SE 2 geração 64gb 
 iPhone 8 64GB 
  (camera traseira off)
 💰R$399,00 → 10x R$ 45,23 | 12x R$ 37,91
-⤴️ Red 100%
+⤴️ Red 100% 
 
-📱 *APARELHOS DISPONÍVEIS PARA PARCELAMENTO EM BOLETO PARA NEGATIVADOS:*
-
-📱 LINHA REDMI - Novos 
-
-☑️ Redmi 15C 128/6
-☑️ Redmi A5 128/4
-✅ Redmi A5 64
-
-📱 LINHA NOTE - Novos 
-
-☑️ Redmi Note 14 256/8 4G
-☑️ Redmi Note 14S 256/8 4G
-☑️ Redmi Note 14 Pro 256/8 5G
-☑️ Redmi Note 15 256/8
-
-📱 LINHA REALME - Novos 
-
-Seminovos - Usados 
-
-✅ Galaxy A06 128GB
-✅ Redmi 15C 128GB
-
-📲 *Realme Novos*
 
 📲*Poco/Xiaomi Novos*
 
@@ -607,6 +599,7 @@ Redmi Note 15 Pro 256GB 8Ram 4G
 Caixa de som JBL GO 4 
 (original)
 💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
+
 ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
 
 ━━━━━━━━━━━━━━━━━━━
