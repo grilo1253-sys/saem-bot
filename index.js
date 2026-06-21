@@ -647,6 +647,8 @@ Aparelho não listado ou condição não encontrada na tabela: informar ao clien
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - ANDROID
 ━━━━━━━━━━━━━━━━━━━
+Todos os valores desta tabela consideram o aparelho SEM NENHUM DEFEITO (tela, traseira, bateria, funcionamento geral perfeitos). Se o cliente informar qualquer defeito (tela trincada, traseira trincada, bateria ruim, problema de funcionamento, etc), NÃO aplique o valor da tabela nem estime um desconto. Diga que, por ter defeito, o aparelho precisa ser avaliado pela equipe, e que o cliente deve aguardar a resposta com o valor correto antes de prosseguir.
+
 
 IMPORTANTE: os valores abaixo são exclusivamente para TROCA (aparelho do cliente como entrada), NÃO são preços de venda. São aparelhos Android.
 
