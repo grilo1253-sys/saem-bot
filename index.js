@@ -602,6 +602,9 @@ ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta se
 VALORES DE TROCA (PRINCIPAIS MODELOS)
 ━━━━━━━━━━━━━━━━━━━
 
+
+Atenção: Se o cliente escrever “Mb” ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
+
 iPhone 7: Sem defeito 32/128GB R$200, 256GB R$250 | Sem Face ID 32/128GB R$150, 256GB R$180 | Bat abaixo 80% R$150 | Tela trincada R$100 | Traseira trincada R$150 | Tudo junto R$50
 iPhone 7 Plus: Sem defeito 32/128GB R$250, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$150 | Traseira trincada R$150 | Tudo junto R$70
 iPhone 8: Sem defeito 64GB R$250, 128GB R$270, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$100 | Traseira trincada R$100 | Tudo junto R$50
