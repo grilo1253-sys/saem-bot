@@ -218,384 +218,7 @@ NUNCA mostre a porcentagem de bateria ao apresentar aparelhos ao cliente, mesmo 
 TABELA DE PREÇOS ATUAL
 ━━━━━━━━━━━━━━━━━━━
 
-✨*TABELA SAEM CELULARES*✨
-
-(Conforme Lei 13.455/2017 no Diário Oficial da União é permitida a cobrança de taxas em cartão débito/crédito)
-
-📷 Site Saem Celulares 
-
-https://www.saemcelulares.net/pagina-inicial
-*(fotos e saúde de baterias)*
-
-🔥*Ofertas Saem Celulares*🔥
-
-iPhone 14 128GB 
-💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-✅Preto 78%
-
-iPhone 13 Pro Max 128gb  
-💰 R$2.799,00 → 10x R$317,32 / 12x R$265,96
-✅Azul 77%
-
-iPhone 13 128GB 
-💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-✅ Azul 80%
-
-iPhone 13 128GB (Tela trocada)
-💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-⤴️ Rosa 73%
-
-iPhone 13 128Gb
-💰 R$1.899,00 → 10x R$ 215,29 | 12x R$180,44
-✅ Azul 88% 
-
-iPhone 12 128Gb
-💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
-⤴️Preto 74%
-
-🍏📱 *iPhones Novos*
-
-iPhone 16 128Gb
-💰 R$4.499,00 → 10x R$ 510,05 / 12x R$ 427,50
-⤴️Rosa
-
-iPhone 17 256Gb
-💰 R$5.299,00 → 10x R$ 600,75 / 12x R$ 503,52
-⤴️preto
-
-iPhone 17 Pro 256Gb
-💰 R$7.499,00 → 10x R$ 850,17/ 12x R$ 712,56
-✅branco
-✅branco
-✅laranja
-⤴️laranja
-
-🍏📱 *iPhones Seminovos*
-
-iPhone 17 Pro max 256Gb
-💰 R$7.399,00 → 10x R$ 838,83 / 12x R$ 703,06
-✅laranja 100%
-
-iPhone 15 128GB
-💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
-✅Azul 73%
-✅Azul 78%
-✅Rosa 77%
-✅Preto 89%
-
-iPhone 14 Pro Max 512Gb
-💰 R$3.999,00 → 10x R$464,71 | 12x R$389,49
-⤴️ Preto 92%
-⤴️ Branco 89%
-
-iPhone 14 Pro max 128GB
-💰 R$3.599,00 → 10x R$ 408,02 | 12x R$341,90
-⤴️ roxo 85%
-✅ branco 76%
-✅ Roxo 86%
-
-iPhone 14 Pro 128GB
-💰 R$2.999,00 → 10x R$ 340,00 | 12x R$284,97
-⤴️ roxo 78%
-✅ roxo 84%
-
-iPhone 14 Plus 128gb 
-💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
-⤴️ Branco 84%
-⤴️ Branco 85%
-
-iPhone 14 128GB
-(Caixa + cabo)
-💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 71%
-
-iPhone 14 128GB
-(Caixa + cabo)
-💰 R$2.399,00 → 10x R$271,98 / 12x R$227,96
-✅ preto 87%
-
-iPhone 14 128GB
-💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
-⤴️ preto 98% 
-⤴️ preto 98%
-⤴️ preto 99%
-⤴️ Red 100%
-⤴️ Azul 87%
-⤴️ Azul 100%
-✅ Red 87%
-✅ azul 87%
-✅ azul 100
-✅ azul 100
-✅ Preto 100%
-✅ Preto 100%
-✅ Preto 100%
-✅ Preto 100%
-✅ Preto 88%
-
-iPhone 14 128Gb
-(Câmera genuína)
-💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-⤴️ vermelho  86%
-⤴️ vermelho 94%
-
-iPhone 14 128Gb
-(Tela e bateria genuína)
-💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-⤴️ preto 100%
-
-iPhone 14 128GB
-(Tela trocada)
-💰 R$2099,00 → 10x R$237,96 / 12x R$199,45
-✅ branco 96%
-
-iPhone 13 Pro Max 128GB
-💰 R$3.099,00 → 10x R$ 351,34 | 12x R$294,47
-⤴️ Branco 100%
-⤴️ dourado 74%
-
-iPhone 13 Pro 128gb 
-💰 R$2.599,00 → 10x R$294,65  | 12x R$246,96
-⤴️Branco 100%
-⤴️Azul 78%
-
-iPhone 13 128GB
-💰 R$2.199,00→ 10x R$249,30 / 12x R$208,95
-⤴️ Verde 88% 
-✅ rosa 82%
-✅ branco 85%
-
-iPhone 13 128GB 
-💰 R$1.999,00 → 10x R$226,63 / 12x R$189,95
-✅ Azul 86%
-✅Vermelho 72%
-
-iPhone 13 128Gb
-(Tela trocada)
-💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
-✅Branco 91%
-
-iPhone 12 Pro Max 128Gb
- (câmera traseira 1x tremendo)
-💰 R$1.899,00 → 10x R$ 215,29 | 12x R$180,44
-⤴️ Dourado 81%
-
-iPhone 12 128Gb
-(Tela trocada)
-💰 R$1.699,00 → 10x R$ 192,62 | 12x R$ 161,44
-⤴️Branco 91%
-
-iPhone 12 64gb 
-💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-✅ preto 74%
-
-iPhone 12 64GB 
-💰 R$1.499,00→ 10x R$ 169,94 | 12x R$ 142,44
-⤴️Branco 71%
-✅Branco 84%
-
-iPhone 12 64Gb
-(bateria trocada)
-💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-⤴️ Preto 100%
-
-iPhone 12 64GB
-(bateria trocada)
-💰 R$1.299,00→ 10x R$ 147,27| 12x R$ 123,43
-✅ preto 100%
-
-iPhone 12 mini 64Gb
-(bateria trocada)
-💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-✅Vermelho 100%
-
-iPhone 11 Pro Max 512Gb
-💰 R$1.799,00 → 10x R$ 203,95 | 12x R$ 170,94
-✅ Dourado 76%
-
-iPhone 11 Pro Max 256gb (Camera 1x tremendo) 
-💰 R$1.399,00 → 10x R$ 158,61 | 12x R$132,93
-⤴️ Preto 69%
-
-iPhone 11 Pro Max 64gb 
-(Tela e bateria trocada, Face ID off)
-💰 R$1.599,00 → 10x R$ 181,28 | 12x R$ 151,94
-⤴️ Preto 100%
-
-iPhone 11 Pro Max 64gb
-💰 R$1.499,00 → 10x R$ 169,94 | 12x R$ 142,44
-✅ Preto 96%
-
-IPhone 11 128gb
-(tela trocada, Face ID off, câmera frontal embaçada)
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ verde 73%
-
-iPhone 11 128GB
-(tela trocada)
-💰 R$1.099,00→ 10x R$ 124,59| 12x R$ 104,43
-✅ Preto 82%
-
-iPhone 11 64GB
-( tela trocada)
-💰 R$1.099,00→ 10x R$ 124,59| 12x R$ 104,43
-⤴️ Preto 72%
-
-iPhone 11 64GB
-(Vibra off)
-💰 R$999,00→ 10x R$ 113,26 | 12x R$ 94,93
-✅Preto 77%
-
-IPhone 11 64gb
-(tela trocada, Face ID off)
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ branco 69%
-
-iPhone 11 64GB
-(Tela e bateria trocada)
-💰 R$999,00→ 10x R$ 113,26 | 12x R$ 94,93
-✅Amarelo 100%
-
-IPhone XR 128Gb
-(NFC off)
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅Preto 73%
-
-IPhone XR 64gb
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅  branco 84%
-
-IPhone XR 64gb
-(Sem Face ID) 
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-⤴️ azul 75%
-
-IPhone SE 2 geração 64gb 
-💰 R$799,00 → 10x R$90,58 / 12x R$75,92
-✅ Preto 100%
-
-iPhone 8 64GB 
- (camera traseira off)
-💰R$399,00 → 10x R$ 45,23 | 12x R$ 37,91
-⤴️ Red 100%
-
-
-📲*Poco/Xiaomi Novos*
-
-Poco c85 256gb 8g
-💰R$1.299,00 → 10x R$ 147,27 | 12x R$123,43
-✅verde
-✅Preto
-✅roxo
-
-Redmi A5 64gb
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅Preto
-✅Preto
-
-Redmi 15C 256/8
-💰R$1299,00 → 10x R$146,25 | 12x R$122,58 
-☑️ azul
-
-Redmi 15 256/8 
-💰R$ 1.499,00 → 10x R$169,94| 12x R$142,44
-☑️ lilás
-☑️ cinza 
-
- Redmi Note 14 Pro 256/8 5G
-💰 R$ 2.199,00 → 10x R$249,30| 12x R$208,95
-☑️Roxo 
-
-Redmi Note 14  256/8 
-💰R$ 1.499,00 → 10x R$169,94| 12x R$142,44
-☑️ azul 
-
-📱 *Android's Seminovos*
-
-Galaxy S21 ultra 256gb
- (Tela e traseira trincada e linha verde na tela e câmera traseira embaçada)
-💰 R$699,00 → 10x R$79,25 / 12x R$66,42
-✅Preto   
-
-Galaxy A17 128gb
-💰R$899,00 → 10x R$101,92 | 12x R$85,42
-✅ Preto 
-
-Moto one action 128GB 
-💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
-✅ Verde
-
-Redmi Note 10 128GB (pequena mancha na tela)
-💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
-✅Preto
-
-Moto G15 256GB
-💰R$599,00 → 10x R$ 67,91| 12x R$ 56,92
-✅Verde
-
-Moto G31 5g 128gb 
-💰 R$699,00 → 10x R$ 79,25 | 12x R$ 66,42
-✅ preto 
-
-Galaxy A13 128GB
- ( tela trincada e lente da camera traseira trincada)
-💰R$499,00 → 10x R$ 56,57 | 12x R$ 47,42
-✅ Branco
-
-📱 *Xiaomis Encomendas*
-
-Poco X8 Pro 512GB 8Ram 5g 
-💰 R$2.699,00 
-☑️ Verde
-☑️ Preto
-☑️ Branco
-
-Poco X8 Pro 256GB 8Ram 5g 
-💰 R$2.399,00 
-☑️ Verde
-
-Poco X7 Pro 256GB 8Ram 5G
-💰 R$2.499,00 
-☑️ Amarelo
-☑️ Preto
-
-Poco X7 512GB 12Ram 5G
-💰 R$2.499,00 
-☑️ Verde
-☑️ Preto
-
-Poco X7 256GB 8Ram 5G
-💰 R$2.399,00 
-☑️ Verde
-☑️ Preto
-
-Redmi Note 15 Pro 512GB 8Ram 5G
-💰 R$2.399,00 
-☑️ Branco
-
-Redmi Note 15 Pro 512GB 8Ram 5G
-💰 R$2.399,00 
-☑️ Branco
-☑️ Preto
-☑️ Azul
-☑️ CInza
-
-Redmi Note 15 Pro 256GB 8Ram 5G
-💰 R$2.399,00 
-☑️ Preto
-☑️ Cinza
-☑️ Azul
-
-Redmi Note 15 Pro 256GB 8Ram 4G
-💰 R$2.299,00 
-☑️ Azul
-☑️ Cinza
-☑️ Preto
-
-📢  *Caixa de som*
-
-Caixa de som JBL GO 4 
-(original)
-💰 R$399,00 → 10x R$ 45,23 l 12x R$ 37,91
+${process.env.PRICE_TABLE || ''}
 
 ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
 
@@ -604,7 +227,7 @@ VALORES DE TROCA (PRINCIPAIS MODELOS)
 ━━━━━━━━━━━━━━━━━━━
 
 
-Atenção: Se o cliente escrever “Mb” ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
+Atenção: Se o cliente escrever "Mb" ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
 
 iPhone 7: Sem defeito 32/128GB R$200, 256GB R$250 | Sem Face ID 32/128GB R$150, 256GB R$180 | Bat abaixo 80% R$150 | Tela trincada R$100 | Traseira trincada R$150 | Tudo junto R$50
 iPhone 7 Plus: Sem defeito 32/128GB R$250, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$150 | Traseira trincada R$150 | Tudo junto R$70
@@ -851,10 +474,11 @@ const FERRAMENTA_PARCELAMENTO = {
 };
 
 async function chamarClaude(mensagens) {
+  const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
-    system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral", ttl: "1h" } }],
+    system: [{ type: "text", text: systemPromptAtual, cache_control: { type: "ephemeral", ttl: "1h" } }],
     tools: [FERRAMENTA_PARCELAMENTO],
     messages: mensagens
   };
@@ -904,11 +528,8 @@ const isImage = body.image || body.mimetype?.includes('image');
 
 if (!phone || (!message && !isImage)) return res.sendStatus(200);
 
-// Confirma recebimento IMEDIATAMENTE — evita que o Z-API reenvie a mesma
-// mensagem por demora na resposta, o que causava respostas duplicadas/repetidas.
 res.sendStatus(200);
 
-// Daqui pra baixo roda em segundo plano, depois do recebimento já confirmado.
 try {
 
 if (isImage) {
@@ -931,33 +552,27 @@ return;
 
 console.log(`📱 Mensagem de ${phone}: ${message}`);
 
-// Inicializa histórico se não existir
 if (!conversas[phone]) {
 conversas[phone] = [];
 }
 
-// Adiciona mensagem do cliente ao histórico
 conversas[phone].push({
 role: 'user',
 content: message
 });
 
-// Limita histórico a 20 mensagens para não estourar tokens
 if (conversas[phone].length > 20) {
 conversas[phone] = conversas[phone].slice(-20);
 }
 
-// Chama a API do Claude (com suporte à ferramenta de cálculo de parcelamento)
 const reply = await chamarClaude(conversas[phone]);
 console.log(`🤖 Resposta: ${reply}`);
 
-// Adiciona resposta ao histórico
 conversas[phone].push({
 role: 'assistant',
 content: reply
 });
 
-// Envia resposta pelo Z-API
 await axios.post(
 `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`,
 {
@@ -977,29 +592,52 @@ console.error('Erro:', error.response?.data || error.message);
 });
 
 // ==========================================
-// INICIA O SERVIDOR
-// ==========================================
-
 // ADMIN PAINEL
-const fs = require('fs');
+// ==========================================
 const path = require('path');
 
+// Tabela em memória — carrega do Railway na inicialização
+let tabelaEmMemoria = process.env.PRICE_TABLE || '';
+
 app.get('/admin', (req, res) => {
-res.sendFile(path.join(__dirname, 'admin.html'));
+  res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 app.get('/tabela', (req, res) => {
-try {
-const t = fs.readFileSync('tabela.txt', 'utf8');
-res.send(t);
-} catch {
-res.send('');
-}
+  res.send(tabelaEmMemoria);
 });
 
-app.post('/salvar-tabela', (req, res) => {
-fs.writeFileSync('tabela.txt', req.body.tabela);
-res.json({ok: true});
+app.post('/salvar-tabela', async (req, res) => {
+  tabelaEmMemoria = req.body.tabela;
+
+  // Salva no Railway como variável de ambiente (persiste para sempre)
+  try {
+    await axios.post(
+      'https://backboard.railway.app/graphql/v2',
+      {
+        query: `mutation {
+          variableUpsert(input: {
+            projectId: "4f91d664-453e-45b2-8e3e-ad8cb8965b0f"
+            environmentId: "c2eca5aa-ccbe-4e4d-b67f-4a5789edbff8"
+            serviceId: "7d77b859-3bec-4f0b-97a3-95b328bd7feb"
+            name: "PRICE_TABLE"
+            value: ${JSON.stringify(req.body.tabela)}
+          })
+        }`
+      },
+      {
+        headers: {
+          'Authorization': 'Bearer 9432504b-5a9c-4a15-8baa-1bd6222b462b',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('✅ Tabela salva no Railway!');
+  } catch(e) {
+    console.error('Erro ao salvar no Railway:', e.message);
+  }
+
+  res.json({ok: true});
 });
 
 app.listen(3000, () => {
