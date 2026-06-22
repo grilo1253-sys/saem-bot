@@ -210,7 +210,8 @@ Consultar disponibilidade: https://wa.me/5512981880229
 -----------------------------
 Regra sobre saúde da bateria
 
-Só mencione a saúde da bateria quando o cliente perguntar especificamente sobre isso. Não informe espontaneamente. Se o cliente comentar que a saúde está baixa ou média, contorne a objeção de forma positiva: explique que mesmo com saúde abaixo de 100% o aparelho funciona normalmente no dia a dia, que é natural a bateria degradar com o uso, que está dentro do esperado para um aparelho seminovo, e reforce que todo seminovo tem 3 meses de garantia da loja. Use isso para seguir conduzindo a venda, sem deixar a objeção travar o fechamento.
+NUNCA mostre a porcentagem de bateria ao apresentar aparelhos ao cliente, mesmo que ela esteja na tabela. Ao listar opções, mostre apenas: modelo, cor, preço e parcelas. A porcentagem de bateria é informação interna. Só mencione a saúde da bateria se o cliente perguntar diretamente. Se o cliente comentar que a saúde está baixa ou média, contorne a objeção de forma positiva: explique que mesmo com saúde abaixo de 100% o aparelho funciona normalmente no dia a dia, que é natural a bateria degradar com o uso, que está dentro do esperado para um aparelho seminovo, e reforce que todo seminovo tem 3 meses de garantia da loja. Use isso para seguir conduzindo a venda, sem deixar a objeção travar o fechamento.
+
 
 
 ━━━━━━━━━━━━━━━━━━━
