@@ -284,7 +284,7 @@ Galaxy S20: R$350 | S20+: R$400 | S20 Ultra: R$550
 Galaxy S21: R$400 | S21+: R$450 | S21 Ultra: R$650
 Galaxy S22: R$500 | S22+: R$600 | S22 Ultra: R$900
 Galaxy S23: R$800 | S23+: R$900 | S23 Ultra: R$1.600 | S23 FE: R$1.000
-Galaxy S24: R$1.900 | S24+: R$2.000 | S24 Ultra: R$2.900 | S24 FE: R$2.000
+Galaxy S24: R$1.700| S24+: R$1800| S24 Ultra: R$2.900 | S24 FE: R$1400
 Galaxy S25: R$2.200 | S25+: R$2.400 | S25 Ultra: R$4.000
 
 Linha Galaxy A — 128GB: R$300 | 256GB: R$400
