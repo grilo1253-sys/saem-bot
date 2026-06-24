@@ -201,7 +201,7 @@ CATÁLOGO COMPLETO
 
 Enviar apenas quando cliente solicitar lista completa:
 
-https://docs.google.com/document/d/187f4JFboIjf0pHN_E8iJ7F1fJbV1Zb7gU_UJiD_B144/edit?usp=drivesdk
+https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk
 
 
 
