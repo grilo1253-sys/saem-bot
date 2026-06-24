@@ -200,7 +200,10 @@ CATÁLOGO COMPLETO
 ━━━━━━━━━━━━━━━━━━━
 
 Enviar apenas quando cliente solicitar lista completa:
+
 https://docs.google.com/document/d/187f4JFboIjf0pHN_E8iJ7F1fJbV1Zb7gU_UJiD_B144/edit?usp=drivesdk
+
+
 
 ━━━━━━━━━━━━━━━━━━━
 ENTREGAS
