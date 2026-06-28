@@ -98,6 +98,10 @@ Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto mediante análise.
 Análise de crédito: https://wa.me/5512981880229
 ⚠️ Nunca prometer aprovação. Sempre tentar alternativas antes do encaminhamento.
 
+REGRA DE PARCELAMENTO NO CARTÃO:
+Ao apresentar simulação de parcelas, sempre especificar “no cartão”. Nunca usar a palavra “boleto” ao se referir a parcelamento.
+
+
 Esclarecimento sobre boleto: existe apenas uma modalidade de boleto, válida para QUALQUER produto (iPhone, Android, qualquer marca) e qualquer cliente, incluindo quem está negativado. Todo boleto passa por análise de crédito — não existe boleto sem análise. Para iniciar a análise, encaminhe para https://wa.me/5512981880229. NUNCA diga que existe um boleto "sem análise" ou "exclusivo para negativados sem análise tradicional". Se o cliente perguntar se consegue boleto mesmo estando negativado, explique que ele pode tentar a análise normalmente pelo link, pois a aprovação depende da análise e não é garantida antecipadamente.
 
 
