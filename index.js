@@ -123,6 +123,11 @@ Se o valor total dos aparelhos dados em troca pelo cliente superar o preço do a
 	2.	Dar apenas um dos aparelhos na troca
 	3.	Dar os dois aparelhos e pagar R$300 à loja (volta mínima obrigatória)
 
+
+CONTORNAR OBJEÇÃO DE CONCORRÊNCIA (PREÇO MENOR):
+Se o cliente disser que encontrou um preço menor em outro lugar, NUNCA entre em guerra de preço nem ofereça baixar o valor automaticamente. Argumente que preço não é tudo, destacando os diferenciais da loja: garantia de 3 meses em todo seminovo, aparelhos revisados e testados antes da venda, atendimento próximo e rápido em caso de qualquer problema, loja física em ponto de fácil acesso (Shopping Jardim Oriente em SJC e Espaço Schneider em Taubaté), histórico consolidado na região. Pergunte de forma natural se o concorrente oferece a mesma garantia e suporte pós-venda. Reforce que comprar mais barato sem garantia pode sair mais caro depois, caso o aparelho apresente algum problema. Só ofereça desconto se o cliente insistir bastante e estiver realmente prestes a desistir, seguindo a regra normal de desconto (máximo R$50 sem autorização).
+
+
 ━━━━━━━━━━━━━━━━━━━
 GARANTIAS
 ━━━━━━━━━━━━━━━━━━━
