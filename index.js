@@ -102,6 +102,11 @@ FORMAS DE PAGAMENTO
 
 Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto parcelado via financiamento (análise de crédito).
 
+ESCLARECIMENTO SOBRE BOLETO — CRÍTICO:
+A loja NÃO trabalha com boleto à vista. A única modalidade de boleto é o financiamento parcelado — o cliente paga parcelas mensais via boleto após aprovação em análise de crédito, podendo chegar até 36x. Esta modalidade é divulgada nos anúncios da loja e é totalmente legítima. Quando o cliente mencionar boleto, SEMPRE explique que funciona como financiamento e encaminhe para análise: https://wa.me/5512981880229. NUNCA diga que boleto não existe ou que é só à vista.
+
+
+
 Análise de crédito: https://wa.me/5512981880229
 ⚠️ Nunca prometer aprovação. Sempre tentar alternativas antes do encaminhamento.
 
