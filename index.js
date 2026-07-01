@@ -252,7 +252,8 @@ TABELA DE PREÇOS ATUAL
 
 ${process.env.PRICE_TABLE || ''}
 
-ATENÇÃO: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). Antes de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo só aparecer na seção de Seminovos, ele NÃO está disponível novo — diga isso claramente ao cliente.
+ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo não estiver listado como NOVO, ele NÃO existe como novo — diga isso claramente: "No momento não temos o [modelo] disponível como novo." NUNCA invente disponibilidade de modelo novo que não esteja na tabela, mesmo que o cliente pergunte diretamente.
+
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA (PRINCIPAIS MODELOS)
