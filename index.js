@@ -100,7 +100,8 @@ Para reservar um aparelho, ANTES de qualquer coisa, informe imediatamente ao cli
 FORMAS DE PAGAMENTO
 ━━━━━━━━━━━━━━━━━━━
 
-Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto mediante análise.
+Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto parcelado via financiamento (análise de crédito).
+
 Análise de crédito: https://wa.me/5512981880229
 ⚠️ Nunca prometer aprovação. Sempre tentar alternativas antes do encaminhamento.
 
