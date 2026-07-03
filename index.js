@@ -16,12 +16,14 @@ const ZAPI_INSTANCE = process.env.ZAPI_INSTANCE;
 const ZAPI_TOKEN = process.env.ZAPI_TOKEN;
 const ZAPI_CLIENT_TOKEN = process.env.ZAPI_CLIENT_TOKEN;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const NUMERO_ADMIN = process.env.NUMERO_ADMIN; // Número pessoal do Saem para receber notificações
 
 // ==========================================
 // PERSISTÊNCIA DAS CONVERSAS
 // ==========================================
 const ARQUIVO_CONVERSAS = '/tmp/conversas_do_dia.json';
 const ARQUIVO_NOITE_ANTERIOR = '/tmp/conversas_noite_anterior.json';
+const ARQUIVO_PENDENTES = '/tmp/pendentes_equipe.json';
 
 function carregarConversas() {
   try {
@@ -41,10 +43,7 @@ function carregarConversas() {
 
 function salvarConversas() {
   try {
-    const data = {
-      data: new Date().toDateString(),
-      conversas: conversas
-    };
+    const data = { data: new Date().toDateString(), conversas: conversas };
     fs.writeFileSync(ARQUIVO_CONVERSAS, JSON.stringify(data), 'utf8');
   } catch (e) {
     console.error('Erro ao salvar conversas:', e.message);
@@ -69,12 +68,91 @@ function salvarMetadados() {
   } catch (e) {}
 }
 
-// Carrega conversas persistidas ao iniciar
+// Carrega pendentes (aparelhos aguardando valor da equipe)
+function carregarPendentes() {
+  try {
+    if (fs.existsSync(ARQUIVO_PENDENTES)) {
+      return JSON.parse(fs.readFileSync(ARQUIVO_PENDENTES, 'utf8'));
+    }
+  } catch (e) {}
+  return {};
+}
+
+function salvarPendentes() {
+  try {
+    fs.writeFileSync(ARQUIVO_PENDENTES, JSON.stringify(pendentesEquipe), 'utf8');
+  } catch (e) {}
+}
+
 const conversas = carregarConversas();
-const metaConversas = carregarMetadados(); // { phone: { ultimaMensagem: timestamp, produto: 'iPhone 14', temBoleto: true } }
+const metaConversas = carregarMetadados();
+const pendentesEquipe = carregarPendentes();
+// pendentesEquipe = { phone: { aparelho: 'Poco X3', aguardando: true } }
 
 // ==========================================
-// SISTEMA DE MEMÓRIA
+// SISTEMA DE NOTIFICAÇÃO PARA O ADMIN
+// ==========================================
+async function notificarAdmin(phoneCliente, aparelho, contexto) {
+  if (!NUMERO_ADMIN) return;
+  try {
+    const msg = `🔔 *Valor necessário para cliente*\n\nCliente: ${phoneCliente}\nAparelho: *${aparelho}*\n\nContexto: ${contexto}\n\n_Responda com o valor no formato:_\n*valor ${phoneCliente} 300*\n_(substitua 300 pelo valor real)_`;
+    await enviarMensagem(NUMERO_ADMIN, msg);
+    console.log(`📲 Admin notificado sobre ${aparelho} para cliente ${phoneCliente}`);
+  } catch (e) {
+    console.error('Erro ao notificar admin:', e.message);
+  }
+}
+
+// Detecta se o Cláudio disse que vai verificar com a equipe
+function detectouPendencia(reply, mensagemCliente) {
+  const frasesPendencia = [
+    'verificar com a equipe',
+    'vou verificar',
+    'retorno em instantes',
+    'precisa ser avaliado',
+    'consultar a equipe',
+    'verificar o valor'
+  ];
+  return frasesPendencia.some(f => reply.toLowerCase().includes(f));
+}
+
+// Extrai aparelho mencionado na conversa recente
+function extrairAparelhoPendente(mensagens) {
+  const ultimasMsgs = mensagens.slice(-4);
+  const texto = ultimasMsgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ');
+  
+  // Tenta extrair modelo mencionado
+  const padroes = [
+    /poco\s+\w+/i, /redmi\s+\w+/i, /galaxy\s+\w+/i, /moto\s+\w+/i,
+    /iphone\s+\d+\s*\w*/i, /macbook\s+\w+/i, /ipad\s+\w*/i,
+    /notebook\s+\w*/i, /ps[34]/i, /xbox\s+\w*/i, /apple\s+watch/i
+  ];
+  
+  for (const padrao of padroes) {
+    const match = texto.match(padrao);
+    if (match) return match[0];
+  }
+  return 'aparelho não identificado';
+}
+
+// ==========================================
+// PROCESSAMENTO DE RESPOSTA DO ADMIN
+// ==========================================
+// Formato esperado: "valor 5512999999999 300"
+function processarRespostaAdmin(message, phoneAdmin) {
+  const match = message.trim().match(/^valor\s+(\d+)\s+(\d+(?:[.,]\d+)?)/i);
+  if (!match) return null;
+  
+  const phoneCliente = match[1];
+  const valorStr = match[2].replace(',', '.');
+  const valor = parseFloat(valorStr);
+  
+  if (!phoneCliente || isNaN(valor)) return null;
+  return { phoneCliente, valor };
+}
+
+// ==========================================
+// SYSTEM PROMPT
 // ==========================================
 const SYSTEM_PROMPT = `VENDEDOR SAEM CELULARES
 
@@ -113,11 +191,13 @@ REGRAS DE ATENDIMENTO
 - Priorize o fechamento da venda de maneira natural e consultiva.
 - Quando qualquer cliente reclamar de problema, defeito ou comportamento estranho em aparelho comprado na loja, siga esta ordem obrigatória: 1) Defenda o aparelho — normalize a situação, diga que é comportamento comum do iOS ou de configurações. 2) Sugira soluções práticas — brilho, reiniciar, configurações, atualização de sistema. 3) Se o cliente insistir, sugira novas soluções diferentes das anteriores. 4) Continue tentando resolver pelo chat o máximo possível. 5) Só encaminhe para o Breno quando o cliente deixar explícito que já tentou tudo e quer atendimento presencial ou está muito insatisfeito. NUNCA encaminhe para o Breno logo de cara. NUNCA mencione defeito, problema de hardware ou qualquer coisa que crie prova contra a loja.
 - REGRA DE ACESSÓRIOS:
-- Quando o cliente perguntar sobre acessórios (carregadores, capas, películas, etc), responda: "Temos todas as linhas de acessórios! É só entrar no nosso site na aba de acessórios e conferir os valores: https://www.saemcelulares.net — Qualquer dúvida é só chamar! 😊"
+Quando o cliente perguntar sobre acessórios (carregadores, capas, películas, etc), responda: "Temos todas as linhas de acessórios! É só entrar no nosso site na aba de acessórios e conferir os valores: https://www.saemcelulares.net — Qualquer dúvida é só chamar! 😊"
 - REGRA DE RECLAMAÇÃO CONTRA A LOJA:
 Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crítica à loja, NUNCA concorde com a reclamação, NUNCA diga "você tem razão" sobre algo negativo da loja e NUNCA prometa repassar feedback para a equipe como se fosse um erro real. Defenda a loja de forma educada e firme. Explique a situação de forma positiva. Exemplo: se o cliente reclamar do anúncio de "36 vezes no boleto", explique que é uma modalidade real de financiamento aprovada, onde o cliente paga parcelas mensais via boleto após análise de crédito — não é propaganda enganosa, é uma forma de pagamento legítima oferecida pela loja.
 - REGRA DE OFERTAS EM IMAGENS:
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
+- REGRA DE VALOR CONFIRMADO PELA EQUIPE:
+Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
 
 ━━━━━━━━━━━━━━━━━━━
 LOJAS E HORÁRIOS
@@ -294,13 +374,10 @@ MODELOS DISPONÍVEIS COMO NOVOS ATUALMENTE (atualizar quando mudar o estoque):
 iPhone 17 256GB — R$5.499,00 — Preto (Taubaté) | Azul (Taubaté) | Azul (SJC)
 iPhone 17 Pro Max 256GB — R$7.899,00 — Branco (SJC) | Branco (SJC)
 
-
-
 ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo não está disponível como novo, verifique CUIDADOSAMENTE a seção iPhones Novos da tabela acima. O iPhone 17 e o iPhone 17 Pro Max estão disponíveis como NOVOS — NUNCA diga que não temos novo se estiver listado. Se o modelo estiver na seção iPhones Novos, confirme que temos sim.
 
 REGRA DE CÁLCULO DE PARCELAS — CRÍTICA:
 Ao calcular parcelas, use SEMPRE o saldo EXATO do produto que está sendo negociado naquele momento. NUNCA misture valores de produtos diferentes. Antes de chamar a ferramenta calcular_parcelamento, confirme internamente: qual é o produto? qual é o preço? qual é o saldo após descontos? Só então calcule.
-
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA (PRINCIPAIS MODELOS)
@@ -635,7 +712,7 @@ Nunca inventar preços, estoque, valores de troca, garantias ou parcelamentos.
 Em caso de dúvida, informar que será necessário verificar com a equipe.`;
 
 // ==========================================
-// FILTRO DE REATIVAÇÃO — SEM CUSTO DE API
+// FILTRO DE REATIVAÇÃO
 // ==========================================
 const PALAVRAS_BOLETO = ['boleto', 'financiamento', 'análise de crédito', 'analise de credito', 'negativado', 'crediário', 'crediario', 'wa.me/5512981880229'];
 const PALAVRAS_CORTAR = ['manutenção', 'manutencao', 'conserto', 'tela quebrada', 'bateria trocada', 'até logo', 'ate logo', 'obrigado', 'obrigada', 'boa sorte'];
@@ -654,36 +731,20 @@ function extrairProduto(msgs) {
 function deveReativar(phone) {
   const meta = metaConversas[phone];
   if (!meta) return false;
-
   const msgs = conversas[phone] || [];
-  if (msgs.length < 3) return false; // Conversa muito curta
-
+  if (msgs.length < 3) return false;
   const textoCompleto = msgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ').toLowerCase();
-
-  // Corta se tiver boleto/financiamento
   if (PALAVRAS_BOLETO.some(p => textoCompleto.includes(p))) return false;
-
-  // Corta se a conversa terminou com despedida
   if (PALAVRAS_CORTAR.some(p => textoCompleto.includes(p))) return false;
-
-  // Corta se não mencionou nenhum produto
-  const temProduto = PALAVRAS_PRODUTO.some(p => textoCompleto.includes(p));
-  if (!temProduto) return false;
-
-  // Corta se não demonstrou interesse real
-  const temInteresse = PALAVRAS_INTERESSE.some(p => textoCompleto.includes(p));
-  if (!temInteresse) return false;
-
+  if (!PALAVRAS_PRODUTO.some(p => textoCompleto.includes(p))) return false;
+  if (!PALAVRAS_INTERESSE.some(p => textoCompleto.includes(p))) return false;
   return true;
 }
 
 function gerarMensagemReativacao(phone) {
   const msgs = conversas[phone] || [];
   const produto = extrairProduto(msgs);
-
-  if (produto) {
-    return `Oi! Passando pra ver se ficou alguma dúvida sobre o ${produto} que conversamos 😊 Qualquer coisa é só falar!`;
-  }
+  if (produto) return `Oi! Passando pra ver se ficou alguma dúvida sobre o ${produto} que conversamos 😊 Qualquer coisa é só falar!`;
   return `Oi! Passando pra ver se ficou alguma dúvida sobre o que conversamos 😊 Qualquer coisa é só falar!`;
 }
 
@@ -693,45 +754,36 @@ function gerarMensagemReativacao(phone) {
 let reativacaoRodandoHoje = false;
 let reativacaoRodandoAmanha = false;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function intervaloAleatorio() {
-  // Entre 3 e 8 minutos em milissegundos
   return (Math.floor(Math.random() * (8 - 3 + 1)) + 3) * 60 * 1000;
 }
 
 async function executarReativacao(janela) {
   const agora = new Date();
   const hora = agora.getHours();
-
   if (janela === 'tarde' && hora < 18) return;
   if (janela === 'manha' && hora < 10) return;
 
   const candidatos = Object.keys(conversas).filter(phone => {
     if (!deveReativar(phone)) return false;
     const meta = metaConversas[phone];
-    if (!meta) return false;
-    if (meta.reativado) return false; // Já foi reativado hoje
+    if (!meta || meta.reativado) return false;
     return true;
   });
 
-  console.log(`🔔 Reativação ${janela}: ${candidatos.length} candidatos encontrados`);
-
+  console.log(`🔔 Reativação ${janela}: ${candidatos.length} candidatos`);
   let enviados = 0;
   for (const phone of candidatos) {
-    if (enviados >= 15) break; // Máximo 15 por disparo
-    if (hora >= 21) break; // Para às 21h
-
+    if (enviados >= 15 || new Date().getHours() >= 21) break;
     try {
       const msg = gerarMensagemReativacao(phone);
       await enviarMensagem(phone, msg);
       if (metaConversas[phone]) metaConversas[phone].reativado = true;
       salvarMetadados();
       enviados++;
-      console.log(`✅ Reativação enviada para ${phone}: "${msg}"`);
-
+      console.log(`✅ Reativação enviada para ${phone}`);
       if (enviados < candidatos.length && enviados < 15) {
         const intervalo = intervaloAleatorio();
         console.log(`⏱ Aguardando ${Math.round(intervalo/60000)} minutos...`);
@@ -741,67 +793,50 @@ async function executarReativacao(janela) {
       console.error(`Erro ao reativar ${phone}:`, e.message);
     }
   }
-
-  console.log(`✅ Reativação ${janela} concluída: ${enviados} mensagens enviadas`);
+  console.log(`✅ Reativação ${janela} concluída: ${enviados} mensagens`);
 }
 
-// Verificação a cada minuto para disparar nos horários certos
 setInterval(() => {
   const agora = new Date();
   const hora = agora.getHours();
   const minuto = agora.getMinutes();
-
-  // Disparo das 18h
   if (hora === 18 && minuto === 0 && !reativacaoRodandoHoje) {
     reativacaoRodandoHoje = true;
     executarReativacao('tarde').catch(console.error);
   }
-
-  // Disparo das 10h
   if (hora === 10 && minuto === 0 && !reativacaoRodandoAmanha) {
     reativacaoRodandoAmanha = true;
     executarReativacao('manha').catch(console.error);
   }
-
-  // Reset à meia-noite
   if (hora === 0 && minuto === 0) {
     reativacaoRodandoHoje = false;
     reativacaoRodandoAmanha = false;
-    // Salva conversas da noite anterior para o disparo das 10h
-    try {
-      fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8'));
-    } catch (e) {}
+    try { fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8')); } catch (e) {}
   }
 }, 60000);
 
 // ==========================================
-// TRANSCRIÇÃO DE ÁUDIO COM WHISPER
+// TRANSCRIÇÃO DE ÁUDIO
 // ==========================================
 async function transcreverAudio(audioUrl, mimetype) {
   try {
-    console.log('🎤 Baixando áudio:', audioUrl);
     const audioResp = await axios.get(audioUrl, { responseType: 'arraybuffer' });
     const audioBuffer = Buffer.from(audioResp.data);
-
     let ext = 'ogg';
-    if (mimetype && mimetype.includes('mp4')) ext = 'mp4';
-    else if (mimetype && mimetype.includes('mpeg')) ext = 'mp3';
-    else if (mimetype && mimetype.includes('wav')) ext = 'wav';
-    else if (mimetype && mimetype.includes('webm')) ext = 'webm';
-
+    if (mimetype?.includes('mp4')) ext = 'mp4';
+    else if (mimetype?.includes('mpeg')) ext = 'mp3';
+    else if (mimetype?.includes('wav')) ext = 'wav';
+    else if (mimetype?.includes('webm')) ext = 'webm';
     const form = new FormData();
     form.append('file', audioBuffer, { filename: `audio.${ext}`, contentType: mimetype || 'audio/ogg' });
     form.append('model', 'whisper-1');
     form.append('language', 'pt');
-
     const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
       headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, ...form.getHeaders() }
     });
-
-    console.log('✅ Transcrição:', response.data.text);
     return response.data.text;
   } catch (error) {
-    console.error('❌ Erro na transcrição:', error.response?.data || error.message);
+    console.error('❌ Erro transcrição:', error.response?.data || error.message);
     return null;
   }
 }
@@ -816,15 +851,12 @@ const TAXAS_JUROS = {
 };
 
 function calcularParcelamento(saldo, parcelasDesejadas) {
-  const parcelasParaCalcular = parcelasDesejadas && parcelasDesejadas.length > 0
-    ? parcelasDesejadas : Object.keys(TAXAS_JUROS).map(Number);
+  const parcelasParaCalcular = parcelasDesejadas?.length > 0 ? parcelasDesejadas : Object.keys(TAXAS_JUROS).map(Number);
   const resultado = {};
   for (const parcelas of parcelasParaCalcular) {
     const taxa = TAXAS_JUROS[parcelas];
     if (!taxa) continue;
-    const valorComJuros = saldo * (1 + taxa);
-    const valorParcela = valorComJuros / parcelas;
-    resultado[`${parcelas}x`] = `R$${valorParcela.toFixed(2).replace('.', ',')}`;
+    resultado[`${parcelas}x`] = `R$${((saldo * (1 + taxa)) / parcelas).toFixed(2).replace('.', ',')}`;
   }
   return resultado;
 }
@@ -836,7 +868,7 @@ const FERRAMENTA_PARCELAMENTO = {
     type: "object",
     properties: {
       saldo: { type: "number", description: "Valor a ser parcelado, já descontado entrada e/ou troca" },
-      parcelas: { type: "array", items: { type: "number" }, description: "Quantidades de parcelas a calcular, ex: [6] ou [10,12]. Se vazio, calcula um resumo padrão." }
+      parcelas: { type: "array", items: { type: "number" }, description: "Quantidades de parcelas a calcular" }
     },
     required: ["saldo"]
   }
@@ -845,8 +877,7 @@ const FERRAMENTA_PARCELAMENTO = {
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
+    model: 'claude-sonnet-4-6', max_tokens: 1024,
     system: [{ type: "text", text: systemPromptAtual, cache_control: { type: "ephemeral", ttl: "1h" } }],
     tools: [FERRAMENTA_PARCELAMENTO],
     messages: mensagens
@@ -864,8 +895,7 @@ async function chamarClaude(mensagens) {
     mensagens.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) }] });
     response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: mensagens }, { headers });
   }
-  const textBlock = response.data.content.find(b => b.type === 'text');
-  return textBlock ? textBlock.text : '';
+  return response.data.content.find(b => b.type === 'text')?.text || '';
 }
 
 async function enviarMensagem(phone, message) {
@@ -888,12 +918,9 @@ app.post('/webhook', async (req, res) => {
   const isGroup = body.isGroup || body.phone?.includes('-group');
   if (isGroup) {
     const msgGrupo = body.text?.message || body.text || '';
-    const isImagemGrupo = body.image || body.mimetype?.includes('image');
-    if (isImagemGrupo) return res.sendStatus(200);
-    if (!msgGrupo) return res.sendStatus(200);
+    if (body.image || body.mimetype?.includes('image') || !msgGrupo) return res.sendStatus(200);
     const assuntosPermitidos = ['troca', 'valor', 'preco', 'manutencao', 'conserto', 'cliente', 'venda', 'negoc', 'quanto', 'aparelho'];
-    const temAssunto = assuntosPermitidos.some(a => msgGrupo.toLowerCase().includes(a));
-    if (!temAssunto) return res.sendStatus(200);
+    if (!assuntosPermitidos.some(a => msgGrupo.toLowerCase().includes(a))) return res.sendStatus(200);
   }
 
   const phone = body.phone;
@@ -905,16 +932,48 @@ app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 
   try {
-    if (!conversas[phone]) conversas[phone] = [];
+    // ==========================================
+    // VERIFICA SE É RESPOSTA DO ADMIN
+    // ==========================================
+    if (NUMERO_ADMIN && phone === NUMERO_ADMIN && message) {
+      const resposta = processarRespostaAdmin(message, phone);
+      if (resposta) {
+        const { phoneCliente, valor } = resposta;
+        if (!conversas[phoneCliente]) conversas[phoneCliente] = [];
 
-    // Atualiza metadados
+        // Injeta o valor como mensagem interna da equipe
+        conversas[phoneCliente].push({
+          role: 'user',
+          content: `[EQUIPE]: O valor de troca do aparelho é R$${valor.toFixed(2).replace('.', ',')}`
+        });
+
+        // Remove pendência
+        if (pendentesEquipe[phoneCliente]) {
+          delete pendentesEquipe[phoneCliente];
+          salvarPendentes();
+        }
+
+        salvarConversas();
+
+        // Dispara resposta do Cláudio para o cliente
+        const msgs = conversas[phoneCliente];
+        const reply = await chamarClaude([...msgs]);
+        conversas[phoneCliente].push({ role: 'assistant', content: reply });
+        salvarConversas();
+        await enviarMensagem(phoneCliente, reply);
+
+        // Confirma para o admin
+        await enviarMensagem(NUMERO_ADMIN, `✅ Valor enviado para o cliente ${phoneCliente}!`);
+        return;
+      }
+    }
+
+    if (!conversas[phone]) conversas[phone] = [];
     if (!metaConversas[phone]) metaConversas[phone] = {};
     metaConversas[phone].ultimaMensagemCliente = Date.now();
-    metaConversas[phone].reativado = false; // Cliente voltou, reseta flag
+    metaConversas[phone].reativado = false;
 
-    // ==========================================
-    // PROCESSAMENTO DE IMAGEM
-    // ==========================================
+    // IMAGEM
     if (isImage) {
       const imageUrl = body.image?.imageUrl || body.image?.url || body.imageUrl;
       if (!imageUrl) return;
@@ -932,40 +991,25 @@ app.post('/webhook', async (req, res) => {
       return;
     }
 
-    // ==========================================
-    // PROCESSAMENTO DE ÁUDIO
-    // ==========================================
+    // ÁUDIO
     if (isAudio) {
       const audioUrl = body.audio?.audioUrl || body.audio?.url || body.audioUrl;
-      if (!audioUrl) {
-        await enviarMensagem(phone, 'Não consegui processar o áudio. Pode digitar sua mensagem? 😊');
-        return;
-      }
-      if (!OPENAI_API_KEY) {
-        await enviarMensagem(phone, 'Não consigo ouvir áudios por aqui, mas pode digitar sua mensagem que respondo na hora! 😊');
-        return;
-      }
+      if (!audioUrl) { await enviarMensagem(phone, 'Não consegui processar o áudio. Pode digitar? 😊'); return; }
+      if (!OPENAI_API_KEY) { await enviarMensagem(phone, 'Não consigo ouvir áudios por aqui, mas pode digitar! 😊'); return; }
       const transcricao = await transcreverAudio(audioUrl, body.mimetype);
-      if (!transcricao || transcricao.trim() === '') {
-        await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar sua mensagem? 😊');
-        return;
-      }
-      console.log(`🎤 Áudio transcrito de ${phone}: ${transcricao}`);
+      if (!transcricao?.trim()) { await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar? 😊'); return; }
       conversas[phone].push({ role: 'user', content: transcricao });
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
       const reply = await chamarClaude(conversas[phone]);
-      console.log(`🤖 Resposta: ${reply}`);
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
       await enviarMensagem(phone, reply);
       return;
     }
 
-    // ==========================================
-    // PROCESSAMENTO DE TEXTO
-    // ==========================================
+    // TEXTO
     if (!message) return;
-    console.log(`📱 Mensagem de ${phone}: ${message}`);
+    console.log(`📱 ${phone}: ${message}`);
     conversas[phone].push({ role: 'user', content: message });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
     const reply = await chamarClaude(conversas[phone]);
@@ -973,6 +1017,15 @@ app.post('/webhook', async (req, res) => {
     conversas[phone].push({ role: 'assistant', content: reply });
     salvarConversas();
     salvarMetadados();
+
+    // Detecta se precisa notificar admin
+    if (detectouPendencia(reply, message) && NUMERO_ADMIN && !pendentesEquipe[phone]) {
+      const aparelho = extrairAparelhoPendente(conversas[phone]);
+      pendentesEquipe[phone] = { aparelho, aguardando: true };
+      salvarPendentes();
+      await notificarAdmin(phone, aparelho, message);
+    }
+
     await enviarMensagem(phone, reply);
 
   } catch (error) {
@@ -985,13 +1038,8 @@ app.post('/webhook', async (req, res) => {
 // ==========================================
 let tabelaEmMemoria = process.env.PRICE_TABLE || '';
 
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-app.get('/tabela', (req, res) => {
-  res.send(tabelaEmMemoria);
-});
+app.get('/admin', (req, res) => { res.sendFile(path.join(__dirname, 'admin.html')); });
+app.get('/tabela', (req, res) => { res.send(tabelaEmMemoria); });
 
 app.post('/salvar-tabela', async (req, res) => {
   tabelaEmMemoria = req.body.tabela;
@@ -999,13 +1047,9 @@ app.post('/salvar-tabela', async (req, res) => {
     await axios.post('https://backboard.railway.app/graphql/v2', {
       query: `mutation { variableUpsert(input: { projectId: "4f91d664-453e-45b2-8e3e-ad8cb8965b0f" environmentId: "c2eca5aa-ccbe-4e4d-b67f-4a5789edbff8" serviceId: "7d77b859-3bec-4f0b-97a3-95b328bd7feb" name: "PRICE_TABLE" value: ${JSON.stringify(req.body.tabela)} }) }`
     }, { headers: { 'Authorization': 'Bearer 9432504b-5a9c-4a15-8baa-1bd6222b462b', 'Content-Type': 'application/json' } });
-    console.log('✅ Tabela salva no Railway!');
-  } catch(e) {
-    console.error('Erro ao salvar no Railway:', e.message);
-  }
+    console.log('✅ Tabela salva!');
+  } catch(e) { console.error('Erro Railway:', e.message); }
   res.json({ok: true});
 });
 
-app.listen(3000, () => {
-  console.log('✅ Bot Saem Celulares rodando na porta 3000!');
-});
+app.listen(3000, () => { console.log('✅ Bot Saem Celulares rodando na porta 3000!'); });
