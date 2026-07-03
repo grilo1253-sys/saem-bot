@@ -288,7 +288,11 @@ TABELA DE PREÇOS ATUAL
 
 ${process.env.PRICE_TABLE || ''}
 
-ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo não estiver listado como NOVO, ele NÃO existe como novo — diga isso claramente: "No momento não temos o [modelo] disponível como novo." NUNCA invente disponibilidade de modelo novo que não esteja na tabela, mesmo que o cliente pergunte diretamente.
+ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo não está disponível como novo, verifique CUIDADOSAMENTE a seção iPhones Novos da tabela acima. O iPhone 17 e o iPhone 17 Pro Max estão disponíveis como NOVOS — NUNCA diga que não temos novo se estiver listado. Se o modelo estiver na seção iPhones Novos, confirme que temos sim.
+
+REGRA DE CÁLCULO DE PARCELAS — CRÍTICA:
+Ao calcular parcelas, use SEMPRE o saldo EXATO do produto que está sendo negociado naquele momento. NUNCA misture valores de produtos diferentes. Antes de chamar a ferramenta calcular_parcelamento, confirme internamente: qual é o produto? qual é o preço? qual é o saldo após descontos? Só então calcule.
+
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA (PRINCIPAIS MODELOS)
