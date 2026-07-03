@@ -361,6 +361,42 @@ Tela quebrada: NÃO aceitamos na troca
 
 ATENÇÃO: se o notebook tiver qualquer outro defeito ou condição não listada acima, informe ao cliente que o aparelho precisa ser avaliado presencialmente na loja antes de passar qualquer valor.
 
+━━━━━━━━━━━━━━━━━━━
+VALORES DE TROCA - MACBOOK
+━━━━━━━━━━━━━━━━━━━
+
+ATENÇÃO: Os valores abaixo são para MacBooks funcionando, sem bloqueios de iCloud, em bom estado estético e sem defeitos. A avaliação definitiva é feita presencialmente na loja.
+
+MACBOOK AIR:
+MacBook Air 2012: R$700
+MacBook Air 2013: R$800
+MacBook Air 2014: R$900
+MacBook Air 2015: R$1.000
+MacBook Air 2017: R$1.200
+MacBook Air 2018 (Retina): R$1.700
+MacBook Air 2020 Intel: R$2.100
+MacBook Air M1 (2020): R$3.300
+MacBook Air M2 (2022): R$3.700
+MacBook Air M3 (2024): R$4.200
+
+MACBOOK PRO:
+MacBook Pro 2012: R$900
+MacBook Pro 2013: R$1.100
+MacBook Pro 2014: R$1.200
+MacBook Pro 2015 Retina: R$1.300
+MacBook Pro 2016: R$1.500
+MacBook Pro 2017: R$1.700
+MacBook Pro 2018: R$2.400
+MacBook Pro 2019 13": R$2.900
+MacBook Pro 2020 Intel: R$3.100
+MacBook Pro M1 (2020): R$3.700
+MacBook Pro M2 (2022): R$4.000
+MacBook Pro M3 (2023/2024): R$5.000
+MacBook Pro M4: R$6.200
+
+AJUSTES:
+Tela quebrada: NÃO aceitamos na troca
+Qualquer defeito, bateria ruim ou condição fora da tabela: NUNCA passe valor. Informe que a equipe irá avaliar e retornar com o valor correto.
 
 
 ━━━━━━━━━━━━━━━━━━━
