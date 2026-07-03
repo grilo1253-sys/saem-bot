@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
@@ -16,12 +18,63 @@ const ZAPI_CLIENT_TOKEN = process.env.ZAPI_CLIENT_TOKEN;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // ==========================================
-// MEMÓRIA DAS CONVERSAS
+// PERSISTÊNCIA DAS CONVERSAS
 // ==========================================
-const conversas = {};
+const ARQUIVO_CONVERSAS = '/tmp/conversas_do_dia.json';
+const ARQUIVO_NOITE_ANTERIOR = '/tmp/conversas_noite_anterior.json';
+
+function carregarConversas() {
+  try {
+    if (fs.existsSync(ARQUIVO_CONVERSAS)) {
+      const data = JSON.parse(fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8'));
+      const hoje = new Date().toDateString();
+      if (data.data === hoje) {
+        console.log(`✅ Conversas carregadas: ${Object.keys(data.conversas).length} clientes`);
+        return data.conversas;
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao carregar conversas:', e.message);
+  }
+  return {};
+}
+
+function salvarConversas() {
+  try {
+    const data = {
+      data: new Date().toDateString(),
+      conversas: conversas
+    };
+    fs.writeFileSync(ARQUIVO_CONVERSAS, JSON.stringify(data), 'utf8');
+  } catch (e) {
+    console.error('Erro ao salvar conversas:', e.message);
+  }
+}
+
+function carregarMetadados() {
+  try {
+    if (fs.existsSync('/tmp/metadados_conversas.json')) {
+      const data = JSON.parse(fs.readFileSync('/tmp/metadados_conversas.json', 'utf8'));
+      const hoje = new Date().toDateString();
+      if (data.data === hoje) return data.meta;
+    }
+  } catch (e) {}
+  return {};
+}
+
+function salvarMetadados() {
+  try {
+    const data = { data: new Date().toDateString(), meta: metaConversas };
+    fs.writeFileSync('/tmp/metadados_conversas.json', JSON.stringify(data), 'utf8');
+  } catch (e) {}
+}
+
+// Carrega conversas persistidas ao iniciar
+const conversas = carregarConversas();
+const metaConversas = carregarMetadados(); // { phone: { ultimaMensagem: timestamp, produto: 'iPhone 14', temBoleto: true } }
 
 // ==========================================
-// SYSTEM PROMPT - SAEM CELULARES
+// SISTEMA DE MEMÓRIA
 // ==========================================
 const SYSTEM_PROMPT = `VENDEDOR SAEM CELULARES
 
@@ -63,9 +116,8 @@ REGRAS DE ATENDIMENTO
 - Quando o cliente perguntar sobre acessórios (carregadores, capas, películas, etc), responda: "Temos todas as linhas de acessórios! É só entrar no nosso site na aba de acessórios e conferir os valores: https://www.saemcelulares.net — Qualquer dúvida é só chamar! 😊"
 - REGRA DE RECLAMAÇÃO CONTRA A LOJA:
 Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crítica à loja, NUNCA concorde com a reclamação, NUNCA diga "você tem razão" sobre algo negativo da loja e NUNCA prometa repassar feedback para a equipe como se fosse um erro real. Defenda a loja de forma educada e firme. Explique a situação de forma positiva. Exemplo: se o cliente reclamar do anúncio de "36 vezes no boleto", explique que é uma modalidade real de financiamento aprovada, onde o cliente paga parcelas mensais via boleto após análise de crédito — não é propaganda enganosa, é uma forma de pagamento legítima oferecida pela loja.
--REGRA DE OFERTAS EM IMAGENS:
+- REGRA DE OFERTAS EM IMAGENS:
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
-
 
 ━━━━━━━━━━━━━━━━━━━
 LOJAS E HORÁRIOS
@@ -81,17 +133,14 @@ Símbolos ✅ ☑️ ⚫ = Loja São José dos Campos
 Símbolos ⤴️ 🟣 = Loja Taubaté
 ⚠️ Só informar a loja quando o cliente perguntar.
 
-
 Regra do que vem nos aparelhos
-todo aparelho/iphone / android / smartphone acompanha apenas o cabo não falar nada alem disso 
-n
+todo aparelho/iphone / android / smartphone acompanha apenas o cabo não falar nada alem disso
 
 ----------------------
 Regra sobre reserva
 -------------------------
 
 Para reservar um aparelho, ANTES de qualquer coisa, informe imediatamente ao cliente que a reserva só vale para o dia atual — não é possível reservar para outro dia. Se o cliente confirmar que quer reservar para hoje, então informe: o sinal é R$100,00 via Pix, chave Pix: saemthiago@gmail.com. Informe também que caso haja algum problema de estoque por parte da loja, o valor é estornado integralmente. Antes de enviar o Pix, o cliente deve escrever "Eu concordo" confirmando que está ciente de que, se desistir da compra por conta própria, o sinal não é devolvido em dinheiro, mas pode ser usado como R$100,00 em crédito para comprar acessórios na loja. Após enviar o pagamento, o cliente deve enviar o comprovante e escrever "Estou de acordo". Depois disso, informe ao cliente que a equipe irá conferir o pagamento e, assim que o valor for confirmado, a reserva será efetivada. A reserva só pode ser feita para o mesmo dia da conversa. Se o cliente pedir para reservar para outro dia, informe que as reservas valem apenas para o dia atual e que ele deve entrar em contato novamente no dia que pretende vir.
-.
 
 ━━━━━━━━━━━━━━━━━━━
 FORMAS DE PAGAMENTO
@@ -120,10 +169,9 @@ Se o cliente confirmar que vai fechar a compra ou que vai à loja, e ainda NÃO 
 
 REGRA DE TROCA COM SALDO POSITIVO:
 Se o valor total dos aparelhos dados em troca pelo cliente superar o preço do aparelho escolhido, informe que a loja não realiza devolução em dinheiro e apresente as seguintes opções:
-
-	1.	Escolher um aparelho de valor mais alto
-	2.	Dar apenas um dos aparelhos na troca
-	3.	Dar os dois aparelhos e pagar R$300 à loja (volta mínima obrigatória)
+1. Escolher um aparelho de valor mais alto
+2. Dar apenas um dos aparelhos na troca
+3. Dar os dois aparelhos e pagar R$300 à loja (volta mínima obrigatória)
 
 CONTORNAR OBJEÇÃO DE CONCORRÊNCIA (PREÇO MENOR):
 Se o cliente disser que encontrou um preço menor em outro lugar, NUNCA entre em guerra de preço nem ofereça baixar o valor automaticamente. Argumente que preço não é tudo, destacando os diferenciais da loja: garantia de 3 meses em todo seminovo, aparelhos revisados e testados antes da venda, atendimento próximo e rápido em caso de qualquer problema, loja física em ponto de fácil acesso (Shopping Jardim Oriente em SJC e Espaço Schneider em Taubaté), histórico consolidado na região. Pergunte de forma natural se o concorrente oferece a mesma garantia e suporte pós-venda. Reforce que comprar mais barato sem garantia pode sair mais caro depois, caso o aparelho apresente algum problema. Só ofereça desconto se o cliente insistir bastante e estiver realmente prestes a desistir, seguindo a regra normal de desconto (máximo R$50 sem autorização).
@@ -141,7 +189,6 @@ TROCAS - ACEITAMOS
 Smartphones, iPhones, Apple Watch, iPad, Notebooks, Videogames, TVs.
 Solicitar: Modelo, Memória, Saúde da bateria, Estado do aparelho.
 Aparelho fora da tabela de trocas: NUNCA diga que não aceitamos ou que não trabalhamos com esse aparelho. Informe que vai verificar o valor com a equipe e que retorna em instantes. Não encaminhe para outro número.
-
 
 VIDEOGAMES - ACEITAMOS NA TROCA:
 PlayStation 5 (PS5) Mídia Física: R$2.400
@@ -221,7 +268,6 @@ CATÁLOGO COMPLETO
 ━━━━━━━━━━━━━━━━━━━
 
 Enviar apenas quando cliente solicitar lista completa:
-
 https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk
 
 ━━━━━━━━━━━━━━━━━━━
@@ -280,7 +326,7 @@ iPhone 15 Plus: Sem defeito 128GB R$2.800, 256GB R$2.900, 512GB R$3.000 | Sem Fa
 iPhone 15 Pro: Sem defeito 128GB R$3.300, 256GB R$3.400, 512GB R$3.500, 1TB R$3.600 | Sem Face ID 128GB R$2.800 | Bat abaixo 80% 128GB R$3.000 | Tela trincada 128GB R$2.200 | Tudo junto R$2.000
 iPhone 15 Pro Max: Sem defeito 256GB R$3.800, 512GB R$3.900, 1TB R$4.000 | Sem Face ID 256GB R$3.200 | Bat abaixo 80% 256GB R$3.700 | Tela trincada 256GB R$2.500, 512GB R$2.550, 1TB R$2.600 | Tudo junto R$2.200
 iPhone 16: Sem defeito 128GB R$3.400, 256GB R$3.500, 512GB R$3.600 | Sem Face ID 128GB R$2.800 | Bat abaixo 80% 128GB R$3.200 | Tela trincada 128GB R$2.400, 256GB R$2.500, 512GB R$2.600 | Traseira trincada 128GB R$2.700 | Tudo junto R$2.200
-iPhone 16e : Sem defeito 128GB R$2500, 256GB R$2700, 512GB R$2900 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2200 | Tela trincada 128GB R$1500, 256GB R$1600, 512GB R$1700 | Traseira trincada 128GB R$1700 | Tudo junto R$1300
+iPhone 16e: Sem defeito 128GB R$2500, 256GB R$2700, 512GB R$2900 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2200 | Tela trincada 128GB R$1500, 256GB R$1600, 512GB R$1700 | Traseira trincada 128GB R$1700 | Tudo junto R$1300
 iPhone 16 Plus: Sem defeito 128GB R$3.600, 256GB R$3.700, 512GB R$3.800 | Sem Face ID 128GB R$3.000 | Bat abaixo 80% 128GB R$3.400 | Tela trincada 128GB R$2.500 | Traseira trincada 128GB R$2.800 | Tudo junto R$2.200
 iPhone 16 Pro: Sem defeito 128GB R$4.000, 256GB R$4.200, 512GB R$4.400, 1TB R$4.500 | Sem Face ID 128GB R$3.500 | Bat abaixo 80% 128GB R$4.000 | Tela trincada 128GB R$2.600 | Traseira trincada 128GB R$3.000 | Tudo junto R$2.300
 iPhone 16 Pro Max: Sem defeito 256GB R$4.600, 512GB R$4.700, 1TB R$4.800 | Sem Face ID 256GB R$4.000 | Bat abaixo 80% 256GB R$4.400 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$3.000 | Tudo junto R$2.400
@@ -312,7 +358,6 @@ Galaxy Watch 46mm: R$400 | Active: R$300 | Active 2: R$350
 Galaxy Watch 3: R$400 | Watch 4: R$500 | Watch 4 Classic: R$500
 Watch 5: R$600 | Watch 5 Pro: R$800 | Watch 6: R$900
 Watch 6 Classic: R$1.200 | Watch 7: R$1.400 | Watch Ultra: R$1.600
-
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - NOTEBOOKS
@@ -397,7 +442,6 @@ MacBook Pro M4: R$6.200
 AJUSTES:
 Tela quebrada: NÃO aceitamos na troca
 Qualquer defeito, bateria ruim ou condição fora da tabela: NUNCA passe valor. Informe que a equipe irá avaliar e retornar com o valor correto.
-
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - ANDROID
@@ -539,9 +583,7 @@ C75 | R$800 | R$900
 ATENÇÃO: se o modelo Android que o cliente mencionar não estiver EXATAMENTE listado nas tabelas acima (Samsung, Xiaomi, Motorola ou Realme), NÃO invente um valor nem estime por aproximação com um modelo parecido. Diga que esse modelo específico precisa ser avaliado presencialmente na loja, e que o valor será informado depois de verificado pela equipe.
 
 ——————————————
-
 TÉCNICAS DE VENDAS
-
 ——————————————
 
 CONTORNAR OBJEÇÃO DE PREÇO:
@@ -568,22 +610,157 @@ ANCORAGEM:
 
 - Quando o cliente pedir fotos ou quiser ver os aparelhos, envie o link: https://www.saemcelulares.net
 - Nunca invente links ou páginas do site.
-
-- NUNCA invente produtos que não estão na tabela. Se o cliente pedir um modelo que não existe, diga claramente que não temos e ofereça o modelo mais próximo disponível. Exemplo: 'Não temos o iPhone 15 Pro Max no momento, mas temos o iPhone 15 Pro 256GB por R$3.999 que é muito similar!'
-
-- Quando o cliente pedir um modelo que NAO existe na tabela, SEMPRE comece dizendo 'No momento não temos o [modelo pedido] disponível.' e só depois ofereça o similar. NUNCA diga 'temos sim' para um produto que não está na tabela.
-- CRÍTICO: NUNCA renomeie um produto para atender o pedido do cliente. Se o cliente pedir um modelo que não existe na tabela (ex: iPhone 15 Pro), diga exatamente: "No momento não temos o [modelo pedido] disponível" e ofereça o modelo mais próximo que existe de fato na tabela. Jamais chame um iPhone 15 de "iPhone 15 Pro" ou qualquer variação que não esteja listada.
-
+- NUNCA invente produtos que não estão na tabela.
+- Quando o cliente pedir um modelo que NAO existe na tabela, SEMPRE comece dizendo 'No momento não temos o [modelo pedido] disponível.' e só depois ofereça o similar.
 - Quando enviar links NUNCA use asteriscos ou negrito. Links limpos sem formatacao.
 - Quando cliente pedir fotos envie: https://www.saemcelulares.net
-
-- Valores de troca: NUNCA estime, calcule ou arredonde valores. Use EXATAMENTE o valor que esta na tabela de trocas. Se o aparelho do cliente tiver condicao que nao esta na tabela, diga que precisa avaliar presencialmente na loja.
+- Valores de troca: NUNCA estime, calcule ou arredonde valores. Use EXATAMENTE o valor que esta na tabela de trocas.
 
 REGRA GERAL
 ━━━━━━━━━━━━━━━━━━━
 
 Nunca inventar preços, estoque, valores de troca, garantias ou parcelamentos.
 Em caso de dúvida, informar que será necessário verificar com a equipe.`;
+
+// ==========================================
+// FILTRO DE REATIVAÇÃO — SEM CUSTO DE API
+// ==========================================
+const PALAVRAS_BOLETO = ['boleto', 'financiamento', 'análise de crédito', 'analise de credito', 'negativado', 'crediário', 'crediario', 'wa.me/5512981880229'];
+const PALAVRAS_CORTAR = ['manutenção', 'manutencao', 'conserto', 'tela quebrada', 'bateria trocada', 'até logo', 'ate logo', 'obrigado', 'obrigada', 'boa sorte'];
+const PALAVRAS_PRODUTO = ['iphone', 'ipad', 'macbook', 'samsung', 'xiaomi', 'motorola', 'redmi', 'galaxy', 'notebook', 'ps5', 'ps4', 'xbox', 'apple watch'];
+const PALAVRAS_INTERESSE = ['troca', 'parcelar', 'parcela', 'cartão', 'cartao', 'pix', 'valor', 'reservar', 'reserva', 'preço', 'preco', 'quanto', 'disponível', 'disponivel'];
+
+function extrairProduto(msgs) {
+  const modelos = ['iphone 17', 'iphone 16 pro max', 'iphone 16 pro', 'iphone 16 plus', 'iphone 16', 'iphone 15 pro max', 'iphone 15 pro', 'iphone 15', 'iphone 14 pro max', 'iphone 14 pro', 'iphone 14', 'iphone 13 pro max', 'iphone 13 pro', 'iphone 13', 'iphone 12', 'iphone 11', 'macbook', 'samsung', 'xiaomi', 'notebook', 'ipad'];
+  const texto = msgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ').toLowerCase();
+  for (const modelo of modelos) {
+    if (texto.includes(modelo)) return modelo.charAt(0).toUpperCase() + modelo.slice(1);
+  }
+  return null;
+}
+
+function deveReativar(phone) {
+  const meta = metaConversas[phone];
+  if (!meta) return false;
+
+  const msgs = conversas[phone] || [];
+  if (msgs.length < 3) return false; // Conversa muito curta
+
+  const textoCompleto = msgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ').toLowerCase();
+
+  // Corta se tiver boleto/financiamento
+  if (PALAVRAS_BOLETO.some(p => textoCompleto.includes(p))) return false;
+
+  // Corta se a conversa terminou com despedida
+  if (PALAVRAS_CORTAR.some(p => textoCompleto.includes(p))) return false;
+
+  // Corta se não mencionou nenhum produto
+  const temProduto = PALAVRAS_PRODUTO.some(p => textoCompleto.includes(p));
+  if (!temProduto) return false;
+
+  // Corta se não demonstrou interesse real
+  const temInteresse = PALAVRAS_INTERESSE.some(p => textoCompleto.includes(p));
+  if (!temInteresse) return false;
+
+  return true;
+}
+
+function gerarMensagemReativacao(phone) {
+  const msgs = conversas[phone] || [];
+  const produto = extrairProduto(msgs);
+
+  if (produto) {
+    return `Oi! Passando pra ver se ficou alguma dúvida sobre o ${produto} que conversamos 😊 Qualquer coisa é só falar!`;
+  }
+  return `Oi! Passando pra ver se ficou alguma dúvida sobre o que conversamos 😊 Qualquer coisa é só falar!`;
+}
+
+// ==========================================
+// SISTEMA DE REATIVAÇÃO
+// ==========================================
+let reativacaoRodandoHoje = false;
+let reativacaoRodandoAmanha = false;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function intervaloAleatorio() {
+  // Entre 3 e 8 minutos em milissegundos
+  return (Math.floor(Math.random() * (8 - 3 + 1)) + 3) * 60 * 1000;
+}
+
+async function executarReativacao(janela) {
+  const agora = new Date();
+  const hora = agora.getHours();
+
+  if (janela === 'tarde' && hora < 18) return;
+  if (janela === 'manha' && hora < 10) return;
+
+  const candidatos = Object.keys(conversas).filter(phone => {
+    if (!deveReativar(phone)) return false;
+    const meta = metaConversas[phone];
+    if (!meta) return false;
+    if (meta.reativado) return false; // Já foi reativado hoje
+    return true;
+  });
+
+  console.log(`🔔 Reativação ${janela}: ${candidatos.length} candidatos encontrados`);
+
+  let enviados = 0;
+  for (const phone of candidatos) {
+    if (enviados >= 15) break; // Máximo 15 por disparo
+    if (hora >= 21) break; // Para às 21h
+
+    try {
+      const msg = gerarMensagemReativacao(phone);
+      await enviarMensagem(phone, msg);
+      if (metaConversas[phone]) metaConversas[phone].reativado = true;
+      salvarMetadados();
+      enviados++;
+      console.log(`✅ Reativação enviada para ${phone}: "${msg}"`);
+
+      if (enviados < candidatos.length && enviados < 15) {
+        const intervalo = intervaloAleatorio();
+        console.log(`⏱ Aguardando ${Math.round(intervalo/60000)} minutos...`);
+        await sleep(intervalo);
+      }
+    } catch (e) {
+      console.error(`Erro ao reativar ${phone}:`, e.message);
+    }
+  }
+
+  console.log(`✅ Reativação ${janela} concluída: ${enviados} mensagens enviadas`);
+}
+
+// Verificação a cada minuto para disparar nos horários certos
+setInterval(() => {
+  const agora = new Date();
+  const hora = agora.getHours();
+  const minuto = agora.getMinutes();
+
+  // Disparo das 18h
+  if (hora === 18 && minuto === 0 && !reativacaoRodandoHoje) {
+    reativacaoRodandoHoje = true;
+    executarReativacao('tarde').catch(console.error);
+  }
+
+  // Disparo das 10h
+  if (hora === 10 && minuto === 0 && !reativacaoRodandoAmanha) {
+    reativacaoRodandoAmanha = true;
+    executarReativacao('manha').catch(console.error);
+  }
+
+  // Reset à meia-noite
+  if (hora === 0 && minuto === 0) {
+    reativacaoRodandoHoje = false;
+    reativacaoRodandoAmanha = false;
+    // Salva conversas da noite anterior para o disparo das 10h
+    try {
+      fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8'));
+    } catch (e) {}
+  }
+}, 60000);
 
 // ==========================================
 // TRANSCRIÇÃO DE ÁUDIO COM WHISPER
@@ -594,7 +771,6 @@ async function transcreverAudio(audioUrl, mimetype) {
     const audioResp = await axios.get(audioUrl, { responseType: 'arraybuffer' });
     const audioBuffer = Buffer.from(audioResp.data);
 
-    // Determinar extensão do arquivo
     let ext = 'ogg';
     if (mimetype && mimetype.includes('mp4')) ext = 'mp4';
     else if (mimetype && mimetype.includes('mpeg')) ext = 'mp3';
@@ -607,10 +783,7 @@ async function transcreverAudio(audioUrl, mimetype) {
     form.append('language', 'pt');
 
     const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        ...form.getHeaders()
-      }
+      headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, ...form.getHeaders() }
     });
 
     console.log('✅ Transcrição:', response.data.text);
@@ -632,9 +805,7 @@ const TAXAS_JUROS = {
 
 function calcularParcelamento(saldo, parcelasDesejadas) {
   const parcelasParaCalcular = parcelasDesejadas && parcelasDesejadas.length > 0
-    ? parcelasDesejadas
-    : Object.keys(TAXAS_JUROS).map(Number);
-
+    ? parcelasDesejadas : Object.keys(TAXAS_JUROS).map(Number);
   const resultado = {};
   for (const parcelas of parcelasParaCalcular) {
     const taxa = TAXAS_JUROS[parcelas];
@@ -669,9 +840,7 @@ async function chamarClaude(mensagens) {
     messages: mensagens
   };
   const headers = { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' };
-
   let response = await axios.post('https://api.anthropic.com/v1/messages', corpo, { headers });
-
   while (response.data.stop_reason === 'tool_use') {
     const toolUseBlock = response.data.content.find(b => b.type === 'tool_use');
     let resultadoFerramenta = {};
@@ -683,7 +852,6 @@ async function chamarClaude(mensagens) {
     mensagens.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) }] });
     response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: mensagens }, { headers });
   }
-
   const textBlock = response.data.content.find(b => b.type === 'text');
   return textBlock ? textBlock.text : '';
 }
@@ -701,7 +869,6 @@ async function enviarMensagem(phone, message) {
 // ==========================================
 app.post('/webhook', async (req, res) => {
   const body = req.body;
-
   if (body.fromMe) return res.sendStatus(200);
 
   console.log('BODY:', JSON.stringify(body).substring(0, 300));
@@ -723,11 +890,15 @@ app.post('/webhook', async (req, res) => {
   const isAudio = body.audio || body.mimetype?.includes('audio') || body.mimetype?.includes('ogg') || body.type === 'audio';
 
   if (!phone) return res.sendStatus(200);
-
   res.sendStatus(200);
 
   try {
     if (!conversas[phone]) conversas[phone] = [];
+
+    // Atualiza metadados
+    if (!metaConversas[phone]) metaConversas[phone] = {};
+    metaConversas[phone].ultimaMensagemCliente = Date.now();
+    metaConversas[phone].reativado = false; // Cliente voltou, reseta flag
 
     // ==========================================
     // PROCESSAMENTO DE IMAGEM
@@ -739,13 +910,13 @@ app.post('/webhook', async (req, res) => {
       const imgBase64 = Buffer.from(imgResp.data).toString('base64');
       const imgMime = body.mimetype || 'image/jpeg';
       const visionResp = await axios.post('https://api.anthropic.com/v1/messages', {
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
+        model: 'claude-sonnet-4-6', max_tokens: 1024,
         system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral", ttl: "1h" } }],
         messages: [...conversas[phone], { role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } }, { type: 'text', text: body.text?.message || 'Descreva esta imagem.' }] }]
       }, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
       const reply = visionResp.data.content[0].text;
       await enviarMensagem(phone, reply);
+      salvarConversas();
       return;
     }
 
@@ -758,26 +929,22 @@ app.post('/webhook', async (req, res) => {
         await enviarMensagem(phone, 'Não consegui processar o áudio. Pode digitar sua mensagem? 😊');
         return;
       }
-
       if (!OPENAI_API_KEY) {
         await enviarMensagem(phone, 'Não consigo ouvir áudios por aqui, mas pode digitar sua mensagem que respondo na hora! 😊');
         return;
       }
-
       const transcricao = await transcreverAudio(audioUrl, body.mimetype);
       if (!transcricao || transcricao.trim() === '') {
         await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar sua mensagem? 😊');
         return;
       }
-
       console.log(`🎤 Áudio transcrito de ${phone}: ${transcricao}`);
-
       conversas[phone].push({ role: 'user', content: transcricao });
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
-
       const reply = await chamarClaude(conversas[phone]);
       console.log(`🤖 Resposta: ${reply}`);
       conversas[phone].push({ role: 'assistant', content: reply });
+      salvarConversas();
       await enviarMensagem(phone, reply);
       return;
     }
@@ -786,15 +953,14 @@ app.post('/webhook', async (req, res) => {
     // PROCESSAMENTO DE TEXTO
     // ==========================================
     if (!message) return;
-
     console.log(`📱 Mensagem de ${phone}: ${message}`);
-
     conversas[phone].push({ role: 'user', content: message });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
-
     const reply = await chamarClaude(conversas[phone]);
     console.log(`🤖 Resposta: ${reply}`);
     conversas[phone].push({ role: 'assistant', content: reply });
+    salvarConversas();
+    salvarMetadados();
     await enviarMensagem(phone, reply);
 
   } catch (error) {
@@ -805,7 +971,6 @@ app.post('/webhook', async (req, res) => {
 // ==========================================
 // ADMIN PAINEL
 // ==========================================
-const path = require('path');
 let tabelaEmMemoria = process.env.PRICE_TABLE || '';
 
 app.get('/admin', (req, res) => {
@@ -819,26 +984,9 @@ app.get('/tabela', (req, res) => {
 app.post('/salvar-tabela', async (req, res) => {
   tabelaEmMemoria = req.body.tabela;
   try {
-    await axios.post(
-      'https://backboard.railway.app/graphql/v2',
-      {
-        query: `mutation {
-          variableUpsert(input: {
-            projectId: "4f91d664-453e-45b2-8e3e-ad8cb8965b0f"
-            environmentId: "c2eca5aa-ccbe-4e4d-b67f-4a5789edbff8"
-            serviceId: "7d77b859-3bec-4f0b-97a3-95b328bd7feb"
-            name: "PRICE_TABLE"
-            value: ${JSON.stringify(req.body.tabela)}
-          })
-        }`
-      },
-      {
-        headers: {
-          'Authorization': 'Bearer 9432504b-5a9c-4a15-8baa-1bd6222b462b',
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    await axios.post('https://backboard.railway.app/graphql/v2', {
+      query: `mutation { variableUpsert(input: { projectId: "4f91d664-453e-45b2-8e3e-ad8cb8965b0f" environmentId: "c2eca5aa-ccbe-4e4d-b67f-4a5789edbff8" serviceId: "7d77b859-3bec-4f0b-97a3-95b328bd7feb" name: "PRICE_TABLE" value: ${JSON.stringify(req.body.tabela)} }) }`
+    }, { headers: { 'Authorization': 'Bearer 9432504b-5a9c-4a15-8baa-1bd6222b462b', 'Content-Type': 'application/json' } });
     console.log('✅ Tabela salva no Railway!');
   } catch(e) {
     console.error('Erro ao salvar no Railway:', e.message);
