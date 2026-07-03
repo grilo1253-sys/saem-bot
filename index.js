@@ -639,27 +639,35 @@ Moto G85 | R$650 | R$700
 Moto G86 | R$1.200 | R$1.300
 Moto G96 | R$1.400 | R$1.500
 
-MOTOROLA - Linha Edge
+MOTOROLA - Linha Edge (valores de troca, aparelho sem defeito)
 
-Modelo | 128GB | 256GB
-Edge 20 | R$600 | R$500
-Edge 20 Pro | R$600 | R$600
-Edge 30 | R$700 | R$600
-Edge 30 Neo | R$700 | R$700
-Edge 30 Fusion | R$700 | R$1.000
-Edge 30 Ultra | — | R$1.400
-Edge 40 | R$1.000 | R$1.000
-Edge 40 Neo | R$1.000 | R$900
-Edge 40 Pro | — | R$1.800
-Edge 50 | R$900 | R$950
-Edge 50 Fusion | R$700 | R$1.200
-Edge 50 Neo | R$1.200 | R$1.600
-Edge 50 Pro | R$1.700 | R$2.000
-Edge 50 Ultra | — | R$2.400
-Edge 60 | R$1.700 | R$1.800
-Edge 60 Fusion | R$1.300 | R$1.700
-Edge 60 Pro | — | R$2.300
-Edge 60 Stylus | R$1.300 | R$1.500
+Edge 20 — 128GB: R$400 | 256GB: R$500
+Edge 20 Pro — 128GB: R$600 | 256GB: R$600
+
+Edge 30 — 128GB: R$400 | 256GB: R$450
+Edge 30 Neo — 128GB: R$450 | 256GB: R$500
+Edge 30 Fusion — 128GB: R$500 | 256GB: R$600
+Edge 30 Ultra — 256GB: R$1.000
+
+Edge 40 — 128GB: R$800 | 256GB: R$850
+Edge 40 Neo — 128GB: R$500 | 256GB: R$600
+Edge 40 Pro — 256GB: R$1.200
+
+Edge 50 — 128GB: R$900 | 256GB: R$950
+Edge 50 Fusion — 128GB: R$600 | 256GB: R$700
+Edge 50 Neo — 128GB: R$600 | 256GB: R$700
+Edge 50 Pro — 128GB: R$1.300 | 256GB: R$1.400
+Edge 50 Ultra — 256GB: R$1.800
+
+Edge 60 — 128GB: R$1.000 | 256GB: R$1.200
+Edge 60 Fusion — 128GB: R$800 | 256GB: R$900
+Edge 60 Pro — 256GB: R$1.700
+Edge 60 Stylus — 128GB: R$1.000 | 256GB: R$1.100
+
+Edge 70 — 128GB: R$1.100 | 256GB: R$1.100
+Edge 70 Fusion — 128GB: R$1.100 | 256GB: R$1.100
+
+Modelo Edge não listado: informar ao cliente que vai verificar com a equipe e retorna em instantes.
 
 ━━━━━━━━━━━━━━━━━━━
 
