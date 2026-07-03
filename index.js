@@ -106,13 +106,19 @@ async function notificarAdmin(phoneCliente, aparelho, contexto) {
 // Detecta se o Cláudio disse que vai verificar com a equipe
 function detectouPendencia(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
-  // Precisa ter referência à equipe E indicação de que vai verificar
-  const temEquipe = replyLower.includes('equipe') || replyLower.includes('verificar o valor');
-  const temVerificar = replyLower.includes('verificar') || replyLower.includes('consultar') || replyLower.includes('checar') || replyLower.includes('retorno em instantes');
-  // Não disparar se já passou o valor (tem R$ na resposta como resultado de cálculo)
-  const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x');
+
+  // Não disparar se for sobre entrega/disponibilidade
+  const sobreEntrega = replyLower.includes('entrega') || replyLower.includes('motoboy') || replyLower.includes('disponibilidade') || replyLower.includes('entregar na sua região');
+  if (sobreEntrega) return false;
+
+  // Não disparar se já passou valor calculado
+  const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista'));
   if (jaTemValor) return false;
-  return temEquipe && temVerificar;
+
+  // Só disparar se for especificamente sobre valor de troca
+  const sobreValorTroca = (replyLower.includes('valor de troca') || replyLower.includes('valor da troca')) && (replyLower.includes('verificar') || replyLower.includes('equipe') || replyLower.includes('retorno em instantes'));
+  
+  return sobreValorTroca;
 }
 
 // Extrai aparelho mencionado na conversa recente
@@ -587,105 +593,97 @@ Galaxy Z Fold 3, 4, 5, 6, 7
 
 ━━━━━━━━━━━━━━━━━━━
 
-XIAOMI
+XIAOMI (valores de troca, aparelho sem defeito)
 
 Linha Xiaomi Number (modelo não listado: consultar equipe):
-Xiaomi 11, 11T, 11T Pro: R$300 (128GB ou 256GB)
-Xiaomi 12, 12 Pro, 12T, 12T Pro: R$400 (128GB ou 256GB)
+Xiaomi 11 — R$300 (128GB ou 256GB)
+Xiaomi 11T — R$300 (128GB ou 256GB)
+Xiaomi 11T Pro — R$300 (128GB ou 256GB)
+Xiaomi 12 — R$400 (128GB ou 256GB)
+Xiaomi 12 Pro — R$400 (128GB ou 256GB)
+Xiaomi 12T — R$400 (128GB ou 256GB)
+Xiaomi 12T Pro — R$400 (128GB ou 256GB)
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
-Redmi Note 10, 10 Pro: R$300
-Redmi Note 11, 11 Pro, 11 Pro+: R$400
-Redmi Note 12, 12 Pro, 12 Pro+: R$400
-Redmi Note 13: R$400 | Redmi Note 13 Pro: R$500 | Redmi Note 13 Pro+: R$600
-Redmi Note 14: R$600 | Redmi Note 14 Pro: R$800 | Redmi Note 14 Pro Max: R$1.100
-
-POCO (valores de troca, aparelho sem defeito)
-
-Poco X3 — 128GB: R$300 | 256GB: R$400
-Poco X4 — 128GB: R$400 | 256GB: R$500
-Poco X5 — 128GB: R$450 | 256GB: R$550
-Poco X6 — 128GB: R$550 | 256GB: R$650
-Poco X7 — 128GB: R$900 | 256GB: R$900
-Poco X7 Pro — 128GB: R$1.100 | 256GB: R$1.100 | 512GB: R$1.100
-
-Modelo Poco não listado: informar ao cliente que vai verificar com a equipe e retorna em instantes.
+Redmi Note 10 — R$300
+Redmi Note 10 Pro — R$300
+Redmi Note 11 — R$400
+Redmi Note 11 Pro — R$400
+Redmi Note 11 Pro+ — R$400
+Redmi Note 12 — R$400
+Redmi Note 12 Pro — R$400
+Redmi Note 12 Pro+ — R$400
+Redmi Note 13 — R$400
+Redmi Note 13 Pro — R$500
+Redmi Note 13 Pro+ — R$600
+Redmi Note 14 — R$600
+Redmi Note 14 Pro — R$800
+Redmi Note 14 Pro Max — R$1.100
 
 ━━━━━━━━━━━━━━━━━━━
 
-MOTOROLA - Linha Moto G
+MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 
-Modelo | 128GB | 256GB
-Moto G31 | R$300 | R$400
-Moto G32 | R$300 | R$400
-Moto G41 | R$350 | R$400
-Moto G42 | R$400 | R$500
-Moto G51 | R$400 | R$500
-Moto G52 | R$400 | R$500
-Moto G53 | R$450 | R$550
-Moto G54 | R$500 | R$600
-Moto G55 | R$500 | R$600
-Moto G56 | R$600 | R$700
-Moto G62 | R$500 | R$550
-Moto G64 | R$450 | R$550
-Moto G65 | R$450 | R$550
-Moto G71 | R$400 | R$500
-Moto G72 | R$500 | R$550
-Moto G73 | R$400 | R$450
-Moto G75 | R$500 | R$550
-Moto G82 | R$500 | R$550
-Moto G84 | R$600 | R$700
-Moto G85 | R$650 | R$700
-Moto G86 | R$1.200 | R$1.300
-Moto G96 | R$1.400 | R$1.500
+Moto G31 — 128GB: R$300 | 256GB: R$400
+Moto G32 — 128GB: R$300 | 256GB: R$400
+Moto G41 — 128GB: R$350 | 256GB: R$400
+Moto G42 — 128GB: R$400 | 256GB: R$500
+Moto G51 — 128GB: R$400 | 256GB: R$500
+Moto G52 — 128GB: R$400 | 256GB: R$500
+Moto G53 — 128GB: R$450 | 256GB: R$550
+Moto G54 — 128GB: R$500 | 256GB: R$600
+Moto G55 — 128GB: R$500 | 256GB: R$600
+Moto G56 — 128GB: R$600 | 256GB: R$700
+Moto G62 — 128GB: R$500 | 256GB: R$550
+Moto G64 — 128GB: R$450 | 256GB: R$550
+Moto G65 — 128GB: R$450 | 256GB: R$550
+Moto G71 — 128GB: R$400 | 256GB: R$500
+Moto G72 — 128GB: R$500 | 256GB: R$550
+Moto G73 — 128GB: R$400 | 256GB: R$450
+Moto G75 — 128GB: R$500 | 256GB: R$550
+Moto G82 — 128GB: R$500 | 256GB: R$550
+Moto G84 — 128GB: R$600 | 256GB: R$700
+Moto G85 — 128GB: R$650 | 256GB: R$700
+Moto G86 — 128GB: R$1.200 | 256GB: R$1.300
+Moto G96 — 128GB: R$1.400 | 256GB: R$1.500
 
 MOTOROLA - Linha Edge (valores de troca, aparelho sem defeito)
 
-Edge 20 — 128GB: R$400 | 256GB: R$500
+Edge 20 — 128GB: R$600 | 256GB: R$500
 Edge 20 Pro — 128GB: R$600 | 256GB: R$600
-
-Edge 30 — 128GB: R$400 | 256GB: R$450
-Edge 30 Neo — 128GB: R$450 | 256GB: R$500
-Edge 30 Fusion — 128GB: R$500 | 256GB: R$600
-Edge 30 Ultra — 256GB: R$1.000
-
-Edge 40 — 128GB: R$800 | 256GB: R$850
-Edge 40 Neo — 128GB: R$500 | 256GB: R$600
-Edge 40 Pro — 256GB: R$1.200
-
+Edge 30 — 128GB: R$700 | 256GB: R$600
+Edge 30 Neo — 128GB: R$700 | 256GB: R$700
+Edge 30 Fusion — 128GB: R$700 | 256GB: R$1.000
+Edge 30 Ultra — 256GB: R$1.400
+Edge 40 — 128GB: R$1.000 | 256GB: R$1.000
+Edge 40 Neo — 128GB: R$1.000 | 256GB: R$900
+Edge 40 Pro — 256GB: R$1.800
 Edge 50 — 128GB: R$900 | 256GB: R$950
-Edge 50 Fusion — 128GB: R$600 | 256GB: R$700
-Edge 50 Neo — 128GB: R$600 | 256GB: R$700
-Edge 50 Pro — 128GB: R$1.300 | 256GB: R$1.400
-Edge 50 Ultra — 256GB: R$1.800
-
-Edge 60 — 128GB: R$1.000 | 256GB: R$1.200
-Edge 60 Fusion — 128GB: R$800 | 256GB: R$900
-Edge 60 Pro — 256GB: R$1.700
-Edge 60 Stylus — 128GB: R$1.000 | 256GB: R$1.100
-
-Edge 70 — 128GB: R$1.100 | 256GB: R$1.100
-Edge 70 Fusion — 128GB: R$1.100 | 256GB: R$1.100
-
-Modelo Edge não listado: informar ao cliente que vai verificar com a equipe e retorna em instantes.
+Edge 50 Fusion — 128GB: R$700 | 256GB: R$1.200
+Edge 50 Neo — 128GB: R$1.200 | 256GB: R$1.600
+Edge 50 Pro — 128GB: R$1.700 | 256GB: R$2.000
+Edge 50 Ultra — 256GB: R$2.400
+Edge 60 — 128GB: R$1.700 | 256GB: R$1.800
+Edge 60 Fusion — 128GB: R$1.300 | 256GB: R$1.700
+Edge 60 Pro — 256GB: R$2.300
+Edge 60 Stylus — 128GB: R$1.300 | 256GB: R$1.500
 
 ━━━━━━━━━━━━━━━━━━━
 
-REALME (modelo não listado: consultar equipe)
+REALME (valores de troca, aparelho sem defeito — modelo não listado: consultar equipe)
 
-Modelo | 64GB | 128GB
-C30 | R$200 | —
-C30s | R$200 | —
-C31 | R$300 | —
-C33 | R$300 | R$400
-C35 | R$350 | R$400
-C51 | R$300 | R$400
-C53 | R$400 | R$500
-C55 | R$400 | R$500
-C61 | R$450 | R$550
-C63 | R$500 | R$600
-C67 | R$600 | R$700
-C75 | R$800 | R$900
+Realme C30 — 64GB: R$200
+Realme C30s — 64GB: R$200
+Realme C31 — 64GB: R$300
+Realme C33 — 64GB: R$300 | 128GB: R$400
+Realme C35 — 64GB: R$350 | 128GB: R$400
+Realme C51 — 64GB: R$300 | 128GB: R$400
+Realme C53 — 64GB: R$400 | 128GB: R$500
+Realme C55 — 64GB: R$400 | 128GB: R$500
+Realme C61 — 64GB: R$450 | 128GB: R$550
+Realme C63 — 64GB: R$500 | 128GB: R$600
+Realme C67 — 64GB: R$600 | 128GB: R$700
+Realme C75 — 64GB: R$800 | 128GB: R$900
 
 ATENÇÃO: se o modelo Android que o cliente mencionar não estiver EXATAMENTE listado nas tabelas acima (Samsung, Xiaomi, Motorola ou Realme), NÃO invente um valor nem estime por aproximação com um modelo parecido. Diga que esse modelo específico precisa ser avaliado presencialmente na loja, e que o valor será informado depois de verificado pela equipe.
 
