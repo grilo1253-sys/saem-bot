@@ -106,12 +106,12 @@ async function notificarAdmin(phoneCliente, aparelho, contexto) {
 // Detecta se o Cláudio disse que vai verificar com a equipe
 function detectouPendencia(reply, mensagemCliente) {
   const frasesPendencia = [
-    'verificar com a equipe',
-    'vou verificar',
-    'retorno em instantes',
-    'precisa ser avaliado',
-    'consultar a equipe',
-    'verificar o valor'
+    'vou verificar com a equipe',
+    'verificarei com a equipe',
+    'retorno em instantes com o valor',
+    'vou consultar a equipe',
+    'aguarde que verifico com a equipe',
+    'vou checar com a equipe'
   ];
   return frasesPendencia.some(f => reply.toLowerCase().includes(f));
 }
