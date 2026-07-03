@@ -425,7 +425,7 @@ iPhone 16 Plus: Sem defeito 128GB R$3.600, 256GB R$3.700, 512GB R$3.800 | Sem Fa
 iPhone 16 Pro: Sem defeito 128GB R$4.000, 256GB R$4.200, 512GB R$4.400, 1TB R$4.500 | Sem Face ID 128GB R$3.500 | Bat abaixo 80% 128GB R$4.000 | Tela trincada 128GB R$2.600 | Traseira trincada 128GB R$3.000 | Tudo junto R$2.300
 iPhone 16 Pro Max: Sem defeito 256GB R$4.600, 512GB R$4.700, 1TB R$4.800 | Sem Face ID 256GB R$4.000 | Bat abaixo 80% 256GB R$4.400 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$3.000 | Tudo junto R$2.400
 
-Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhar para outro número, apenas dizer que irá verificar e retornar em instantes.
+Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhe para outro número, apenas dizer que irá verificar e retornar em instantes.
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - APPLE WATCH, IPAD E SAMSUNG GALAXY WATCH
@@ -812,22 +812,37 @@ async function executarReativacao(janela) {
   console.log(`✅ Reativação ${janela} concluída: ${enviados} mensagens`);
 }
 
+// ==========================================
+// CHECAGEM DE HORÁRIO DA REATIVAÇÃO (CORRIGIDA)
+// ==========================================
+// Antes só disparava se pegasse o minuto EXATO (hora === 18 && minuto === 0).
+// Se o Railway "dormisse" o container ou reiniciasse perto do minuto exato,
+// a janela passava e a reativação daquele dia nunca rodava — foi o que aconteceu ontem.
+// Agora dispara em qualquer checagem dentro da janela de horário, contanto que
+// ainda não tenha rodado hoje.
 setInterval(() => {
   const agora = new Date();
   const hora = agora.getHours();
-  const minuto = agora.getMinutes();
-  if (hora === 18 && minuto === 0 && !reativacaoRodandoHoje) {
+
+  // Janela da tarde: qualquer horário entre 18h e 20h59, uma vez por dia
+  if (hora >= 18 && hora < 21 && !reativacaoRodandoHoje) {
     reativacaoRodandoHoje = true;
     executarReativacao('tarde').catch(console.error);
   }
-  if (hora === 10 && minuto === 0 && !reativacaoRodandoAmanha) {
+
+  // Janela da manhã: qualquer horário entre 10h e 12h59, uma vez por dia
+  if (hora >= 10 && hora < 13 && !reativacaoRodandoAmanha) {
     reativacaoRodandoAmanha = true;
     executarReativacao('manha').catch(console.error);
   }
-  if (hora === 0 && minuto === 0) {
-    reativacaoRodandoHoje = false;
-    reativacaoRodandoAmanha = false;
-    try { fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8')); } catch (e) {}
+
+  // Reset das flags à meia-noite
+  if (hora === 0) {
+    if (reativacaoRodandoHoje || reativacaoRodandoAmanha) {
+      reativacaoRodandoHoje = false;
+      reativacaoRodandoAmanha = false;
+      try { fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8')); } catch (e) {}
+    }
   }
 }, 60000);
 
