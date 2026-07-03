@@ -1,20 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-
+const FormData = require('form-data');
 
 const app = express();
 app.use(express.json());
 
 // ==========================================
-// 
+// VARIÁVEIS DE AMBIENTE
 // ==========================================
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ZAPI_INSTANCE = process.env.ZAPI_INSTANCE;
 const ZAPI_TOKEN = process.env.ZAPI_TOKEN;
 const ZAPI_CLIENT_TOKEN = process.env.ZAPI_CLIENT_TOKEN;
-
-
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // ==========================================
 // MEMÓRIA DAS CONVERSAS
@@ -55,7 +54,7 @@ REGRAS DE ATENDIMENTO
 - Se o cliente já informou forma de pagamento ou entrada, utilize essas informações nas próximas respostas.
 - Sempre que possível conduza a conversa para uma proposta, simulação ou fechamento.
 - Seja objetivo. Evite textos longos e repetitivos. Vá direto ao ponto: respostas curtas (preferencialmente 1 a 4 frases), sem repetir informações que o cliente já recebeu na conversa, sem saudações ou despedidas longas, e sem reescrever a mesma proposta mais de uma vez.
-- Quando o cliente perguntar quais modelos estão disponíveis de forma genérica (sem especificar modelo, memória ou faixa de preço), NÃO liste os produtos. Responda apenas: “Claro! Aqui está nosso catálogo completo com todos os modelos e preços disponíveis: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — Tem algum modelo específico que você já tem em mente? 😊
+- Quando o cliente perguntar quais modelos estão disponíveis de forma genérica (sem especificar modelo, memória ou faixa de preço), NÃO liste os produtos. Responda apenas: "Claro! Aqui está nosso catálogo completo com todos os modelos e preços disponíveis: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — Tem algum modelo específico que você já tem em mente? 😊
 - Não invente preços, condições ou produtos que não estejam nas informações fornecidas.
 - Quando houver informações suficientes, apresente a proposta de forma clara e organizada.
 - Priorize o fechamento da venda de maneira natural e consultiva.
@@ -92,10 +91,6 @@ Regra sobre reserva
 Para reservar um aparelho, ANTES de qualquer coisa, informe imediatamente ao cliente que a reserva só vale para o dia atual — não é possível reservar para outro dia. Se o cliente confirmar que quer reservar para hoje, então informe: o sinal é R$100,00 via Pix, chave Pix: saemthiago@gmail.com. Informe também que caso haja algum problema de estoque por parte da loja, o valor é estornado integralmente. Antes de enviar o Pix, o cliente deve escrever "Eu concordo" confirmando que está ciente de que, se desistir da compra por conta própria, o sinal não é devolvido em dinheiro, mas pode ser usado como R$100,00 em crédito para comprar acessórios na loja. Após enviar o pagamento, o cliente deve enviar o comprovante e escrever "Estou de acordo". Depois disso, informe ao cliente que a equipe irá conferir o pagamento e, assim que o valor for confirmado, a reserva será efetivada. A reserva só pode ser feita para o mesmo dia da conversa. Se o cliente pedir para reservar para outro dia, informe que as reservas valem apenas para o dia atual e que ele deve entrar em contato novamente no dia que pretende vir.
 .
 
-
-
-
-
 ━━━━━━━━━━━━━━━━━━━
 FORMAS DE PAGAMENTO
 ━━━━━━━━━━━━━━━━━━━
@@ -105,20 +100,13 @@ Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto parcelado via financ
 ESCLARECIMENTO SOBRE BOLETO — CRÍTICO:
 A loja NÃO trabalha com boleto à vista. A única modalidade de boleto é o financiamento parcelado — o cliente paga parcelas mensais via boleto após aprovação em análise de crédito, podendo chegar até 36x. Esta modalidade é divulgada nos anúncios da loja e é totalmente legítima. Quando o cliente mencionar boleto, SEMPRE explique que funciona como financiamento e encaminhe para análise: https://wa.me/5512981880229. NUNCA diga que boleto não existe ou que é só à vista.
 
-
-
 Análise de crédito: https://wa.me/5512981880229
 ⚠️ Nunca prometer aprovação. Sempre tentar alternativas antes do encaminhamento.
 
 REGRA DE PARCELAMENTO NO CARTÃO — CRÍTICA:
 NUNCA, em hipótese alguma, use a palavra "boleto" junto com simulação de parcelas (2x, 3x, 6x, 10x, 12x, 18x, etc). Parcelamento é EXCLUSIVAMENTE no cartão de crédito. Ao apresentar qualquer simulação de parcelas, SEMPRE especificar "no cartão" ou "no cartão de crédito" — nunca deixe a palavra "parcelado" sozinha sem indicar que é no cartão. Frases como "No boleto parcelado:", "parcelado no boleto" ou qualquer combinação de "boleto" com número de parcelas são PROIBIDAS. Boleto é APENAS para pagamento à vista ou para iniciar a análise de crédito via link de financiamento — nunca apresentar valores parcelados como sendo do boleto.
 
-
-
 Esclarecimento sobre boleto: existe apenas uma modalidade de boleto, válida para QUALQUER produto (iPhone, Android, qualquer marca) e qualquer cliente, incluindo quem está negativado. Todo boleto passa por análise de crédito — não existe boleto sem análise. Para iniciar a análise, encaminhe para https://wa.me/5512981880229. NUNCA diga que existe um boleto "sem análise" ou "exclusivo para negativados sem análise tradicional". Se o cliente perguntar se consegue boleto mesmo estando negativado, explique que ele pode tentar a análise normalmente pelo link, pois a aprovação depende da análise e não é garantida antecipadamente.
-
-
-
 
 ━━━━━━━━━━━━━━━━━━━
 DESCONTOS E NEGOCIAÇÃO
@@ -135,10 +123,8 @@ Se o valor total dos aparelhos dados em troca pelo cliente superar o preço do a
 	2.	Dar apenas um dos aparelhos na troca
 	3.	Dar os dois aparelhos e pagar R$300 à loja (volta mínima obrigatória)
 
-
 CONTORNAR OBJEÇÃO DE CONCORRÊNCIA (PREÇO MENOR):
 Se o cliente disser que encontrou um preço menor em outro lugar, NUNCA entre em guerra de preço nem ofereça baixar o valor automaticamente. Argumente que preço não é tudo, destacando os diferenciais da loja: garantia de 3 meses em todo seminovo, aparelhos revisados e testados antes da venda, atendimento próximo e rápido em caso de qualquer problema, loja física em ponto de fácil acesso (Shopping Jardim Oriente em SJC e Espaço Schneider em Taubaté), histórico consolidado na região. Pergunte de forma natural se o concorrente oferece a mesma garantia e suporte pós-venda. Reforce que comprar mais barato sem garantia pode sair mais caro depois, caso o aparelho apresente algum problema. Só ofereça desconto se o cliente insistir bastante e estiver realmente prestes a desistir, seguindo a regra normal de desconto (máximo R$50 sem autorização).
-
 
 ━━━━━━━━━━━━━━━━━━━
 GARANTIAS
@@ -165,8 +151,6 @@ Xbox Series S: R$1.200
 Xbox One S: R$900
 Xbox (modelo antigo): R$300
 
-
-
 ━━━━━━━━━━━━━━━━━━━
 TABELA DE JUROS - PARCELAMENTO
 ━━━━━━━━━━━━━━━━━━━
@@ -185,7 +169,6 @@ ASSISTÊNCIA TÉCNICA
 
 REGRA DE MANUTENÇÃO ANDROID:
 A tabela de preços de manutenção é EXCLUSIVA para iPhones. Para qualquer serviço em aparelhos Android (Samsung, Motorola, Xiaomi, Realme, etc), NUNCA invente ou estime valores. Informe que o valor precisa ser verificado com a equipe técnica e encaminhe para o Breno: https://wa.me/5512981919584
-
 
 Serviços: Tela, Bateria, Tampa traseira, Conector de carga, Câmeras, Face ID, Software e outros.
 Marcas: iPhone, Samsung, Xiaomi, Motorola, Realme, Redmi, Poco, Tablets, iPads, Apple Watch.
@@ -238,8 +221,6 @@ Enviar apenas quando cliente solicitar lista completa:
 
 https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk
 
-
-
 ━━━━━━━━━━━━━━━━━━━
 ENTREGAS
 ━━━━━━━━━━━━━━━━━━━
@@ -252,9 +233,6 @@ Regra sobre saúde da bateria
 
 NUNCA mostre a porcentagem de bateria ao apresentar aparelhos ao cliente, mesmo que ela esteja na tabela. Ao listar opções, mostre apenas: modelo, cor, preço e parcelas. A porcentagem de bateria é informação interna. Só mencione a saúde da bateria se o cliente perguntar diretamente. Quando o cliente perguntar diretamente sobre a saúde da bateria, SEMPRE informe a porcentagem exata que consta na tabela — nunca diga que precisa verificar com a equipe se a informação já estiver na tabela. Se o cliente comentar que a saúde está baixa ou média, contorne a objeção de forma positiva: explique que mesmo com saúde abaixo de 100% o aparelho funciona normalmente no dia a dia, que é natural a bateria degradar com o uso, que está dentro do esperado para um aparelho seminovo, e reforce que todo seminovo tem 3 meses de garantia da loja. Use isso para seguir conduzindo a venda, sem deixar a objeção travar o fechamento.
 
-
-
-
 ━━━━━━━━━━━━━━━━━━━
 TABELA DE PREÇOS ATUAL
 ━━━━━━━━━━━━━━━━━━━
@@ -263,11 +241,9 @@ ${process.env.PRICE_TABLE || ''}
 
 ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo está disponível novo, confira se ele aparece EXATAMENTE nesta seção. Se o modelo não estiver listado como NOVO, ele NÃO existe como novo — diga isso claramente: "No momento não temos o [modelo] disponível como novo." NUNCA invente disponibilidade de modelo novo que não esteja na tabela, mesmo que o cliente pergunte diretamente.
 
-
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA (PRINCIPAIS MODELOS)
 ━━━━━━━━━━━━━━━━━━━
-
 
 Atenção: Se o cliente escrever "Mb" ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
 
@@ -309,9 +285,6 @@ iPhone 16 Pro Max: Sem defeito 256GB R$4.600, 512GB R$4.700, 1TB R$4.800 | Sem F
 Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhar para outro número, apenas dizer que irá verificar e retornar em instantes.
 
 ━━━━━━━━━━━━━━━━━━━
-
-
-━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - APPLE WATCH, IPAD E SAMSUNG GALAXY WATCH
 ━━━━━━━━━━━━━━━━━━━
 
@@ -337,14 +310,10 @@ Galaxy Watch 3: R$400 | Watch 4: R$500 | Watch 4 Classic: R$500
 Watch 5: R$600 | Watch 5 Pro: R$800 | Watch 6: R$900
 Watch 6 Classic: R$1.200 | Watch 7: R$1.400 | Watch Ultra: R$1.600
 
-
-
-
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - ANDROID
 ━━━━━━━━━━━━━━━━━━━
 Todos os valores desta tabela consideram o aparelho SEM NENHUM DEFEITO (tela, traseira, bateria, funcionamento geral perfeitos). Se o cliente informar qualquer defeito (tela trincada, traseira trincada, bateria ruim, problema de funcionamento, etc), NÃO aplique o valor da tabela nem estime um desconto. Diga que, por ter defeito, o aparelho precisa ser avaliado pela equipe, e que o cliente deve aguardar a resposta com o valor correto antes de prosseguir.
-
 
 IMPORTANTE: os valores abaixo são exclusivamente para TROCA (aparelho do cliente como entrada), NÃO são preços de venda. São aparelhos Android.
 
@@ -480,7 +449,6 @@ C75 | R$800 | R$900
 
 ATENÇÃO: se o modelo Android que o cliente mencionar não estiver EXATAMENTE listado nas tabelas acima (Samsung, Xiaomi, Motorola ou Realme), NÃO invente um valor nem estime por aproximação com um modelo parecido. Diga que esse modelo específico precisa ser avaliado presencialmente na loja, e que o valor será informado depois de verificado pela equipe.
 
-
 ——————————————
 
 TÉCNICAS DE VENDAS
@@ -529,7 +497,43 @@ Nunca inventar preços, estoque, valores de troca, garantias ou parcelamentos.
 Em caso de dúvida, informar que será necessário verificar com a equipe.`;
 
 // ==========================================
-// CÁLCULO DE PARCELAMENTO (à prova de erro)
+// TRANSCRIÇÃO DE ÁUDIO COM WHISPER
+// ==========================================
+async function transcreverAudio(audioUrl, mimetype) {
+  try {
+    console.log('🎤 Baixando áudio:', audioUrl);
+    const audioResp = await axios.get(audioUrl, { responseType: 'arraybuffer' });
+    const audioBuffer = Buffer.from(audioResp.data);
+
+    // Determinar extensão do arquivo
+    let ext = 'ogg';
+    if (mimetype && mimetype.includes('mp4')) ext = 'mp4';
+    else if (mimetype && mimetype.includes('mpeg')) ext = 'mp3';
+    else if (mimetype && mimetype.includes('wav')) ext = 'wav';
+    else if (mimetype && mimetype.includes('webm')) ext = 'webm';
+
+    const form = new FormData();
+    form.append('file', audioBuffer, { filename: `audio.${ext}`, contentType: mimetype || 'audio/ogg' });
+    form.append('model', 'whisper-1');
+    form.append('language', 'pt');
+
+    const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        ...form.getHeaders()
+      }
+    });
+
+    console.log('✅ Transcrição:', response.data.text);
+    return response.data.text;
+  } catch (error) {
+    console.error('❌ Erro na transcrição:', error.response?.data || error.message);
+    return null;
+  }
+}
+
+// ==========================================
+// CÁLCULO DE PARCELAMENTO
 // ==========================================
 const TAXAS_JUROS = {
   1: 0.0497, 2: 0.0553, 3: 0.0637, 4: 0.0802, 5: 0.0872, 6: 0.0947,
@@ -595,101 +599,124 @@ async function chamarClaude(mensagens) {
   return textBlock ? textBlock.text : '';
 }
 
+async function enviarMensagem(phone, message) {
+  await axios.post(
+    `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`,
+    { phone, message },
+    { headers: { 'Client-Token': ZAPI_CLIENT_TOKEN } }
+  );
+}
+
 // ==========================================
-// WEBHOOK - RECEBE MENSAGENS DO WHATSAPP
+// WEBHOOK
 // ==========================================
 app.post('/webhook', async (req, res) => {
-const body = req.body;
+  const body = req.body;
 
-// Ignora mensagens do próprio bot
-if (body.fromMe) return res.sendStatus(200);
+  if (body.fromMe) return res.sendStatus(200);
 
-console.log('BODY:', JSON.stringify(body).substring(0, 300));
-const isGroup = body.isGroup || body.phone?.includes('-group');
-if (isGroup) {
-const msgGrupo = body.text?.message || body.text || '';
-const isImagemGrupo = body.image || body.mimetype?.includes('image');
-if (isImagemGrupo) return res.sendStatus(200);
-if (!msgGrupo) return res.sendStatus(200);
-const assuntosPermitidos = ['troca', 'valor', 'preco', 'manutencao', 'conserto', 'cliente', 'venda', 'negoc', 'quanto', 'aparelho'];
-const temAssunto = assuntosPermitidos.some(a => msgGrupo.toLowerCase().includes(a));
-if (!temAssunto) return res.sendStatus(200);
-}
-const phone = body.phone;
-const message = body.text?.message || body.text || '';
-const isImage = body.image || body.mimetype?.includes('image');
+  console.log('BODY:', JSON.stringify(body).substring(0, 300));
 
-if (!phone || (!message && !isImage)) return res.sendStatus(200);
+  const isGroup = body.isGroup || body.phone?.includes('-group');
+  if (isGroup) {
+    const msgGrupo = body.text?.message || body.text || '';
+    const isImagemGrupo = body.image || body.mimetype?.includes('image');
+    if (isImagemGrupo) return res.sendStatus(200);
+    if (!msgGrupo) return res.sendStatus(200);
+    const assuntosPermitidos = ['troca', 'valor', 'preco', 'manutencao', 'conserto', 'cliente', 'venda', 'negoc', 'quanto', 'aparelho'];
+    const temAssunto = assuntosPermitidos.some(a => msgGrupo.toLowerCase().includes(a));
+    if (!temAssunto) return res.sendStatus(200);
+  }
 
-res.sendStatus(200);
+  const phone = body.phone;
+  const message = body.text?.message || body.text || '';
+  const isImage = body.image || body.mimetype?.includes('image');
+  const isAudio = body.audio || body.mimetype?.includes('audio') || body.mimetype?.includes('ogg') || body.type === 'audio';
 
-try {
+  if (!phone) return res.sendStatus(200);
 
-if (isImage) {
-const imageUrl = body.image?.imageUrl || body.image?.url || body.imageUrl;
-if (!imageUrl) return;
-const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-const imgBase64 = Buffer.from(imgResp.data).toString('base64');
-const imgMime = body.mimetype || 'image/jpeg';
-if (!conversas[phone]) conversas[phone] = [];
-const visionResp = await axios.post('https://api.anthropic.com/v1/messages', {
-model: 'claude-sonnet-4-6',
-max_tokens: 1024,
-system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral", ttl: "1h" } }],
-messages: [...conversas[phone], { role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } }, { type: 'text', text: body.text?.message || 'Descreva esta imagem.' }] }]
-}, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
-const reply = visionResp.data.content[0].text;
-await axios.post('https://api.z-api.io/instances/' + ZAPI_INSTANCE + '/token/' + ZAPI_TOKEN + '/send-text', { phone, message: reply }, { headers: { 'client-token': ZAPI_CLIENT_TOKEN } });
-return;
-}
+  res.sendStatus(200);
 
-console.log(`📱 Mensagem de ${phone}: ${message}`);
+  try {
+    if (!conversas[phone]) conversas[phone] = [];
 
-if (!conversas[phone]) {
-conversas[phone] = [];
-}
+    // ==========================================
+    // PROCESSAMENTO DE IMAGEM
+    // ==========================================
+    if (isImage) {
+      const imageUrl = body.image?.imageUrl || body.image?.url || body.imageUrl;
+      if (!imageUrl) return;
+      const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const imgBase64 = Buffer.from(imgResp.data).toString('base64');
+      const imgMime = body.mimetype || 'image/jpeg';
+      const visionResp = await axios.post('https://api.anthropic.com/v1/messages', {
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral", ttl: "1h" } }],
+        messages: [...conversas[phone], { role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } }, { type: 'text', text: body.text?.message || 'Descreva esta imagem.' }] }]
+      }, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
+      const reply = visionResp.data.content[0].text;
+      await enviarMensagem(phone, reply);
+      return;
+    }
 
-conversas[phone].push({
-role: 'user',
-content: message
-});
+    // ==========================================
+    // PROCESSAMENTO DE ÁUDIO
+    // ==========================================
+    if (isAudio) {
+      const audioUrl = body.audio?.audioUrl || body.audio?.url || body.audioUrl;
+      if (!audioUrl) {
+        await enviarMensagem(phone, 'Não consegui processar o áudio. Pode digitar sua mensagem? 😊');
+        return;
+      }
 
-if (conversas[phone].length > 20) {
-conversas[phone] = conversas[phone].slice(-20);
-}
+      if (!OPENAI_API_KEY) {
+        await enviarMensagem(phone, 'Não consigo ouvir áudios por aqui, mas pode digitar sua mensagem que respondo na hora! 😊');
+        return;
+      }
 
-const reply = await chamarClaude(conversas[phone]);
-console.log(`🤖 Resposta: ${reply}`);
+      const transcricao = await transcreverAudio(audioUrl, body.mimetype);
+      if (!transcricao || transcricao.trim() === '') {
+        await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar sua mensagem? 😊');
+        return;
+      }
 
-conversas[phone].push({
-role: 'assistant',
-content: reply
-});
+      console.log(`🎤 Áudio transcrito de ${phone}: ${transcricao}`);
 
-await axios.post(
-`https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`,
-{
-phone: phone,
-message: reply
-},
-{
-headers: {
-'Client-Token': ZAPI_CLIENT_TOKEN
-}
-}
-);
+      conversas[phone].push({ role: 'user', content: transcricao });
+      if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
 
-} catch (error) {
-console.error('Erro:', error.response?.data || error.message);
-}
+      const reply = await chamarClaude(conversas[phone]);
+      console.log(`🤖 Resposta: ${reply}`);
+      conversas[phone].push({ role: 'assistant', content: reply });
+      await enviarMensagem(phone, reply);
+      return;
+    }
+
+    // ==========================================
+    // PROCESSAMENTO DE TEXTO
+    // ==========================================
+    if (!message) return;
+
+    console.log(`📱 Mensagem de ${phone}: ${message}`);
+
+    conversas[phone].push({ role: 'user', content: message });
+    if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+
+    const reply = await chamarClaude(conversas[phone]);
+    console.log(`🤖 Resposta: ${reply}`);
+    conversas[phone].push({ role: 'assistant', content: reply });
+    await enviarMensagem(phone, reply);
+
+  } catch (error) {
+    console.error('Erro:', error.response?.data || error.message);
+  }
 });
 
 // ==========================================
 // ADMIN PAINEL
 // ==========================================
 const path = require('path');
-
-// Tabela em memória — carrega do Railway na inicialização
 let tabelaEmMemoria = process.env.PRICE_TABLE || '';
 
 app.get('/admin', (req, res) => {
@@ -702,8 +729,6 @@ app.get('/tabela', (req, res) => {
 
 app.post('/salvar-tabela', async (req, res) => {
   tabelaEmMemoria = req.body.tabela;
-
-  // Salva no Railway como variável de ambiente (persiste para sempre)
   try {
     await axios.post(
       'https://backboard.railway.app/graphql/v2',
@@ -729,12 +754,9 @@ app.post('/salvar-tabela', async (req, res) => {
   } catch(e) {
     console.error('Erro ao salvar no Railway:', e.message);
   }
-
   res.json({ok: true});
 });
 
 app.listen(3000, () => {
-console.log('✅ Bot Saem Celulares rodando na porta 3000!');
+  console.log('✅ Bot Saem Celulares rodando na porta 3000!');
 });
-
-// site correto
