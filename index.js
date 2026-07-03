@@ -140,7 +140,8 @@ TROCAS - ACEITAMOS
 
 Smartphones, iPhones, Apple Watch, iPad, Notebooks, Videogames, TVs.
 Solicitar: Modelo, Memória, Saúde da bateria, Estado do aparelho.
-Aparelho fora da tabela: encaminhar para https://wa.me/5512981880229
+Aparelho fora da tabela de trocas: NUNCA diga que não aceitamos ou que não trabalhamos com esse aparelho. Informe que vai verificar o valor com a equipe e que retorna em instantes. Não encaminhe para outro número.
+
 
 VIDEOGAMES - ACEITAMOS NA TROCA:
 PlayStation 5 (PS5) Mídia Física: R$2.400
