@@ -21,9 +21,17 @@ const NUMERO_ADMIN = process.env.NUMERO_ADMIN; // Número pessoal do Saem para r
 // ==========================================
 // PERSISTÊNCIA DAS CONVERSAS
 // ==========================================
-const ARQUIVO_CONVERSAS = '/tmp/conversas_do_dia.json';
-const ARQUIVO_NOITE_ANTERIOR = '/tmp/conversas_noite_anterior.json';
-const ARQUIVO_PENDENTES = '/tmp/pendentes_equipe.json';
+// Pasta persistente (montada como Volume no Railway). Diferente de /tmp,
+// o conteúdo dela NÃO é apagado quando o serviço reinicia ou recebe um novo deploy.
+const PASTA_DADOS = process.env.RAILWAY_VOLUME_MOUNT_PATH || '/data';
+if (!fs.existsSync(PASTA_DADOS)) {
+  try { fs.mkdirSync(PASTA_DADOS, { recursive: true }); } catch (e) {}
+}
+
+const ARQUIVO_CONVERSAS = path.join(PASTA_DADOS, 'conversas_do_dia.json');
+const ARQUIVO_NOITE_ANTERIOR = path.join(PASTA_DADOS, 'conversas_noite_anterior.json');
+const ARQUIVO_PENDENTES = path.join(PASTA_DADOS, 'pendentes_equipe.json');
+const ARQUIVO_METADADOS = path.join(PASTA_DADOS, 'metadados_conversas.json');
 
 function carregarConversas() {
   try {
@@ -52,8 +60,8 @@ function salvarConversas() {
 
 function carregarMetadados() {
   try {
-    if (fs.existsSync('/tmp/metadados_conversas.json')) {
-      const data = JSON.parse(fs.readFileSync('/tmp/metadados_conversas.json', 'utf8'));
+    if (fs.existsSync(ARQUIVO_METADADOS)) {
+      const data = JSON.parse(fs.readFileSync(ARQUIVO_METADADOS, 'utf8'));
       const hoje = new Date().toDateString();
       if (data.data === hoje) return data.meta;
     }
@@ -64,7 +72,7 @@ function carregarMetadados() {
 function salvarMetadados() {
   try {
     const data = { data: new Date().toDateString(), meta: metaConversas };
-    fs.writeFileSync('/tmp/metadados_conversas.json', JSON.stringify(data), 'utf8');
+    fs.writeFileSync(ARQUIVO_METADADOS, JSON.stringify(data), 'utf8');
   } catch (e) {}
 }
 
