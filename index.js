@@ -105,15 +105,14 @@ async function notificarAdmin(phoneCliente, aparelho, contexto) {
 
 // Detecta se o Cláudio disse que vai verificar com a equipe
 function detectouPendencia(reply, mensagemCliente) {
-  const frasesPendencia = [
-    'vou verificar com a equipe',
-    'verificarei com a equipe',
-    'retorno em instantes com o valor',
-    'vou consultar a equipe',
-    'aguarde que verifico com a equipe',
-    'vou checar com a equipe'
-  ];
-  return frasesPendencia.some(f => reply.toLowerCase().includes(f));
+  const replyLower = reply.toLowerCase();
+  // Precisa ter referência à equipe E indicação de que vai verificar
+  const temEquipe = replyLower.includes('equipe') || replyLower.includes('verificar o valor');
+  const temVerificar = replyLower.includes('verificar') || replyLower.includes('consultar') || replyLower.includes('checar') || replyLower.includes('retorno em instantes');
+  // Não disparar se já passou o valor (tem R$ na resposta como resultado de cálculo)
+  const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x');
+  if (jaTemValor) return false;
+  return temEquipe && temVerificar;
 }
 
 // Extrai aparelho mencionado na conversa recente
