@@ -313,6 +313,56 @@ Galaxy Watch 3: R$400 | Watch 4: R$500 | Watch 4 Classic: R$500
 Watch 5: R$600 | Watch 5 Pro: R$800 | Watch 6: R$900
 Watch 6 Classic: R$1.200 | Watch 7: R$1.400 | Watch Ultra: R$1.600
 
+
+━━━━━━━━━━━━━━━━━━━
+VALORES DE TROCA - NOTEBOOKS
+━━━━━━━━━━━━━━━━━━━
+
+ATENÇÃO: Os valores abaixo são para notebooks funcionando, em bom estado e sem defeitos. A avaliação definitiva é feita presencialmente na loja.
+
+PROCESSADORES BÁSICOS (uso dia a dia):
+Intel Celeron: R$200
+Intel Pentium: R$200
+Intel Core 2 Duo: R$250
+Intel Atom: R$200
+AMD E-Series / A-Series: R$200
+
+INTEL CORE:
+2ª geração: R$300
+3ª geração: R$400
+4ª geração: R$500
+5ª geração: R$700
+6ª geração: R$800
+7ª geração: R$1.000
+8ª geração: R$1.200
+9ª geração: R$1.500
+10ª geração: R$1.700
+11ª geração: R$2.000
+12ª geração: R$2.500
+13ª geração: R$3.000
+14ª geração: R$3.500
+
+AMD RYZEN:
+Ryzen 3 (1000/2000): R$800
+Ryzen 5 (1000/2000): R$1.100
+Ryzen 3 (3000): R$1.200
+Ryzen 5 (3000): R$1.400
+Ryzen 5 (4000): R$1.700
+Ryzen 5 (5000): R$2.100
+Ryzen 7 (5000): R$2.500
+Ryzen 7 (7000): R$3.200
+Ryzen AI (8000/9000): R$3.800
+
+AJUSTES:
++ R$100 se tiver SSD e 16GB de RAM ou mais
++ R$250 se tiver placa de vídeo dedicada (GTX/RTX)
+- R$200 se a bateria estiver ruim
+Tela quebrada: NÃO aceitamos na troca
+
+ATENÇÃO: se o notebook tiver qualquer outro defeito ou condição não listada acima, informe ao cliente que o aparelho precisa ser avaliado presencialmente na loja antes de passar qualquer valor.
+
+
+
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - ANDROID
 ━━━━━━━━━━━━━━━━━━━
