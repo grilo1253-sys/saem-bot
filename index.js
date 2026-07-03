@@ -348,23 +348,43 @@ Todos os valores desta tabela consideram o aparelho SEM NENHUM DEFEITO (tela, tr
 
 IMPORTANTE: os valores abaixo são exclusivamente para TROCA (aparelho do cliente como entrada), NÃO são preços de venda. São aparelhos Android.
 
-SAMSUNG
+SAMSUNG — LINHA GALAXY S (aceita 128GB, 256GB ou 512GB pelo mesmo valor)
 
-Linha Galaxy S (aceita 128GB, 256GB ou 512GB pelo mesmo valor):
-Galaxy S20: R$350 | S20+: R$400 | S20 Ultra: R$550
-Galaxy S21: R$400 | S21+: R$450 | S21 Ultra: R$650
-Galaxy S22: R$500 | S22+: R$600 | S22 Ultra: R$900
-Galaxy S23: R$800 | S23+: R$900 | S23 Ultra: R$1.600 | S23 FE: R$1.000
-Galaxy S24: R$1.700| S24+: R$1800| S24 Ultra: R$2.900 | S24 FE: R$1400
-Galaxy S25: R$2.200 | S25+: R$2.400 | S25 Ultra: R$4.000
+Galaxy S20: R$350
+Galaxy S20+: R$400
+Galaxy S20 Ultra: R$550
 
-Linha Galaxy A — 128GB: R$300 | 256GB: R$400
+Galaxy S21: R$400
+Galaxy S21+: R$450
+Galaxy S21 Ultra: R$650
+
+Galaxy S22: R$500
+Galaxy S22+: R$600
+Galaxy S22 Ultra: R$900
+
+Galaxy S23: R$800
+Galaxy S23+: R$900
+Galaxy S23 Ultra: R$1.600
+Galaxy S23 FE: R$1.000
+
+Galaxy S24: R$1.450
+Galaxy S24+: R$1.700
+Galaxy S24 Ultra: R$2.900
+Galaxy S24 FE: R$1.400
+
+Galaxy S25: R$2.200
+Galaxy S25+: R$2.400
+Galaxy S25 Ultra: R$4.000
+
+SAMSUNG — LINHA GALAXY A
+
+128GB: R$300 | 256GB: R$400
 A03, A03s, A04, A04s, A05, A05s, A12, A13, A14, A15, A16, A22, A23, A24, A32, A33
 
-Linha Galaxy A — 128GB: R$400 | 256GB: R$500
+128GB: R$400 | 256GB: R$500
 A25, A26, A34, A35, A36
 
-Linha Galaxy A — 128GB: R$300 | 256GB: R$400
+128GB: R$300 | 256GB: R$400
 A52, A53, A54
 
 A55: R$600 (128GB ou 256GB)
