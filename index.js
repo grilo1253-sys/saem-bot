@@ -600,6 +600,17 @@ Redmi Note 12, 12 Pro, 12 Pro+: R$400
 Redmi Note 13: R$400 | Redmi Note 13 Pro: R$500 | Redmi Note 13 Pro+: R$600
 Redmi Note 14: R$600 | Redmi Note 14 Pro: R$800 | Redmi Note 14 Pro Max: R$1.100
 
+POCO (valores de troca, aparelho sem defeito)
+
+Poco X3 — 128GB: R$300 | 256GB: R$400
+Poco X4 — 128GB: R$400 | 256GB: R$500
+Poco X5 — 128GB: R$450 | 256GB: R$550
+Poco X6 — 128GB: R$550 | 256GB: R$650
+Poco X7 — 128GB: R$900 | 256GB: R$900
+Poco X7 Pro — 128GB: R$1.100 | 256GB: R$1.100 | 512GB: R$1.100
+
+Modelo Poco não listado: informar ao cliente que vai verificar com a equipe e retorna em instantes.
+
 ━━━━━━━━━━━━━━━━━━━
 
 MOTOROLA - Linha Moto G
