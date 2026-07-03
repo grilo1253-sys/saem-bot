@@ -288,6 +288,12 @@ TABELA DE PREÇOS ATUAL
 
 ${process.env.PRICE_TABLE || ''}
 
+MODELOS DISPONÍVEIS COMO NOVOS ATUALMENTE (atualizar quando mudar o estoque):
+iPhone 17 256GB — R$5.499,00 — Preto (Taubaté) | Azul (Taubaté) | Azul (SJC)
+iPhone 17 Pro Max 256GB — R$7.899,00 — Branco (SJC) | Branco (SJC)
+
+
+
 ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo não está disponível como novo, verifique CUIDADOSAMENTE a seção iPhones Novos da tabela acima. O iPhone 17 e o iPhone 17 Pro Max estão disponíveis como NOVOS — NUNCA diga que não temos novo se estiver listado. Se o modelo estiver na seção iPhones Novos, confirme que temos sim.
 
 REGRA DE CÁLCULO DE PARCELAS — CRÍTICA:
