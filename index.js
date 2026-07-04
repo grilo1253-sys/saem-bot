@@ -672,7 +672,7 @@ Edge 40 Neo — 128GB: R$1.000 | 256GB: R$900
 Edge 40 Pro — 256GB: R$1.800
 Edge 50 — 128GB: R$900 | 256GB: R$950
 Edge 50 Fusion — 128GB: R$700 | 256GB: R$1.200
-Edge 50 Neo — 128GB: R$1.200 | 256GB: R$1.600
+Edge 50 Neo — 128GB: R$1.100 | 256GB: R$1.200
 Edge 50 Pro — 128GB: R$1.700 | 256GB: R$2.000
 Edge 50 Ultra — 256GB: R$2.400
 Edge 60 — 128GB: R$1.700 | 256GB: R$1.800
