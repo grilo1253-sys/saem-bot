@@ -123,10 +123,12 @@ function detectouPendencia(reply, mensagemCliente) {
   const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista'));
   if (jaTemValor) return false;
 
-  // Só disparar se for especificamente sobre valor de troca
-  const sobreValorTroca = (replyLower.includes('valor de troca') || replyLower.includes('valor da troca')) && (replyLower.includes('verificar') || replyLower.includes('equipe') || replyLower.includes('retorno em instantes'));
-  
-  return sobreValorTroca;
+  // Dispara para qualquer assunto em que o Cláudio disse que vai verificar com a equipe
+  // (valor de troca, saúde de bateria, peça trocada, manutenção fora da tabela, etc.)
+  const temEquipe = replyLower.includes('equipe');
+  const temVerificar = replyLower.includes('verificar') || replyLower.includes('retorno em instantes') || replyLower.includes('retornar em instantes') || replyLower.includes('retorno em breve');
+
+  return temEquipe && temVerificar;
 }
 
 // Extrai aparelho mencionado na conversa recente
@@ -314,6 +316,8 @@ ASSISTÊNCIA TÉCNICA
 
 REGRA DE MANUTENÇÃO ANDROID:
 A tabela de preços de manutenção é EXCLUSIVA para iPhones. Para qualquer serviço em aparelhos Android (Samsung, Motorola, Xiaomi, Realme, etc), NUNCA invente ou estime valores. Informe que o valor precisa ser verificado com a equipe técnica e encaminhe para o Breno: https://wa.me/5512981919584
+
+ATENÇÃO CRÍTICA - NÃO CONFUNDIR TABELAS: A tabela de "VALORES DE TROCA - ANDROID" serve APENAS para quando o cliente está dando o aparelho como entrada/troca em uma compra. Ela NUNCA deve ser usada para responder perguntas sobre conserto, reparo, ou troca de peça (tela, módulo, bateria, conector, etc) em aparelhos Android. Se o cliente perguntar "quanto custa trocar a tela/módulo/bateria" de um aparelho Android, isso é MANUTENÇÃO, não troca de aparelho — mesmo que o valor da tabela de troca pareça coincidir ou parecer plausível, é PROIBIDO usá-lo como preço de conserto. "Módulo" é sinônimo de tela/display — trate como pergunta de manutenção.
 
 Serviços: Tela, Bateria, Tampa traseira, Conector de carga, Câmeras, Face ID, Software e outros.
 Marcas: iPhone, Samsung, Xiaomi, Motorola, Realme, Redmi, Poco, Tablets, iPads, Apple Watch.
