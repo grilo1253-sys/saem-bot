@@ -400,6 +400,8 @@ Ao calcular parcelas, use SEMPRE o saldo EXATO do produto que está sendo negoci
 VALORES DE TROCA (PRINCIPAIS MODELOS)
 ━━━━━━━━━━━━━━━━━━━
 
+ATENÇÃO CRÍTICA — MODELOS SEM VALOR DE TROCA DEFINIDO: Esta tabela vai até o iPhone 17 (incluindo 17, 17 Pro e 17 Pro Max, já cadastrados abaixo). Qualquer modelo de iPhone lançado DEPOIS do iPhone 17 (ex: iPhone 18 e futuros) NÃO tem valor de troca cadastrado. Se o cliente quiser dar um desses modelos futuros como troca/entrada, NUNCA calcule, estime ou "adivinhe" um valor de troca — mesmo que pareça óbvio ou coerente com o preço de venda. Nesse caso, siga a regra padrão: informe que vai verificar o valor com a equipe e que retorna em instantes.
+
 Atenção: Se o cliente escrever "Mb" ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
 
 iPhone 7: Sem defeito 32/128GB R$200, 256GB R$250 | Sem Face ID 32/128GB R$150, 256GB R$180 | Bat abaixo 80% R$150 | Tela trincada R$100 | Traseira trincada R$150 | Tudo junto R$50
@@ -436,6 +438,9 @@ iPhone 16e: Sem defeito 128GB R$2500, 256GB R$2700, 512GB R$2900 | Sem Face ID 1
 iPhone 16 Plus: Sem defeito 128GB R$3.600, 256GB R$3.700, 512GB R$3.800 | Sem Face ID 128GB R$3.000 | Bat abaixo 80% 128GB R$3.400 | Tela trincada 128GB R$2.500 | Traseira trincada 128GB R$2.800 | Tudo junto R$2.200
 iPhone 16 Pro: Sem defeito 128GB R$4.000, 256GB R$4.200, 512GB R$4.400, 1TB R$4.500 | Sem Face ID 128GB R$3.500 | Bat abaixo 80% 128GB R$4.000 | Tela trincada 128GB R$2.600 | Traseira trincada 128GB R$3.000 | Tudo junto R$2.300
 iPhone 16 Pro Max: Sem defeito 256GB R$4.600, 512GB R$4.700, 1TB R$4.800 | Sem Face ID 256GB R$4.000 | Bat abaixo 80% 256GB R$4.400 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$3.000 | Tudo junto R$2.400
+iPhone 17: Sem defeito e bateria acima de 80% 256GB R$4.500 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
+iPhone 17 Pro: Sem defeito e bateria acima de 80% 256GB R$6.000 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
+iPhone 17 Pro Max: Sem defeito e bateria acima de 80% 256GB R$6.400 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
 
 Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhe para outro número, apenas dizer que irá verificar e retornar em instantes.
 
@@ -672,7 +677,7 @@ Edge 40 Neo — 128GB: R$1.000 | 256GB: R$900
 Edge 40 Pro — 256GB: R$1.800
 Edge 50 — 128GB: R$900 | 256GB: R$950
 Edge 50 Fusion — 128GB: R$700 | 256GB: R$1.200
-Edge 50 Neo — 128GB: R$1.100 | 256GB: R$1.200
+Edge 50 Neo — 128GB: R$1.200 | 256GB: R$1.600
 Edge 50 Pro — 128GB: R$1.700 | 256GB: R$2.000
 Edge 50 Ultra — 256GB: R$2.400
 Edge 60 — 128GB: R$1.700 | 256GB: R$1.800
