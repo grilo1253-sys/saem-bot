@@ -591,6 +591,8 @@ Galaxy S25 Ultra: R$4.000
 
 SAMSUNG — LINHA GALAXY A
 
+A02/A01 - 128/256gb : R$200
+
 128GB: R$300 | 256GB: R$400
 A03, A03s, A04, A04s, A05, A05s, A12, A13, A14, A15, A16, A22, A23, A24, A32, A33
 
@@ -622,7 +624,7 @@ Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
-Redmi Note 10 — R$300
+Redmi Note 10 / note 10s — R$300
 Redmi Note 10 Pro — R$300
 Redmi Note 11 — R$400
 Redmi Note 11 Pro — R$400
@@ -641,8 +643,12 @@ Redmi Note 14 Pro Max — R$1.100
 
 MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 
+moto g9 - 128/256 : R$250
+moto g9 play - 128/256 : R$200
+moto g9 plus - 128/256 : R$250
 Moto G31 — 128GB: R$300 | 256GB: R$400
 Moto G32 — 128GB: R$300 | 256GB: R$400
+Moto G34 — 128GB: R$300 | 256GB: R$400
 Moto G41 — 128GB: R$350 | 256GB: R$400
 Moto G42 — 128GB: R$400 | 256GB: R$500
 Moto G51 — 128GB: R$400 | 256GB: R$500
