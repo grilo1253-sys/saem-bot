@@ -408,11 +408,7 @@ ATENÇÃO CRÍTICA — NÃO CONFUNDIR NÚMEROS DE MODELO: iPhone 13, 14, 15, 16 
 
 ${process.env.PRICE_TABLE || ''}
 
-MODELOS DISPONÍVEIS COMO NOVOS ATUALMENTE (atualizar quando mudar o estoque):
-iPhone 17 256GB — R$5.499,00 — Preto (Taubaté) | Azul (Taubaté) | Azul (SJC)
-iPhone 17 Pro Max 256GB — R$7.899,00 — Branco (SJC) | Branco (SJC)
-
-ATENÇÃO CRÍTICA: os ÚNICOS modelos disponíveis NOVOS são os listados acima nesta seção (iPhones Novos). ANTES de dizer que um modelo não está disponível como novo, verifique CUIDADOSAMENTE a seção iPhones Novos da tabela acima. O iPhone 17 e o iPhone 17 Pro Max estão disponíveis como NOVOS — NUNCA diga que não temos novo se estiver listado. Se o modelo estiver na seção iPhones Novos, confirme que temos sim.
+ATENÇÃO CRÍTICA — ÚNICA FONTE DE ESTOQUE: A tabela acima (dentro de TABELA DE PREÇOS ATUAL, vinda diretamente do Admin) é a ÚNICA fonte válida para saber quais aparelhos estão disponíveis como Novos ou Seminovos, seus preços, cores e condições. NUNCA use qualquer informação de estoque, preço ou condição "Novo"/"Seminovo" que você lembre de conversas anteriores ou de qualquer outro lugar — só o que está escrito na tabela acima, exatamente como está escrito agora. Se a loja atualizar o Admin (mudar preço, cor, ou trocar um aparelho de Novo para Seminovo ou vice-versa), a tabela acima já vai refletir isso automaticamente — então sempre releia a tabela atual antes de responder, nunca responda de memória.
 
 REGRA DE CÁLCULO DE PARCELAS — CRÍTICA:
 Ao calcular parcelas, use SEMPRE o saldo EXATO do produto que está sendo negociado naquele momento. NUNCA misture valores de produtos diferentes. Antes de chamar a ferramenta calcular_parcelamento, confirme internamente: qual é o produto? qual é o preço? qual é o saldo após descontos? Só então calcule.
