@@ -109,19 +109,31 @@ async function notificarAdmin(phoneCliente, aparelho, contexto) {
 
 function detectouPendencia(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
+  const clienteLower = (mensagemCliente || '').toLowerCase();
+  const textoCompleto = replyLower + ' ' + clienteLower;
 
   // Não disparar se for sobre entrega/disponibilidade
-  const sobreEntrega = replyLower.includes('entrega') || replyLower.includes('motoboy') || replyLower.includes('disponibilidade') || replyLower.includes('entregar na sua região');
+  const sobreEntrega = textoCompleto.includes('entrega') || textoCompleto.includes('motoboy') || textoCompleto.includes('disponibilidade') || textoCompleto.includes('entregar na sua região');
   if (sobreEntrega) return false;
 
   // Não disparar se já passou valor calculado
-  const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista'));
+  const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || (replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista')));
   if (jaTemValor) return false;
 
   // Não disparar para reclamações, defeitos, sinal, internet, conexão, cartão ou falta de resposta —
-  // esses assuntos não são "valor de aparelho faltando na tabela" e devem ser resolvidos pelo
-  // próprio Cláudio (seguindo a regra de reclamação ou respondendo direto), não pela equipe.
-  const naoEhSobreValor = replyLower.includes('sinal') || replyLower.includes('internet') || replyLower.includes('wi-fi') || replyLower.includes('wifi') || replyLower.includes('conexão') || replyLower.includes('conexao') || replyLower.includes('defeito') || replyLower.includes('não obtive resposta') || replyLower.includes('nao obtive resposta') || replyLower.includes('demora') || replyLower.includes('cartão') || replyLower.includes('cartao');
+  // checando TANTO a resposta do Cláudio QUANTO a mensagem do cliente, pois o cliente pode usar
+  // palavras diferentes das que o Cláudio usou na resposta. Esses assuntos não são "valor de
+  // aparelho faltando na tabela" e devem ser resolvidos pelo próprio Cláudio (seguindo a regra
+  // de reclamação ou respondendo direto), não pela equipe.
+  const palavrasNaoValor = [
+    'sinal', 'internet', 'wi-fi', 'wifi', 'conexão', 'conexao',
+    'defeito', 'não obtive resposta', 'nao obtive resposta',
+    'demora', 'demorando', 'atraso', 'atrasado',
+    'cartão', 'cartao', 'não funciona', 'nao funciona',
+    'travando', 'travou', 'lento', 'lenta',
+    'reclama', 'insatisfeit', 'não obtive', 'nao obtive'
+  ];
+  const naoEhSobreValor = palavrasNaoValor.some(p => textoCompleto.includes(p));
   if (naoEhSobreValor) return false;
 
   // Dispara para qualquer assunto em que o Cláudio disse que vai verificar com a equipe
