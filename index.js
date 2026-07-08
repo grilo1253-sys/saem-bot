@@ -21,8 +21,6 @@ const NUMERO_ADMIN = process.env.NUMERO_ADMIN; // Número pessoal do Saem para r
 // ==========================================
 // PERSISTÊNCIA DAS CONVERSAS
 // ==========================================
-// Pasta persistente (montada como Volume no Railway). Diferente de /tmp,
-// o conteúdo dela NÃO é apagado quando o serviço reinicia ou recebe um novo deploy.
 const PASTA_DADOS = process.env.RAILWAY_VOLUME_MOUNT_PATH || '/data';
 if (!fs.existsSync(PASTA_DADOS)) {
   try { fs.mkdirSync(PASTA_DADOS, { recursive: true }); } catch (e) {}
@@ -76,7 +74,6 @@ function salvarMetadados() {
   } catch (e) {}
 }
 
-// Carrega pendentes (aparelhos aguardando valor da equipe)
 function carregarPendentes() {
   try {
     if (fs.existsSync(ARQUIVO_PENDENTES)) {
@@ -95,7 +92,6 @@ function salvarPendentes() {
 const conversas = carregarConversas();
 const metaConversas = carregarMetadados();
 const pendentesEquipe = carregarPendentes();
-// pendentesEquipe = { phone: { aparelho: 'Poco X3', aguardando: true } }
 
 // ==========================================
 // SISTEMA DE NOTIFICAÇÃO PARA O ADMIN
@@ -111,38 +107,25 @@ async function notificarAdmin(phoneCliente, aparelho, contexto) {
   }
 }
 
-// Detecta se o Cláudio disse que vai verificar com a equipe
 function detectouPendencia(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
-
-  // Não disparar se for sobre entrega/disponibilidade
   const sobreEntrega = replyLower.includes('entrega') || replyLower.includes('motoboy') || replyLower.includes('disponibilidade') || replyLower.includes('entregar na sua região');
   if (sobreEntrega) return false;
-
-  // Não disparar se já passou valor calculado
   const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista'));
   if (jaTemValor) return false;
-
-  // Dispara para qualquer assunto em que o Cláudio disse que vai verificar com a equipe
-  // (valor de troca, saúde de bateria, peça trocada, manutenção fora da tabela, etc.)
   const temEquipe = replyLower.includes('equipe');
   const temVerificar = replyLower.includes('verificar') || replyLower.includes('retorno em instantes') || replyLower.includes('retornar em instantes') || replyLower.includes('retorno em breve');
-
   return temEquipe && temVerificar;
 }
 
-// Extrai aparelho mencionado na conversa recente
 function extrairAparelhoPendente(mensagens) {
   const ultimasMsgs = mensagens.slice(-4);
   const texto = ultimasMsgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ');
-  
-  // Tenta extrair modelo mencionado
   const padroes = [
     /poco\s+\w+/i, /redmi\s+\w+/i, /galaxy\s+\w+/i, /moto\s+\w+/i,
     /iphone\s+\d+\s*\w*/i, /macbook\s+\w+/i, /ipad\s+\w*/i,
     /notebook\s+\w*/i, /ps[34]/i, /xbox\s+\w*/i, /apple\s+watch/i
   ];
-  
   for (const padrao of padroes) {
     const match = texto.match(padrao);
     if (match) return match[0];
@@ -150,18 +133,12 @@ function extrairAparelhoPendente(mensagens) {
   return 'aparelho não identificado';
 }
 
-// ==========================================
-// PROCESSAMENTO DE RESPOSTA DO ADMIN
-// ==========================================
-// Formato esperado: "valor 5512999999999 300"
 function processarRespostaAdmin(message, phoneAdmin) {
   const match = message.trim().match(/^valor\s+(\d+)\s+(\d+(?:[.,]\d+)?)/i);
   if (!match) return null;
-  
   const phoneCliente = match[1];
   const valorStr = match[2].replace(',', '.');
   const valor = parseFloat(valorStr);
-  
   if (!phoneCliente || isNaN(valor)) return null;
   return { phoneCliente, valor };
 }
@@ -430,6 +407,8 @@ ATENÇÃO CRÍTICA — MODELOS SEM VALOR DE TROCA DEFINIDO: Esta tabela vai até
 
 Atenção: Se o cliente escrever "Mb" ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
 
+ATENÇÃO CRÍTICA — LEIA A LISTA INTEIRA ANTES DE DIZER "NÃO ESTÁ NA TABELA": Esta lista cobre TODOS os iPhones do 7 ao 17, incluindo TODAS as variações Mini, Plus, Pro e Pro Max já lançadas oficialmente (por exemplo: 12 Mini, 13 Mini, 14 Plus, 15 Plus, 16 Plus estão todos aqui). Antes de responder que um modelo "não está na tabela" ou "tem valor diferenciado", releia a lista completa abaixo do início ao fim procurando a linha exata — é comum a IA parar de procurar no meio da lista por engano. Só depois de confirmar que realmente não existe nenhuma linha com esse modelo exato, siga a regra de "aparelho não listado".
+
 iPhone 7: Sem defeito 32/128GB R$200, 256GB R$250 | Sem Face ID 32/128GB R$150, 256GB R$180 | Bat abaixo 80% R$150 | Tela trincada R$100 | Traseira trincada R$150 | Tudo junto R$50
 iPhone 7 Plus: Sem defeito 32/128GB R$250, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$150 | Traseira trincada R$150 | Tudo junto R$70
 iPhone 8: Sem defeito 64GB R$250, 128GB R$270, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$100 | Traseira trincada R$100 | Tudo junto R$50
@@ -617,14 +596,11 @@ Galaxy S25 Ultra: R$4.000
 
 SAMSUNG — LINHA GALAXY A
 
-
-A02/A01 - 128/256gb : R$200
+A02/A01 — 128GB ou 256GB: R$200
+A21s/A22s — 128GB: R$200 | 256GB: R$300
 
 128GB: R$300 | 256GB: R$400
 A03, A03s, A04, A04s, A05, A05s, A12, A13, A14, A15, A16, A22, A23, A24, A32, A33
-
-A21s/a22s - 128/256gb : R$200/300
-
 
 128GB: R$400 | 256GB: R$500
 A25, A26, A34, A35, A36
@@ -654,7 +630,7 @@ Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
-Redmi Note 10 / note 10s — R$300
+Redmi Note 10 / Note 10s — R$300
 Redmi Note 10 Pro — R$300
 Redmi Note 11 — R$400
 Redmi Note 11 Pro — R$400
@@ -673,11 +649,11 @@ Redmi Note 14 Pro Max — R$1.100
 
 MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 
-moto g9 - 128/256 : R$250
-moto g05 - 128/256 : R$300
-moto g9 play - 128/256 : R$200
-moto g9 plus - 128/256 : R$250
-moto g15  - 128/256gb : R$400/500
+Moto G9 — 128GB ou 256GB: R$250
+Moto G05 — 128GB ou 256GB: R$300
+Moto G9 Play — 128GB ou 256GB: R$200
+Moto G9 Plus — 128GB ou 256GB: R$250
+Moto G15 — 128GB: R$400 | 256GB: R$500
 Moto G31 — 128GB: R$300 | 256GB: R$400
 Moto G32 — 128GB: R$300 | 256GB: R$400
 Moto G34 — 128GB: R$300 | 256GB: R$400
@@ -870,28 +846,20 @@ async function executarReativacao(janela) {
 // ==========================================
 // CHECAGEM DE HORÁRIO DA REATIVAÇÃO (CORRIGIDA)
 // ==========================================
-// Antes só disparava se pegasse o minuto EXATO (hora === 18 && minuto === 0).
-// Se o Railway "dormisse" o container ou reiniciasse perto do minuto exato,
-// a janela passava e a reativação daquele dia nunca rodava — foi o que aconteceu ontem.
-// Agora dispara em qualquer checagem dentro da janela de horário, contanto que
-// ainda não tenha rodado hoje.
 setInterval(() => {
   const agora = new Date();
   const hora = agora.getHours();
 
-  // Janela da tarde: qualquer horário entre 18h e 20h59, uma vez por dia
   if (hora >= 18 && hora < 21 && !reativacaoRodandoHoje) {
     reativacaoRodandoHoje = true;
     executarReativacao('tarde').catch(console.error);
   }
 
-  // Janela da manhã: qualquer horário entre 10h e 12h59, uma vez por dia
   if (hora >= 10 && hora < 13 && !reativacaoRodandoAmanha) {
     reativacaoRodandoAmanha = true;
     executarReativacao('manha').catch(console.error);
   }
 
-  // Reset das flags à meia-noite
   if (hora === 0) {
     if (reativacaoRodandoHoje || reativacaoRodandoAmanha) {
       reativacaoRodandoHoje = false;
@@ -1018,22 +986,17 @@ app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 
   try {
-    // ==========================================
-    // VERIFICA SE É RESPOSTA DO ADMIN
-    // ==========================================
     if (NUMERO_ADMIN && phone === NUMERO_ADMIN && message) {
       const resposta = processarRespostaAdmin(message, phone);
       if (resposta) {
         const { phoneCliente, valor } = resposta;
         if (!conversas[phoneCliente]) conversas[phoneCliente] = [];
 
-        // Injeta o valor como mensagem interna da equipe
         conversas[phoneCliente].push({
           role: 'user',
           content: `[EQUIPE]: O valor de troca do aparelho é R$${valor.toFixed(2).replace('.', ',')}`
         });
 
-        // Remove pendência
         if (pendentesEquipe[phoneCliente]) {
           delete pendentesEquipe[phoneCliente];
           salvarPendentes();
@@ -1041,14 +1004,12 @@ app.post('/webhook', async (req, res) => {
 
         salvarConversas();
 
-        // Dispara resposta do Cláudio para o cliente
         const msgs = conversas[phoneCliente];
         const reply = await chamarClaude([...msgs]);
         conversas[phoneCliente].push({ role: 'assistant', content: reply });
         salvarConversas();
         await enviarMensagem(phoneCliente, reply);
 
-        // Confirma para o admin
         await enviarMensagem(NUMERO_ADMIN, `✅ Valor enviado para o cliente ${phoneCliente}!`);
         return;
       }
@@ -1059,7 +1020,6 @@ app.post('/webhook', async (req, res) => {
     metaConversas[phone].ultimaMensagemCliente = Date.now();
     metaConversas[phone].reativado = false;
 
-    // IMAGEM
     if (isImage) {
       const imageUrl = body.image?.imageUrl || body.image?.url || body.imageUrl;
       if (!imageUrl) return;
@@ -1077,7 +1037,6 @@ app.post('/webhook', async (req, res) => {
       return;
     }
 
-    // ÁUDIO
     if (isAudio) {
       const audioUrl = body.audio?.audioUrl || body.audio?.url || body.audioUrl;
       if (!audioUrl) { await enviarMensagem(phone, 'Não consegui processar o áudio. Pode digitar? 😊'); return; }
@@ -1093,7 +1052,6 @@ app.post('/webhook', async (req, res) => {
       return;
     }
 
-    // TEXTO
     if (!message) return;
     console.log(`📱 ${phone}: ${message}`);
     conversas[phone].push({ role: 'user', content: message });
@@ -1104,7 +1062,6 @@ app.post('/webhook', async (req, res) => {
     salvarConversas();
     salvarMetadados();
 
-    // Detecta se precisa notificar admin
     if (detectouPendencia(reply, message) && NUMERO_ADMIN && !pendentesEquipe[phone]) {
       const aparelho = extrairAparelhoPendente(conversas[phone]);
       pendentesEquipe[phone] = { aparelho, aguardando: true };
