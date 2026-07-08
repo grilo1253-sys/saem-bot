@@ -109,13 +109,31 @@ async function notificarAdmin(phoneCliente, aparelho, contexto) {
 
 function detectouPendencia(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
+
+  // Não disparar se for sobre entrega/disponibilidade
   const sobreEntrega = replyLower.includes('entrega') || replyLower.includes('motoboy') || replyLower.includes('disponibilidade') || replyLower.includes('entregar na sua região');
   if (sobreEntrega) return false;
+
+  // Não disparar se já passou valor calculado
   const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista'));
   if (jaTemValor) return false;
+
+  // Não disparar para reclamações, defeitos, sinal, internet, conexão, cartão ou falta de resposta —
+  // esses assuntos não são "valor de aparelho faltando na tabela" e devem ser resolvidos pelo
+  // próprio Cláudio (seguindo a regra de reclamação ou respondendo direto), não pela equipe.
+  const naoEhSobreValor = replyLower.includes('sinal') || replyLower.includes('internet') || replyLower.includes('wi-fi') || replyLower.includes('wifi') || replyLower.includes('conexão') || replyLower.includes('conexao') || replyLower.includes('defeito') || replyLower.includes('não obtive resposta') || replyLower.includes('nao obtive resposta') || replyLower.includes('demora') || replyLower.includes('cartão') || replyLower.includes('cartao');
+  if (naoEhSobreValor) return false;
+
+  // Dispara para qualquer assunto em que o Cláudio disse que vai verificar com a equipe
+  // (valor de troca, saúde de bateria, peça trocada, manutenção fora da tabela, etc.)
   const temEquipe = replyLower.includes('equipe');
   const temVerificar = replyLower.includes('verificar') || replyLower.includes('retorno em instantes') || replyLower.includes('retornar em instantes') || replyLower.includes('retorno em breve');
-  return temEquipe && temVerificar;
+
+  // Só considera pendência real se a resposta também mencionar contexto de valor/preço/aparelho/troca —
+  // evita disparar para assuntos genéricos que nada têm a ver com precificação.
+  const sobreValor = replyLower.includes('valor') || replyLower.includes('preço') || replyLower.includes('preco') || replyLower.includes('aparelho') || replyLower.includes('troca');
+
+  return temEquipe && temVerificar && sobreValor;
 }
 
 function extrairAparelhoPendente(mensagens) {
@@ -207,6 +225,8 @@ REGRAS DE ATENDIMENTO
 - Quando houver informações suficientes, apresente a proposta de forma clara e organizada.
 - Priorize o fechamento da venda de maneira natural e consultiva.
 - Quando qualquer cliente reclamar de problema, defeito ou comportamento estranho em aparelho comprado na loja, siga esta ordem obrigatória: 1) Defenda o aparelho — normalize a situação, diga que é comportamento comum do iOS ou de configurações. 2) Sugira soluções práticas — brilho, reiniciar, configurações, atualização de sistema. 3) Se o cliente insistir, sugira novas soluções diferentes das anteriores. 4) Continue tentando resolver pelo chat o máximo possível. 5) Só encaminhe para o Breno quando o cliente deixar explícito que já tentou tudo e quer atendimento presencial ou está muito insatisfeito. NUNCA encaminhe para o Breno logo de cara. NUNCA mencione defeito, problema de hardware ou qualquer coisa que crie prova contra a loja.
+- ATENÇÃO: problemas de sinal, internet, Wi-Fi, rede ou conexão em aparelho comprado na loja seguem exatamente essa mesma regra de reclamação acima (defender, sugerir soluções como reiniciar/atualizar/verificar configurações de rede, só escalar se o cliente insistir muito). NUNCA trate esses casos como "valor de aparelho a verificar com a equipe" — não é uma questão de preço, é uma questão de suporte, e deve ser resolvida seguindo a regra de reclamação, não te faça parecer que vai "consultar um valor".
+- Se o cliente reclamar que já mandou informações antes e não obteve resposta, ou reclamar de demora, NUNCA diga que vai "verificar com a equipe" como se fosse uma pendência de valor. Peça desculpas pela demora de forma breve e natural, e tente resolver a dúvida dele diretamente agora, com base no que ele já informou na conversa.
 - REGRA DE ACESSÓRIOS:
 Quando o cliente perguntar sobre acessórios (carregadores, capas, películas, etc), responda: "Temos todas as linhas de acessórios! É só entrar no nosso site na aba de acessórios e conferir os valores: https://www.saemcelulares.net — Qualquer dúvida é só chamar! 😊"
 - REGRA DE RECLAMAÇÃO CONTRA A LOJA:
@@ -253,6 +273,9 @@ Análise de crédito: https://wa.me/5512981880229
 
 REGRA DE PARCELAMENTO NO CARTÃO — CRÍTICA:
 NUNCA, em hipótese alguma, use a palavra "boleto" junto com simulação de parcelas (2x, 3x, 6x, 10x, 12x, 18x, etc). Parcelamento é EXCLUSIVAMENTE no cartão de crédito. Ao apresentar qualquer simulação de parcelas, SEMPRE especificar "no cartão" ou "no cartão de crédito" — nunca deixe a palavra "parcelado" sozinha sem indicar que é no cartão. Frases como "No boleto parcelado:", "parcelado no boleto" ou qualquer combinação de "boleto" com número de parcelas são PROIBIDAS. Boleto é APENAS para pagamento à vista ou para iniciar a análise de crédito via link de financiamento — nunca apresentar valores parcelados como sendo do boleto.
+
+ESCLARECIMENTO SOBRE BANDEIRAS DE CARTÃO:
+A loja aceita QUALQUER bandeira de cartão de crédito (Visa, Mastercard, Elo, American Express, etc.) para parcelamento em até 18x — não existe restrição de bandeira. Se o cliente perguntar "quais cartões aceitam parcelar em Nx" ou algo parecido, responda diretamente que qualquer cartão de crédito é aceito para parcelamento em até 18x, sem nunca dizer que precisa verificar isso com a equipe.
 
 Esclarecimento sobre boleto: existe apenas uma modalidade de boleto, válida para QUALQUER produto (iPhone, Android, qualquer marca) e qualquer cliente, incluindo quem está negativado. Todo boleto passa por análise de crédito — não existe boleto sem análise. Para iniciar a análise, encaminhe para https://wa.me/5512981880229. NUNCA diga que existe um boleto "sem análise" ou "exclusivo para negativados sem análise tradicional". Se o cliente perguntar se consegue boleto mesmo estando negativado, explique que ele pode tentar a análise normalmente pelo link, pois a aprovação depende da análise e não é garantida antecipadamente.
 
