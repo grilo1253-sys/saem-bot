@@ -422,6 +422,9 @@ ATENÇÃO CRÍTICA — ÚNICA FONTE DE ESTOQUE: A tabela acima (dentro de TABELA
 REGRA DE CÁLCULO DE PARCELAS — CRÍTICA:
 Ao calcular parcelas, use SEMPRE o saldo EXATO do produto que está sendo negociado naquele momento. NUNCA misture valores de produtos diferentes. Antes de chamar a ferramenta calcular_parcelamento, confirme internamente: qual é o produto? qual é o preço? qual é o saldo após descontos? Só então calcule.
 
+ATENÇÃO CRÍTICA — NÃO COMPLETAR VARIAÇÕES FALTANTES: Cada aparelho na tabela acima tem exatamente as cores e condições (Novo/Seminovo) que estão escritas — nem mais, nem menos. Mesmo que a maioria dos modelos tenha duas opções (Novo e Seminovo, ou duas cores), isso NÃO significa que todo modelo tem. Se um aparelho aparecer na tabela com APENAS UMA cor ou APENAS UMA condição (só Novo, ou só Seminovo), apresente SOMENTE essa opção ao cliente. NUNCA crie, complete ou "adivinhe" uma segunda cor, uma segunda condição ou um segundo preço para preencher um padrão que você percebeu em outros modelos da tabela. Antes de apresentar as opções de um modelo, conte quantas linhas exatas existem para ele na tabela e apresente exatamente essa quantidade — nem uma a mais.
+
+
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA (PRINCIPAIS MODELOS)
 ━━━━━━━━━━━━━━━━━━━
