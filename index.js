@@ -430,7 +430,7 @@ NUNCA mostre a porcentagem de bateria ao apresentar aparelhos ao cliente, mesmo 
 
 EXEMPLO REAL DE ERRO QUE JÁ ACONTECEU E NUNCA MAIS PODE SE REPETIR: um cliente perguntou só "quais as opções de iPhone 15 você tem", sem perguntar nada sobre bateria. Mesmo assim, uma resposta anterior listou cada variação já mostrando a porcentagem junto da cor (ex: "Branco 86%", "Rosa 88%", "Verde 89%"). Isso é proibido — a porcentagem NUNCA aparece por iniciativa própria, só quando o cliente perguntar sobre bateria especificamente. Ao listar opções, mostre só modelo, cor, preço e parcelas — nunca a porcentagem, mesmo que ela esteja bem ali do lado na tabela.
 
-ATENÇÃO CRÍTICA — RESPOSTA POR ETAPAS, MESMO PRA MODELO ESPECÍFICO: Quando o cliente pergunta por um modelo específico que tem VÁRIAS variações (cores diferentes, condições diferentes, lojas diferentes — ex: "iPhone 15 Pro Max 256GB" com 2 cores, "iPhone 15 128GB" com 3 variações), NÃO despeje todas as variações com preço e parcela completos de uma vez. Em vez disso, dê uma resposta mais enxuta: diga que modelo/memória tem disponível e a faixa de preço (ex: "a partir de R$X"), cite rapidamente quais cores existem, e pergunte qual delas interessa. Só depois que o cliente escolher a cor/condição específica, aí sim mostre o preço exato completo com as opções de parcela daquela variação escolhida. Isso evita gastar texto (e tokens) detalhando variações que o cliente pode nem querer, e ainda deixa a conversa mais natural, como um vendedor de loja faria perguntando as preferências antes de fechar os detalhes.
+ATENÇÃO CRÍTICA — RESPOSTA POR ETAPAS, MESMO PRA MODELO ESPECÍFICO: Quando o cliente pergunta por um modelo específico que tem VÁRIAS variações (cores diferentes, condições diferentes, lojas diferentes — ex: "iPhone 15 Pro Max 256GB" com 2 cores, "iPhone 15 128GB" com 3 variações), NÃO despeje todas as variações com preço e parcela completos de uma vez. Em vez disso, dê uma resposta mais enxuta, mas SEM tirar o parcelamento — mostre o preço à vista "a partir de R$X" JUNTO com uma opção de parcela de exemplo (ex: "a partir de R$2.199,00 (ou 10x R$249,30)"), cite rapidamente quais cores existem, e pergunte qual delas interessa. NÃO repita o parcelamento completo (todas as opções de parcela) pra cada cor/variação nessa etapa — isso sim gera texto desnecessário. Só depois que o cliente escolher a cor/condição específica, aí sim mostre o preço exato completo com TODAS as opções de parcela daquela variação escolhida. O objetivo é o meio-termo: nem virar uma parede de texto com tudo detalhado de cada variação, nem esconder o parcelamento que ajuda a vender — uma pincelada de parcela no resumo, detalhe completo só na variação escolhida.
 
 ━━━━━━━━━━━━━━━━━━━
 TABELA DE PREÇOS ATUAL
@@ -1150,6 +1150,49 @@ async function gerarRespostaComAlternativa(mensagens) {
   return RESPOSTA_SEGURA_FALLBACK;
 }
 
+// ==========================================
+// TRAVA DE SEGURANÇA — SAUDAÇÃO REPETIDA
+// ==========================================
+// Se o Cláudio já se apresentou antes nessa conversa (existe uma mensagem
+// anterior do assistente com a saudação), remove automaticamente qualquer
+// saudação repetida do início da resposta nova, mesmo que o modelo tenha
+// tentado se apresentar de novo. Isso é uma trava de código, complementar
+// à regra do prompt — não depende só do modelo "lembrar" de não repetir.
+function jaSeApresentouAntes(mensagens) {
+  const regexApresentacao = /sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio/i;
+  return mensagens.some(m => {
+    if (m.role !== 'assistant') return false;
+    const texto = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
+    return regexApresentacao.test(texto);
+  });
+}
+
+function removerApresentacaoRepetida(mensagensAnteriores, reply) {
+  if (!jaSeApresentouAntes(mensagensAnteriores)) return reply;
+  // Remove o parágrafo inicial de saudação/apresentação, se a resposta nova começar com isso
+  const regexSaudacaoInicial = /^(oi|ol[aá])[!,.]?\s*tudo bem\??\s*(sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio)[^\n]*\n*\s*/i;
+  const semSaudacao = reply.replace(regexSaudacaoInicial, '').trim();
+  return semSaudacao.length > 0 ? semSaudacao : reply;
+}
+
+// ==========================================
+// TRAVA DE SEGURANÇA — BATERIA NÃO SOLICITADA
+// ==========================================
+// Se o cliente NÃO perguntou sobre bateria na mensagem atual, remove
+// automaticamente qualquer menção de porcentagem que apareça na resposta
+// (geralmente vem entre parênteses, ex: "(98% de bateria)"). Trava de código
+// complementar à regra do prompt, que sozinha não estava sendo suficiente.
+function removerBateriaNaoSolicitada(mensagemClienteAtual, reply) {
+  const perguntouBateria = /bateria/i.test(mensagemClienteAtual || '');
+  if (perguntouBateria) return reply;
+  if (!/\d{1,3}\s*%/.test(reply)) return reply;
+  return reply
+    .replace(/\([^)]*\d{1,3}\s*%[^)]*\)/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .trim();
+}
+
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
@@ -1269,6 +1312,8 @@ app.post('/webhook', async (req, res) => {
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
       let reply = await chamarClaude(conversas[phone]);
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+      reply = removerApresentacaoRepetida(conversas[phone], reply);
+      reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
       await enviarMensagem(phone, reply);
@@ -1281,6 +1326,8 @@ app.post('/webhook', async (req, res) => {
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
     let reply = await chamarClaude(conversas[phone]);
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+    reply = removerApresentacaoRepetida(conversas[phone], reply);
+    reply = removerBateriaNaoSolicitada(message, reply);
     console.log(`🤖 Resposta: ${reply}`);
     conversas[phone].push({ role: 'assistant', content: reply });
     salvarConversas();
