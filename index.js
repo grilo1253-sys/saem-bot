@@ -966,13 +966,41 @@ const FERRAMENTA_PARCELAMENTO = {
   }
 };
 
+// ==========================================
+// CACHE INCREMENTAL DE CONVERSA (ECONOMIA)
+// ==========================================
+// Marca o último bloco da última mensagem com cache_control. Isso faz a API
+// guardar em cache tudo que já foi enviado até aqui; na próxima chamada dessa
+// mesma conversa, esse trecho anterior é lido a ~10% do preço normal, e só a
+// parte nova (mensagem mais recente) é cobrada no valor cheio. Não altera em
+// nada o comportamento do Cláudio nem o que fica salvo em conversas[phone] —
+// é só uma marcação aplicada na cópia enviada para a API.
+function comCacheBreakpoint(msg) {
+  if (Array.isArray(msg.content)) {
+    const conteudo = msg.content.map(b => ({ ...b }));
+    if (conteudo.length > 0) {
+      conteudo[conteudo.length - 1].cache_control = { type: "ephemeral", ttl: "1h" };
+    }
+    return { ...msg, content: conteudo };
+  }
+  return {
+    ...msg,
+    content: [{ type: "text", text: msg.content, cache_control: { type: "ephemeral", ttl: "1h" } }]
+  };
+}
+
+function prepararMensagensParaEnvio(mensagens) {
+  if (mensagens.length === 0) return mensagens;
+  return mensagens.map((m, i) => i === mensagens.length - 1 ? comCacheBreakpoint(m) : m);
+}
+
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
     model: 'claude-sonnet-4-6', max_tokens: 1024,
     system: [{ type: "text", text: systemPromptAtual, cache_control: { type: "ephemeral", ttl: "1h" } }],
     tools: [FERRAMENTA_PARCELAMENTO],
-    messages: mensagens
+    messages: prepararMensagensParaEnvio(mensagens)
   };
   const headers = { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' };
   let response = await axios.post('https://api.anthropic.com/v1/messages', corpo, { headers });
@@ -985,7 +1013,7 @@ async function chamarClaude(mensagens) {
     }
     mensagens.push({ role: 'assistant', content: response.data.content });
     mensagens.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) }] });
-    response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: mensagens }, { headers });
+    response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: prepararMensagensParaEnvio(mensagens) }, { headers });
   }
   return response.data.content.find(b => b.type === 'text')?.text || '';
 }
