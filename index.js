@@ -1095,6 +1095,27 @@ function respostaTemModeloForaDaTabela(reply) {
 
 const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
 
+// Quando a trava de segurança bloqueia uma resposta (modelo/condição que não existe
+// na tabela), em vez de só dizer "não temos" e mandar o cliente pro catálogo, tentamos
+// pedir pro próprio Cláudio já oferecer uma alternativa REAL da tabela (venda ativa,
+// sem travar a negociação). Essa nova tentativa passa pela MESMA verificação de
+// segurança — se ela também falhar, aí sim usamos o texto genérico como último recurso.
+async function gerarRespostaComAlternativa(mensagens) {
+  try {
+    const instrucaoInterna = {
+      role: 'user',
+      content: '[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O modelo/condição/memória que o cliente pediu não está disponível na tabela. NÃO diga apenas "não temos" e NÃO mande o cliente olhar o catálogo agora. Em vez disso, ofereça proativamente 1 ou 2 alternativas REAIS que existam na tabela de preços (modelo parecido, mesma faixa de preço, ou um upgrade), citando modelo, memória, condição (Novo/Seminovo) e preço EXATOS que estejam escritos na tabela — nunca invente nem aproxime valores. Seja breve (1 a 3 frases) e termine com uma pergunta que ajude a fechar a venda.'
+    };
+    const respostaAlternativa = await chamarClaude([...mensagens, instrucaoInterna]);
+    if (!respostaTemModeloForaDaTabela(respostaAlternativa)) {
+      return respostaAlternativa;
+    }
+  } catch (e) {
+    console.error('Erro ao gerar resposta alternativa:', e.message);
+  }
+  return RESPOSTA_SEGURA_FALLBACK;
+}
+
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
@@ -1213,7 +1234,7 @@ app.post('/webhook', async (req, res) => {
       conversas[phone].push({ role: 'user', content: transcricao });
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
       let reply = await chamarClaude(conversas[phone]);
-      if (respostaTemModeloForaDaTabela(reply)) reply = RESPOSTA_SEGURA_FALLBACK;
+      if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
       await enviarMensagem(phone, reply);
@@ -1225,7 +1246,7 @@ app.post('/webhook', async (req, res) => {
     conversas[phone].push({ role: 'user', content: message });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
     let reply = await chamarClaude(conversas[phone]);
-    if (respostaTemModeloForaDaTabela(reply)) reply = RESPOSTA_SEGURA_FALLBACK;
+    if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
     console.log(`🤖 Resposta: ${reply}`);
     conversas[phone].push({ role: 'assistant', content: reply });
     salvarConversas();
