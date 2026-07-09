@@ -1102,11 +1102,27 @@ const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico 
 // segurança — se ela também falhar, aí sim usamos o texto genérico como último recurso.
 async function gerarRespostaComAlternativa(mensagens) {
   try {
-    const instrucaoInterna = {
-      role: 'user',
-      content: '[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O modelo/condição/memória que o cliente pediu não está disponível na tabela. NÃO diga apenas "não temos" e NÃO mande o cliente olhar o catálogo agora. Em vez disso, ofereça proativamente 1 ou 2 alternativas REAIS que existam na tabela de preços (modelo parecido, mesma faixa de preço, ou um upgrade), citando modelo, memória, condição (Novo/Seminovo) e preço EXATOS que estejam escritos na tabela — nunca invente nem aproxime valores. Seja breve (1 a 3 frases) e termine com uma pergunta que ajude a fechar a venda.'
-    };
-    const respostaAlternativa = await chamarClaude([...mensagens, instrucaoInterna]);
+    if (mensagens.length === 0) return RESPOSTA_SEGURA_FALLBACK;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O modelo/condição/memória que o cliente pediu não está disponível na tabela. NÃO diga apenas "não temos" e NÃO mande o cliente olhar o catálogo agora. Em vez disso, ofereça proativamente 1 ou 2 alternativas REAIS que existam na tabela de preços (modelo parecido, mesma faixa de preço, ou um upgrade), citando modelo, memória, condição (Novo/Seminovo) e preço EXATOS que estejam escritos na tabela — nunca invente nem aproxime valores. Seja breve (1 a 3 frases) e termine com uma pergunta que ajude a fechar a venda.';
+
+    // Anexa a instrução na ÚLTIMA mensagem já existente (que é do cliente), em vez de
+    // criar uma nova mensagem "user" — a API da Anthropic exige alternância estrita
+    // entre "user" e "assistant", então duas mensagens "user" seguidas dá erro.
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaAlternativa = await chamarClaude(mensagensComInstrucao);
     if (!respostaTemModeloForaDaTabela(respostaAlternativa)) {
       return respostaAlternativa;
     }
