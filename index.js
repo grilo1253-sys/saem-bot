@@ -1017,6 +1017,7 @@ function normalizarTexto(txt) {
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^\w\s]/g, ' ')
     .replace(/\s+/g, ' ')
+    .replace(/(\d)\s*gb\b/g, '$1gb')
     .trim();
 }
 
