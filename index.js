@@ -217,6 +217,10 @@ Antes de informar qualquer valor ao cliente, faça esta verificação mentalment
 
 Se em qualquer um desses passos a resposta for "não tenho certeza" ou "não achei uma linha exata": NUNCA calcule, estime, arredonde, adivinhe ou "chute" um valor aproximado — mesmo que pareça óbvio, coerente ou fácil de deduzir a partir de outros valores da tabela ou de aparelhos parecidos. Também nunca use o valor de uma tabela para responder a pergunta de outra tabela (ex: usar tabela de troca para responder pergunta de manutenção, ou vice-versa).
 
+ATENÇÃO CRÍTICA — TROCA NÃO É VENDA, NUNCA MISTURE AS DUAS: A tabela "VALORES DE TROCA" mostra quanto a LOJA PAGA quando o cliente entrega um aparelho como entrada. A tabela "TABELA DE PREÇOS ATUAL" (a que vem do Admin) mostra quanto o CLIENTE PAGA para comprar um aparelho da loja. São conceitos opostos e NUNCA podem ser misturados. Se um cliente perguntar "quanto custa o iPhone [modelo]" ou "vocês têm o iPhone [modelo] à venda", isso é uma pergunta de VENDA — a resposta só pode vir da tabela de preços do Admin (estoque Novo/Seminovo). NUNCA responda uma pergunta de venda usando um valor da tabela de troca, mesmo que o modelo pareça bater e o valor pareça plausível como preço de venda. Se o modelo perguntado não estiver na tabela de preços do Admin (a de estoque), a resposta é sempre "não temos esse modelo disponível no momento" — mesmo que esse mesmo modelo apareça na tabela de troca (que serve só para avaliar o aparelho USADO do cliente, não para vender).
+
+EXEMPLO REAL DE ERRO QUE JÁ ACONTECEU E NUNCA MAIS PODE SE REPETIR: um cliente perguntou "iPhone 16 256 gigas" pedindo para COMPRAR. A tabela de preços do Admin NÃO tinha nenhuma linha de iPhone 16 Novo à venda. Mesmo assim, uma resposta anterior pegou o valor R$3.500 da tabela de TROCA do iPhone 16 256GB (valor que a loja paga para aceitar esse aparelho como entrada) e apresentou como se fosse o preço de VENDA (R$3.499,00, arredondado) do iPhone 16 256GB Preto — um produto que a loja nem tinha em estoque para vender. Isso é gravíssimo: mistura duas tabelas com finalidades opostas. Antes de informar qualquer preço de venda, confirme mentalmente: "este valor vem da tabela de preços do Admin (estoque), ou estou olhando sem querer para a tabela de troca?" Se vier da tabela de troca, NUNCA use para responder pergunta de venda.
+
 Nesses casos, a resposta correta é SEMPRE: informar que vai verificar o valor com a equipe e que retorna em instantes (para Android/iPhone/troca em geral) ou encaminhar para o Breno (para manutenção). Nunca deixe a vontade de "ajudar rápido" ou "parecer que sabe" te levar a inventar um número — é preferível demorar um pouco mais e acertar do que responder na hora e errar.
 
 ━━━━━━━━━━━━━━━━━━━
@@ -998,6 +1002,51 @@ function prepararMensagensParaEnvio(mensagens) {
   return mensagens.map((m, i) => i === mensagens.length - 1 ? comCacheBreakpoint(m) : m);
 }
 
+// ==========================================
+// TRAVA DE SEGURANÇA — VERIFICAÇÃO DETERMINÍSTICA
+// ==========================================
+// Depois que o Cláudio gera a resposta, esta função confere se qualquer
+// combinação "iPhone [modelo] [memória]GB" mencionada como oferta de venda
+// (junto de um preço em R$) realmente existe, literalmente, na tabela de
+// preços do Admin. Se não existir, a resposta é BLOQUEADA no código (não
+// depende só do modelo "se comportar bem") e substituída por uma mensagem
+// segura. Isso é uma segunda camada de proteção, além das regras do prompt.
+function normalizarTexto(txt) {
+  return (txt || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extrairModelosMencionados(textoNormalizado) {
+  const regex = /iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?\s+\d{2,4}\s*gb/g;
+  return textoNormalizado.match(regex) || [];
+}
+
+function respostaTemModeloForaDaTabela(reply) {
+  // Só verifica respostas que parecem oferecer um produto à venda (têm preço em R$)
+  if (!/r\$/i.test(reply)) return false;
+  // Não verifica quando o Cláudio já está encaminhando pra equipe (resposta já é segura)
+  const replyLower = reply.toLowerCase();
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  const tabelaNormalizada = normalizarTexto(process.env.PRICE_TABLE || '');
+  const replyNormalizado = normalizarTexto(reply);
+  const modelosMencionados = extrairModelosMencionados(replyNormalizado);
+
+  for (const modelo of modelosMencionados) {
+    if (!tabelaNormalizada.includes(modelo)) {
+      console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado na tabela de preços`);
+      return true;
+    }
+  }
+  return false;
+}
+
+const RESPOSTA_SEGURA_FALLBACK = 'Deixa eu confirmar certinho a disponibilidade e o valor exato desse modelo com a equipe e já te retorno! 😊';
+
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
@@ -1115,7 +1164,8 @@ app.post('/webhook', async (req, res) => {
       if (!transcricao?.trim()) { await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar? 😊'); return; }
       conversas[phone].push({ role: 'user', content: transcricao });
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
-      const reply = await chamarClaude(conversas[phone]);
+      let reply = await chamarClaude(conversas[phone]);
+      if (respostaTemModeloForaDaTabela(reply)) reply = RESPOSTA_SEGURA_FALLBACK;
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
       await enviarMensagem(phone, reply);
@@ -1126,7 +1176,8 @@ app.post('/webhook', async (req, res) => {
     console.log(`📱 ${phone}: ${message}`);
     conversas[phone].push({ role: 'user', content: message });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
-    const reply = await chamarClaude(conversas[phone]);
+    let reply = await chamarClaude(conversas[phone]);
+    if (respostaTemModeloForaDaTabela(reply)) reply = RESPOSTA_SEGURA_FALLBACK;
     console.log(`🤖 Resposta: ${reply}`);
     conversas[phone].push({ role: 'assistant', content: reply });
     salvarConversas();
