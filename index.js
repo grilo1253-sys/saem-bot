@@ -676,6 +676,7 @@ Galaxy S24 Ultra: R$2.900
 Galaxy S24 FE: R$1.400
 
 Galaxy S25: R$2.200
+Galaxy S25 fe : R$2.000
 Galaxy S25+: R$2.400
 Galaxy S25 Ultra: R$4.000
 
