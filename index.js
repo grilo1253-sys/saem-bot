@@ -1026,6 +1026,31 @@ function extrairModelosMencionados(textoNormalizado) {
   return textoNormalizado.match(regex) || [];
 }
 
+// Divide a tabela de preços em duas partes (Novos / Seminovos) usando os
+// cabeçalhos de seção. Isso permite conferir não só se o modelo+memória
+// existe em algum lugar da tabela, mas se existe especificamente sob a
+// condição (Novo ou Seminovo) que o Cláudio mencionou na resposta.
+function dividirTabelaPorCondicao(tabelaCrua) {
+  const regexNovos = /iphones?\s*novos/i;
+  const regexSeminovos = /iphones?\s*seminovos/i;
+  const matchNovos = tabelaCrua.match(regexNovos);
+  const matchSeminovos = tabelaCrua.match(regexSeminovos);
+  let chunkNovo = tabelaCrua;
+  let chunkSeminovo = tabelaCrua;
+  if (matchNovos && matchSeminovos) {
+    const idxNovos = matchNovos.index;
+    const idxSeminovos = matchSeminovos.index;
+    if (idxNovos < idxSeminovos) {
+      chunkNovo = tabelaCrua.slice(idxNovos, idxSeminovos);
+      chunkSeminovo = tabelaCrua.slice(idxSeminovos);
+    } else {
+      chunkSeminovo = tabelaCrua.slice(idxSeminovos, idxNovos);
+      chunkNovo = tabelaCrua.slice(idxNovos);
+    }
+  }
+  return { novo: normalizarTexto(chunkNovo), seminovo: normalizarTexto(chunkSeminovo) };
+}
+
 function respostaTemModeloForaDaTabela(reply) {
   // Só verifica respostas que parecem oferecer um produto à venda (têm preço em R$)
   if (!/r\$/i.test(reply)) return false;
@@ -1033,20 +1058,42 @@ function respostaTemModeloForaDaTabela(reply) {
   const replyLower = reply.toLowerCase();
   if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
 
-  const tabelaNormalizada = normalizarTexto(process.env.PRICE_TABLE || '');
+  const tabelaCrua = process.env.PRICE_TABLE || '';
+  const tabelaNormalizada = normalizarTexto(tabelaCrua);
   const replyNormalizado = normalizarTexto(reply);
   const modelosMencionados = extrairModelosMencionados(replyNormalizado);
 
+  if (modelosMencionados.length === 0) return false;
+
+  // Verificação 1: o modelo+memória existe em ALGUM lugar da tabela
   for (const modelo of modelosMencionados) {
     if (!tabelaNormalizada.includes(modelo)) {
       console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado na tabela de preços`);
       return true;
     }
   }
+
+  // Verificação 2: se a resposta menciona explicitamente "Novo" ou "Seminovo",
+  // confirma que o modelo existe sob ESSA condição específica — evita pegar o
+  // preço de uma condição e rotular como se fosse a outra (ex: usar o preço do
+  // Novo e chamar de Seminovo, ou vice-versa).
+  const mencionaSeminovo = /\bseminovo\b/.test(replyLower);
+  const mencionaNovo = /\bnovo\b/.test(replyLower) && !mencionaSeminovo;
+  if (mencionaSeminovo || mencionaNovo) {
+    const { novo, seminovo } = dividirTabelaPorCondicao(tabelaCrua);
+    const chunkEsperado = mencionaSeminovo ? seminovo : novo;
+    for (const modelo of modelosMencionados) {
+      if (!chunkEsperado.includes(modelo)) {
+        console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado como ${mencionaSeminovo ? 'Seminovo' : 'Novo'} na tabela`);
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
-const RESPOSTA_SEGURA_FALLBACK = 'Deixa eu confirmar certinho a disponibilidade e o valor exato desse modelo com a equipe e já te retorno! 😊';
+const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
 
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
