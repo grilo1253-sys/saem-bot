@@ -1153,26 +1153,29 @@ async function gerarRespostaComAlternativa(mensagens) {
 // ==========================================
 // TRAVA DE SEGURANÇA — SAUDAÇÃO REPETIDA
 // ==========================================
-// Se o Cláudio já se apresentou antes nessa conversa (existe uma mensagem
-// anterior do assistente com a saudação), remove automaticamente qualquer
-// saudação repetida do início da resposta nova, mesmo que o modelo tenha
-// tentado se apresentar de novo. Isso é uma trava de código, complementar
-// à regra do prompt — não depende só do modelo "lembrar" de não repetir.
-function jaSeApresentouAntes(mensagens) {
-  const regexApresentacao = /sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio/i;
-  return mensagens.some(m => {
-    if (m.role !== 'assistant') return false;
-    const texto = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
-    return regexApresentacao.test(texto);
-  });
-}
-
-function removerApresentacaoRepetida(mensagensAnteriores, reply) {
-  if (!jaSeApresentouAntes(mensagensAnteriores)) return reply;
-  // Remove o parágrafo inicial de saudação/apresentação, se a resposta nova começar com isso
+// Usa uma flag persistente em metaConversas[phone] (não depende das últimas
+// 20 mensagens do histórico, que pode "esquecer" a saudação original em
+// conversas longas). Uma vez marcado como apresentado, nunca mais deixa
+// passar a saudação de novo naquele dia, não importa quantas mensagens
+// tenham passado.
+function removerApresentacaoRepetida(phone, reply) {
   const regexSaudacaoInicial = /^(oi|ol[aá])[!,.]?\s*tudo bem\??\s*(sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio)[^\n]*\n*\s*/i;
-  const semSaudacao = reply.replace(regexSaudacaoInicial, '').trim();
-  return semSaudacao.length > 0 ? semSaudacao : reply;
+  const contemSaudacao = regexSaudacaoInicial.test(reply);
+
+  if (!metaConversas[phone]) metaConversas[phone] = {};
+
+  if (metaConversas[phone].apresentado) {
+    // Já se apresentou antes — remove a saudação se ela aparecer de novo
+    if (contemSaudacao) {
+      const semSaudacao = reply.replace(regexSaudacaoInicial, '').trim();
+      return semSaudacao.length > 0 ? semSaudacao : reply;
+    }
+    return reply;
+  }
+
+  // Primeira vez — se a resposta contém a saudação, marca como apresentado e deixa passar
+  if (contemSaudacao) metaConversas[phone].apresentado = true;
+  return reply;
 }
 
 // ==========================================
@@ -1312,7 +1315,7 @@ app.post('/webhook', async (req, res) => {
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
       let reply = await chamarClaude(conversas[phone]);
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
-      reply = removerApresentacaoRepetida(conversas[phone], reply);
+      reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
@@ -1326,7 +1329,7 @@ app.post('/webhook', async (req, res) => {
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
     let reply = await chamarClaude(conversas[phone]);
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
-    reply = removerApresentacaoRepetida(conversas[phone], reply);
+    reply = removerApresentacaoRepetida(phone, reply);
     reply = removerBateriaNaoSolicitada(message, reply);
     console.log(`🤖 Resposta: ${reply}`);
     conversas[phone].push({ role: 'assistant', content: reply });
