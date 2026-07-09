@@ -1315,7 +1315,12 @@ app.post('/webhook', async (req, res) => {
       if (!transcricao?.trim()) { await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar? 😊'); return; }
       conversas[phone].push({ role: 'user', content: transcricao });
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+      const tamanhoAntesAudio = conversas[phone].length;
       let reply = await chamarClaude(conversas[phone]);
+      // Remove mensagens internas de uso de ferramenta (calcular_parcelamento) que
+      // tenham sido adicionadas durante a chamada — elas não são conversa real com
+      // o cliente e não devem consumir espaço no histórico de 20 mensagens.
+      if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
       reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
@@ -1329,7 +1334,9 @@ app.post('/webhook', async (req, res) => {
     console.log(`📱 ${phone}: ${message}`);
     conversas[phone].push({ role: 'user', content: message });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+    const tamanhoAntes = conversas[phone].length;
     let reply = await chamarClaude(conversas[phone]);
+    if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
     reply = removerApresentacaoRepetida(phone, reply);
     reply = removerBateriaNaoSolicitada(message, reply);
