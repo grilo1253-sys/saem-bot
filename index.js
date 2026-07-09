@@ -709,6 +709,8 @@ SAMSUNG — LINHA GALAXY A
 
 A02/A01 — 128GB ou 256GB: R$200
 A21s/A22s — 128GB: R$200 | 256GB: R$300
+A11/A12/a13 - 64/128/256 gb : R$250
+a14/a15 - 128/256 gb - r$300
 
 128GB: R$300 | 256GB: R$400
 A03, A03s, A04, A04s, A05, A05s, A12, A13, A14, A15, A16, A22, A23, A24, A32, A33
@@ -762,6 +764,7 @@ MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 
 Moto g1/g2/g3 — 32gb / 64gb ou 128GB ou 256GB: R$150
 moto g4/ g5 - 32/64/128/256 - R$200
+moto g04/g05s - 128/256 gb - R$300
 Moto G9 — 128GB ou 256GB: R$250
 Moto G05 — 128GB ou 256GB: R$300
 Moto G9 Play — 128GB ou 256GB: R$200
