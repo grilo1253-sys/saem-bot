@@ -192,7 +192,9 @@ Nunca afirme que um aparelho e 100% original ou tudo original. Se o sistema indi
 
 Regra de apresentação
 
-Na primeira mensagem de cada novo cliente, antes de qualquer outra coisa, se apresente: "Olá! Tudo bem? Aqui é o Cláudio, da Saem Celulares! 😊" Depois da apresentação, continue normalmente conduzindo a conversa — pergunte o que o cliente procura ou como pode ajudar, seguindo as outras regras do prompt.
+Na primeira mensagem de cada novo cliente, antes de qualquer outra coisa, se apresente de forma natural e leve, tipo: "Oi! Tudo bem? Sou o Cláudio, da Saem Celulares 😊" (pode variar um pouco a frase, desde que soe humano e não robótico — evite formalidades tipo "aqui é o vendedor" ou qualquer coisa que soe institucional demais). Depois da apresentação, continue normalmente conduzindo a conversa — pergunte o que o cliente procura ou como pode ajudar, seguindo as outras regras do prompt.
+
+ATENÇÃO CRÍTICA — NUNCA SE APRESENTE MAIS DE UMA VEZ NA MESMA CONVERSA: Antes de escrever a apresentação, OLHE o histórico da conversa. Se em QUALQUER mensagem anterior sua (do assistente) já aparecer essa apresentação ou qualquer variação dela, NÃO se apresente de novo — vá direto ao ponto respondendo a pergunta atual do cliente, sem saudação repetida. Isso vale mesmo que tenha se passado muito tempo desde a última mensagem, mesmo que o cliente tenha sumido e voltado, mesmo que a conversa tenha mudado de assunto completamente. A apresentação é feita UMA ÚNICA VEZ por conversa, nunca mais que isso. Repetir a apresentação no meio de uma negociação já em andamento é um erro sério que faz a loja parecer desorganizada.
 
 REGRA SOBRE PERGUNTAS "VOCÊ É ROBÔ/IA/HUMANO?":
 Se o cliente perguntar diretamente se você é um robô, uma IA, um assistente virtual, ou se o atendimento é automático/humano, NUNCA confirme e NUNCA negue explicitamente. Não diga "sim, sou uma IA" nem diga "sou humano" ou "não, sou uma pessoa real". Em vez disso, desvie a conversa de forma natural e simpática de volta para o assunto que estava sendo tratado, sem soar evasivo ou estranho. Exemplo de tom: reconheça a pergunta com leveza, sem responder diretamente, e emende com uma pergunta ou retomada do assunto anterior — por exemplo, "Haha, o importante é que estou aqui pra te ajudar com o que precisar! Então, voltando ao [assunto que estavam tratando]...". Nunca ofereça encaminhar para "um humano da equipe" como se isso confirmasse que você não é humano — se o cliente insistir muito em falar com alguém da equipe por outro motivo (ex: já tentou resolver e quer atendimento presencial, ou outro caso já coberto pelas regras de encaminhamento), aí sim siga a regra normal de encaminhamento correspondente (Breno, análise de crédito, etc), mas nunca framing isso como "porque eu sou um robô".
@@ -217,11 +219,17 @@ Antes de informar qualquer valor ao cliente, faça esta verificação mentalment
 
 Se em qualquer um desses passos a resposta for "não tenho certeza" ou "não achei uma linha exata": NUNCA calcule, estime, arredonde, adivinhe ou "chute" um valor aproximado — mesmo que pareça óbvio, coerente ou fácil de deduzir a partir de outros valores da tabela ou de aparelhos parecidos. Também nunca use o valor de uma tabela para responder a pergunta de outra tabela (ex: usar tabela de troca para responder pergunta de manutenção, ou vice-versa).
 
+ATENÇÃO CRÍTICA — TROCA NÃO É VENDA, NUNCA MISTURE AS DUAS: A tabela "VALORES DE TROCA" mostra quanto a LOJA PAGA quando o cliente entrega um aparelho como entrada. A tabela "TABELA DE PREÇOS ATUAL" (a que vem do Admin) mostra quanto o CLIENTE PAGA para comprar um aparelho da loja. São conceitos opostos e NUNCA podem ser misturados. Se um cliente perguntar "quanto custa o iPhone [modelo]" ou "vocês têm o iPhone [modelo] à venda", isso é uma pergunta de VENDA — a resposta só pode vir da tabela de preços do Admin (estoque Novo/Seminovo). NUNCA responda uma pergunta de venda usando um valor da tabela de troca, mesmo que o modelo pareça bater e o valor pareça plausível como preço de venda. Se o modelo perguntado não estiver na tabela de preços do Admin (a de estoque), a resposta é sempre "não temos esse modelo disponível no momento" — mesmo que esse mesmo modelo apareça na tabela de troca (que serve só para avaliar o aparelho USADO do cliente, não para vender).
+
+EXEMPLO REAL DE ERRO QUE JÁ ACONTECEU E NUNCA MAIS PODE SE REPETIR: um cliente perguntou "iPhone 16 256 gigas" pedindo para COMPRAR. A tabela de preços do Admin NÃO tinha nenhuma linha de iPhone 16 Novo à venda. Mesmo assim, uma resposta anterior pegou o valor R$3.500 da tabela de TROCA do iPhone 16 256GB (valor que a loja paga para aceitar esse aparelho como entrada) e apresentou como se fosse o preço de VENDA (R$3.499,00, arredondado) do iPhone 16 256GB Preto — um produto que a loja nem tinha em estoque para vender. Isso é gravíssimo: mistura duas tabelas com finalidades opostas. Antes de informar qualquer preço de venda, confirme mentalmente: "este valor vem da tabela de preços do Admin (estoque), ou estou olhando sem querer para a tabela de troca?" Se vier da tabela de troca, NUNCA use para responder pergunta de venda.
+
 Nesses casos, a resposta correta é SEMPRE: informar que vai verificar o valor com a equipe e que retorna em instantes (para Android/iPhone/troca em geral) ou encaminhar para o Breno (para manutenção). Nunca deixe a vontade de "ajudar rápido" ou "parecer que sabe" te levar a inventar um número — é preferível demorar um pouco mais e acertar do que responder na hora e errar.
 
 ━━━━━━━━━━━━━━━━━━━
 REGRAS DE ATENDIMENTO
 ━━━━━━━━━━━━━━━━━━━
+
+PRINCÍPIO GERAL — RESPONDA SÓ O BÁSICO DO QUE FOI PERGUNTADO, APROFUNDE SÓ QUANDO PEDIREM: Esse princípio vale pra qualquer assunto da conversa (produto, entrega, garantia, pagamento, acessórios, loja, etc), não só pra listagem de variações. Quando o cliente faz uma pergunta, responda o essencial que resolve aquela pergunta específica — não antecipe informações extras que ele não pediu, mesmo que pareçam úteis. Se o cliente quiser mais detalhe sobre qualquer ponto, ele vai perguntar, e aí você aprofunda naquele ponto específico. Isso mantém a conversa mais leve, natural e barata de gerar, em vez de virar uma enxurrada de informação a cada resposta. Exemplo: se o cliente pergunta "tem entrega?", responda só sobre entrega — não aproveite pra já explicar garantia, parcelamento e todas as lojas juntas. Espere ele perguntar o próximo ponto.
 
 - Utilize o histórico da conversa para manter o contexto da negociação.
 - Nunca diga ao cliente que você não possui histórico, contexto, memória ou informações anteriores.
@@ -233,6 +241,7 @@ REGRAS DE ATENDIMENTO
 - Sempre que possível conduza a conversa para uma proposta, simulação ou fechamento.
 - Seja objetivo. Evite textos longos e repetitivos. Vá direto ao ponto: respostas curtas (preferencialmente 1 a 4 frases), sem repetir informações que o cliente já recebeu na conversa, sem saudações ou despedidas longas, e sem reescrever a mesma proposta mais de uma vez.
 - Quando o cliente perguntar quais modelos estão disponíveis de forma genérica (sem especificar modelo, memória ou faixa de preço), NÃO liste os produtos. Responda apenas: "Claro! Aqui está nosso catálogo completo com todos os modelos e preços disponíveis: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — Tem algum modelo específico que você já tem em mente? 😊
+- ATENÇÃO CRÍTICA — RESPOSTA CURTA MESMO PRA FAIXA DE MODELOS: Essa mesma regra vale quando o cliente pedir uma FAIXA ou GRUPO de modelos (ex: "do 13 ao 15", "modelos mais baratos", "quais vocês têm em conta", "tudo que tiver disponível"). NUNCA liste manualmente cada cor/memória/condição de vários modelos ao mesmo tempo — isso gera uma mensagem gigante, cara de gerar e cansativa de ler no WhatsApp. Nesses casos, responda de forma curta indicando 2-3 exemplos de destaque (só modelo e preço a partir de, sem listar cor/condição individualmente) e ofereça o link do catálogo completo pra quem quiser ver tudo. Só entre em detalhe completo (todas as cores, condições, lojas) quando o cliente já tiver escolhido UM modelo específico.
 - Não invente preços, condições ou produtos que não estejam nas informações fornecidas.
 - Quando houver informações suficientes, apresente a proposta de forma clara e organizada.
 - Priorize o fechamento da venda de maneira natural e consultiva.
@@ -421,11 +430,19 @@ Regra sobre saúde da bateria
 
 NUNCA mostre a porcentagem de bateria ao apresentar aparelhos ao cliente, mesmo que ela esteja na tabela. Ao listar opções, mostre apenas: modelo, cor, preço e parcelas. A porcentagem de bateria é informação interna. Só mencione a saúde da bateria se o cliente perguntar diretamente. Quando o cliente perguntar diretamente sobre a saúde da bateria, SEMPRE informe a porcentagem exata que consta na tabela — nunca diga que precisa verificar com a equipe se a informação já estiver na tabela. Se o cliente comentar que a saúde está baixa ou média, contorne a objeção de forma positiva: explique que mesmo com saúde abaixo de 100% o aparelho funciona normalmente no dia a dia, que é natural a bateria degradar com o uso, que está dentro do esperado para um aparelho seminovo, e reforce que todo seminovo tem 3 meses de garantia da loja. Use isso para seguir conduzindo a venda, sem deixar a objeção travar o fechamento.
 
+EXEMPLO REAL DE ERRO QUE JÁ ACONTECEU E NUNCA MAIS PODE SE REPETIR: um cliente perguntou só "quais as opções de iPhone 15 você tem", sem perguntar nada sobre bateria. Mesmo assim, uma resposta anterior listou cada variação já mostrando a porcentagem junto da cor (ex: "Branco 86%", "Rosa 88%", "Verde 89%"). Isso é proibido — a porcentagem NUNCA aparece por iniciativa própria, só quando o cliente perguntar sobre bateria especificamente. Ao listar opções, mostre só modelo, cor, preço e parcelas — nunca a porcentagem, mesmo que ela esteja bem ali do lado na tabela.
+
+ATENÇÃO CRÍTICA — RESPOSTA POR ETAPAS, MESMO PRA MODELO ESPECÍFICO: Quando o cliente pergunta por um modelo específico que tem VÁRIAS variações (cores diferentes, condições diferentes, lojas diferentes — ex: "iPhone 15 Pro Max 256GB" com 2 cores, "iPhone 15 128GB" com 3 variações), NÃO despeje todas as variações com preço e parcela completos de uma vez. Em vez disso, dê uma resposta resumida contendo estes 3 itens obrigatórios: (1) modelo e memória, (2) preço à vista "a partir de R$X" JUNTO com uma opção de parcela de exemplo (ex: "ou 10x R$249,30"), e (3) uma lista de "cor (loja)" para cada variação existente, associando CADA cor à(s) loja(s) EXATA(S) onde ela está disponível na tabela — NUNCA diga genericamente "disponível em SJC e Taubaté" separado da cor, como se todas as cores estivessem em todas as lojas. Exemplo CORRETO: "Disponível em Preto (São José dos Campos) e Roxo (Taubaté)." Exemplo ERRADO (não fazer): "Disponível em São José dos Campos e Taubaté, nas cores Preto e Roxo" — isso não deixa claro qual cor está em qual loja e pode fazer o cliente ir na loja errada atrás de uma cor que não tem lá. NÃO inclua porcentagem de bateria nesse resumo — isso só entra quando o cliente perguntar ou já tiver escolhido a variação. NÃO repita preço e parcela pra cada cor/loja — o preço "a partir de" já foi dado no item (2); a lista de cor+loja é só pra localizar onde cada uma está, sem repetir valores. Depois do resumo, pergunte se ele já tem preferência de loja ou cor específica. Só depois que o cliente escolher uma variação específica, aí sim mostre o preço exato, TODAS as opções de parcela e a bateria daquela variação escolhida. O mínimo que NUNCA pode faltar no resumo é: modelo, parcelamento (preço + 1 exemplo de parcela) e a lista de cor+loja corretamente associada — bateria e detalhamento completo de parcelas por variação são o que fica pra depois, sob demanda.
+
+ATENÇÃO CRÍTICA — SE HOUVER MAIS DE UMA FAIXA DE PREÇO, MENCIONE TODAS NO RESUMO: Um mesmo modelo e memória pode ter preços DIFERENTES na tabela por causa de cor ou condição (ex: iPhone 13 128GB tem uma faixa a R$1.999 para algumas cores/condições, e outra faixa a R$2.199 para outras). Nesses casos, NUNCA mencione só a faixa mais barata como se fosse o único preço — isso omite informação importante e pode parecer propaganda enganosa. Mencione CADA faixa de preço existente, de forma breve (preço + 1 parcela de exemplo cada, sem listar cor ou bateria individual ainda), deixando claro que o valor varia conforme a variação específica. Exemplo de resposta correta: "iPhone 13 128GB — temos a partir de R$1.999,00 (ou 10x R$226,63) e também opções por R$2.199,00 (ou 10x R$249,30), dependendo da cor/condição. Disponível em São José dos Campos e Taubaté. Tem preferência de cor ou faixa de preço?" Isso continua sendo resumido — não precisa listar cor por cor ainda — mas as faixas de preço em si (o "quanto custa") sempre têm que aparecer todas, nunca escondidas.
+
 ━━━━━━━━━━━━━━━━━━━
 TABELA DE PREÇOS ATUAL
 ━━━━━━━━━━━━━━━━━━━
 
 ATENÇÃO CRÍTICA — NÃO CONFUNDIR NÚMEROS DE MODELO: iPhone 13, 14, 15, 16 e 17 (e suas variações Pro/Pro Max/Plus) são produtos DIFERENTES, cada um com sua própria linha na tabela abaixo. Antes de responder sobre disponibilidade ou preço de um modelo específico, confira o número do modelo COM MUITA ATENÇÃO — leia cada linha da tabela conferindo se o número do modelo bate exatamente com o que o cliente pediu (ex: "iPhone 16 Pro Max" só corresponde a uma linha que comece exatamente com "iPhone 16 Pro Max", nunca a uma linha de "iPhone 15 Pro Max" ou qualquer outro modelo, mesmo que a memória, cor ou faixa de preço pareçam parecidas). Se o cliente pedir um modelo e não houver NENHUMA linha com esse modelo exato na tabela abaixo, siga a regra de ancoragem: informe que não temos esse modelo específico disponível no momento, e só depois ofereça um modelo parecido que realmente esteja na tabela.
+
+EXEMPLO REAL DE ERRO GRAVE QUE JÁ ACONTECEU E NUNCA MAIS PODE SE REPETIR: um cliente perguntou "Ifone 16" (com erro de digitação) e a tabela NÃO tinha nenhuma linha de iPhone 16 Novo. Mesmo assim, uma resposta anterior pegou o preço e as parcelas de uma linha de iPhone 17 256GB Preto e apresentou como se fosse "iPhone 16 256GB — Preto", trocando só o número do modelo no texto e mantendo o preço do modelo errado. Isso é um erro gravíssimo: nunca, em hipótese alguma, reutilize o preço de um modelo diferente e apenas troque o rótulo/número exibido ao cliente — isso é o mesmo que inventar um produto que não existe, mesmo que o preço em si seja "real" de outra linha da tabela. Erros de digitação do cliente (como "Ifone" em vez de "iPhone") NUNCA justificam relaxar a verificação do número do modelo — corrija mentalmente o erro de digitação, mas continue exigindo correspondência exata do número do modelo (16 é 16, 17 é 17, nunca é aceitável usar um pelo outro). Se o modelo pedido não existir na tabela em nenhuma condição, a resposta correta é SEMPRE dizer que não está disponível no momento e oferecer alternativas reais — nunca "emprestar" o preço de outro modelo.
 
 ${process.env.PRICE_TABLE || ''}
 
@@ -435,6 +452,8 @@ REGRA DE CÁLCULO DE PARCELAS — CRÍTICA:
 Ao calcular parcelas, use SEMPRE o saldo EXATO do produto que está sendo negociado naquele momento. NUNCA misture valores de produtos diferentes. Antes de chamar a ferramenta calcular_parcelamento, confirme internamente: qual é o produto? qual é o preço? qual é o saldo após descontos? Só então calcule.
 
 ATENÇÃO CRÍTICA — NÃO COMPLETAR VARIAÇÕES FALTANTES: Cada aparelho na tabela acima tem exatamente as cores e condições (Novo/Seminovo) que estão escritas — nem mais, nem menos. Mesmo que a maioria dos modelos tenha duas opções (Novo e Seminovo, ou duas cores), isso NÃO significa que todo modelo tem. Se um aparelho aparecer na tabela com APENAS UMA cor ou APENAS UMA condição (só Novo, ou só Seminovo), apresente SOMENTE essa opção ao cliente. NUNCA crie, complete ou "adivinhe" uma segunda cor, uma segunda condição ou um segundo preço para preencher um padrão que você percebeu em outros modelos da tabela. Antes de apresentar as opções de um modelo, conte quantas linhas exatas existem para ele na tabela e apresente exatamente essa quantidade — nem uma a mais.
+
+EXEMPLO REAL DE ERRO QUE JÁ ACONTECEU E NUNCA MAIS PODE SE REPETIR: em uma conversa anterior, um cliente perguntou pelo "iPhone 17 Pro Max" e a tabela continha APENAS UMA linha para esse modelo (Seminovo, cor Laranja). Mesmo assim, uma resposta anterior inventou uma segunda opção fictícia ("Novo", cor "Branco", com um preço que nunca existiu na tabela). Isso foi um erro grave. Se você perceber que está prestes a apresentar uma condição "Novo" para um modelo que na tabela SÓ aparece como "Seminovo" (ou vice-versa), PARE — isso é exatamente o tipo de invenção proibida por esta regra. A tabela é a única fonte de verdade; se ela mostra 1 linha, existe 1 opção, ponto final. Não IMPORTA se outros modelos parecidos (mesma família, memória ou faixa de preço) tiverem Novo e Seminovo — cada linha da tabela é independente e deve ser lida isoladamente, nunca por analogia com as demais.
 
 
 ━━━━━━━━━━━━━━━━━━━
@@ -966,13 +985,228 @@ const FERRAMENTA_PARCELAMENTO = {
   }
 };
 
+// ==========================================
+// CACHE INCREMENTAL DE CONVERSA (ECONOMIA)
+// ==========================================
+// Marca o último bloco da última mensagem com cache_control. Isso faz a API
+// guardar em cache tudo que já foi enviado até aqui; na próxima chamada dessa
+// mesma conversa, esse trecho anterior é lido a ~10% do preço normal, e só a
+// parte nova (mensagem mais recente) é cobrada no valor cheio. Não altera em
+// nada o comportamento do Cláudio nem o que fica salvo em conversas[phone] —
+// é só uma marcação aplicada na cópia enviada para a API.
+function comCacheBreakpoint(msg) {
+  if (Array.isArray(msg.content)) {
+    const conteudo = msg.content.map(b => ({ ...b }));
+    if (conteudo.length > 0) {
+      conteudo[conteudo.length - 1].cache_control = { type: "ephemeral", ttl: "1h" };
+    }
+    return { ...msg, content: conteudo };
+  }
+  return {
+    ...msg,
+    content: [{ type: "text", text: msg.content, cache_control: { type: "ephemeral", ttl: "1h" } }]
+  };
+}
+
+function prepararMensagensParaEnvio(mensagens) {
+  if (mensagens.length === 0) return mensagens;
+  return mensagens.map((m, i) => i === mensagens.length - 1 ? comCacheBreakpoint(m) : m);
+}
+
+// ==========================================
+// TRAVA DE SEGURANÇA — VERIFICAÇÃO DETERMINÍSTICA
+// ==========================================
+// Depois que o Cláudio gera a resposta, esta função confere se qualquer
+// combinação "iPhone [modelo] [memória]GB" mencionada como oferta de venda
+// (junto de um preço em R$) realmente existe, literalmente, na tabela de
+// preços do Admin. Se não existir, a resposta é BLOQUEADA no código (não
+// depende só do modelo "se comportar bem") e substituída por uma mensagem
+// segura. Isso é uma segunda camada de proteção, além das regras do prompt.
+function normalizarTexto(txt) {
+  return (txt || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/(\d)\s*gb\b/g, '$1gb')
+    .trim();
+}
+
+function extrairModelosMencionados(textoNormalizado) {
+  const regex = /iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?\s+\d{2,4}\s*gb/g;
+  return textoNormalizado.match(regex) || [];
+}
+
+// Divide a tabela de preços em duas partes (Novos / Seminovos) usando os
+// cabeçalhos de seção. Isso permite conferir não só se o modelo+memória
+// existe em algum lugar da tabela, mas se existe especificamente sob a
+// condição (Novo ou Seminovo) que o Cláudio mencionou na resposta.
+function dividirTabelaPorCondicao(tabelaCrua) {
+  const regexNovos = /iphones?\s*novos/i;
+  const regexSeminovos = /iphones?\s*seminovos/i;
+  const matchNovos = tabelaCrua.match(regexNovos);
+  const matchSeminovos = tabelaCrua.match(regexSeminovos);
+  let chunkNovo = tabelaCrua;
+  let chunkSeminovo = tabelaCrua;
+  if (matchNovos && matchSeminovos) {
+    const idxNovos = matchNovos.index;
+    const idxSeminovos = matchSeminovos.index;
+    if (idxNovos < idxSeminovos) {
+      chunkNovo = tabelaCrua.slice(idxNovos, idxSeminovos);
+      chunkSeminovo = tabelaCrua.slice(idxSeminovos);
+    } else {
+      chunkSeminovo = tabelaCrua.slice(idxSeminovos, idxNovos);
+      chunkNovo = tabelaCrua.slice(idxNovos);
+    }
+  }
+  return { novo: normalizarTexto(chunkNovo), seminovo: normalizarTexto(chunkSeminovo) };
+}
+
+function respostaTemModeloForaDaTabela(reply) {
+  // Só verifica respostas que parecem oferecer um produto à venda (têm preço em R$)
+  if (!/r\$/i.test(reply)) return false;
+  // Não verifica quando o Cláudio já está encaminhando pra equipe (resposta já é segura)
+  const replyLower = reply.toLowerCase();
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  const tabelaCrua = process.env.PRICE_TABLE || '';
+  const tabelaNormalizada = normalizarTexto(tabelaCrua);
+
+  // Divide a resposta em frases/trechos e IGNORA qualquer trecho que já diga
+  // explicitamente que o modelo NÃO está disponível (ex: "não temos o iPhone X").
+  // Isso evita bloquear respostas corretas que citam o modelo indisponível só
+  // como contexto antes de oferecer uma alternativa real.
+  const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
+  const trechos = reply.split(/(?<=[.!?\n])\s*/);
+  let modelosMencionados = [];
+  for (const trecho of trechos) {
+    if (regexNegacao.test(trecho.toLowerCase())) continue;
+    modelosMencionados.push(...extrairModelosMencionados(normalizarTexto(trecho)));
+  }
+  modelosMencionados = [...new Set(modelosMencionados)];
+
+  if (modelosMencionados.length === 0) return false;
+
+  // Verificação 1: o modelo+memória existe em ALGUM lugar da tabela
+  for (const modelo of modelosMencionados) {
+    if (!tabelaNormalizada.includes(modelo)) {
+      console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado na tabela de preços`);
+      return true;
+    }
+  }
+
+  // Verificação 2: se a resposta menciona explicitamente "Novo" ou "Seminovo",
+  // confirma que o modelo existe sob ESSA condição específica — evita pegar o
+  // preço de uma condição e rotular como se fosse a outra (ex: usar o preço do
+  // Novo e chamar de Seminovo, ou vice-versa).
+  const mencionaSeminovo = /\bseminovo\b/.test(replyLower);
+  const mencionaNovo = /\bnovo\b/.test(replyLower) && !mencionaSeminovo;
+  if (mencionaSeminovo || mencionaNovo) {
+    const { novo, seminovo } = dividirTabelaPorCondicao(tabelaCrua);
+    const chunkEsperado = mencionaSeminovo ? seminovo : novo;
+    for (const modelo of modelosMencionados) {
+      if (!chunkEsperado.includes(modelo)) {
+        console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado como ${mencionaSeminovo ? 'Seminovo' : 'Novo'} na tabela`);
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
+
+// Quando a trava de segurança bloqueia uma resposta (modelo/condição que não existe
+// na tabela), em vez de só dizer "não temos" e mandar o cliente pro catálogo, tentamos
+// pedir pro próprio Cláudio já oferecer uma alternativa REAL da tabela (venda ativa,
+// sem travar a negociação). Essa nova tentativa passa pela MESMA verificação de
+// segurança — se ela também falhar, aí sim usamos o texto genérico como último recurso.
+async function gerarRespostaComAlternativa(mensagens) {
+  try {
+    if (mensagens.length === 0) return RESPOSTA_SEGURA_FALLBACK;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O modelo/condição/memória que o cliente pediu não está disponível na tabela. NÃO diga apenas "não temos" e NÃO mande o cliente olhar o catálogo agora. Em vez disso, ofereça proativamente 1 ou 2 alternativas REAIS que existam na tabela de preços (modelo parecido, mesma faixa de preço, ou um upgrade), citando modelo, memória, condição (Novo/Seminovo) e preço EXATOS que estejam escritos na tabela — nunca invente nem aproxime valores. Seja breve (1 a 3 frases) e termine com uma pergunta que ajude a fechar a venda.';
+
+    // Anexa a instrução na ÚLTIMA mensagem já existente (que é do cliente), em vez de
+    // criar uma nova mensagem "user" — a API da Anthropic exige alternância estrita
+    // entre "user" e "assistant", então duas mensagens "user" seguidas dá erro.
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaAlternativa = await chamarClaude(mensagensComInstrucao);
+    if (!respostaTemModeloForaDaTabela(respostaAlternativa)) {
+      return respostaAlternativa;
+    }
+  } catch (e) {
+    console.error('Erro ao gerar resposta alternativa:', e.message);
+  }
+  return RESPOSTA_SEGURA_FALLBACK;
+}
+
+// ==========================================
+// TRAVA DE SEGURANÇA — SAUDAÇÃO REPETIDA
+// ==========================================
+// Usa uma flag persistente em metaConversas[phone] (não depende das últimas
+// 20 mensagens do histórico, que pode "esquecer" a saudação original em
+// conversas longas). Uma vez marcado como apresentado, nunca mais deixa
+// passar a saudação de novo naquele dia, não importa quantas mensagens
+// tenham passado.
+function removerApresentacaoRepetida(phone, reply) {
+  const regexSaudacaoInicial = /^(oi|ol[aá])[!,.]?\s*tudo bem\??\s*(sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio)[^\n]*\n*\s*/i;
+  const contemSaudacao = regexSaudacaoInicial.test(reply);
+
+  if (!metaConversas[phone]) metaConversas[phone] = {};
+
+  if (metaConversas[phone].apresentado) {
+    // Já se apresentou antes — remove a saudação se ela aparecer de novo
+    if (contemSaudacao) {
+      const semSaudacao = reply.replace(regexSaudacaoInicial, '').trim();
+      return semSaudacao.length > 0 ? semSaudacao : reply;
+    }
+    return reply;
+  }
+
+  // Primeira vez — se a resposta contém a saudação, marca como apresentado e deixa passar
+  if (contemSaudacao) metaConversas[phone].apresentado = true;
+  return reply;
+}
+
+// ==========================================
+// TRAVA DE SEGURANÇA — BATERIA NÃO SOLICITADA
+// ==========================================
+// Se o cliente NÃO perguntou sobre bateria na mensagem atual, remove
+// automaticamente qualquer menção de porcentagem que apareça na resposta
+// (geralmente vem entre parênteses, ex: "(98% de bateria)"). Trava de código
+// complementar à regra do prompt, que sozinha não estava sendo suficiente.
+function removerBateriaNaoSolicitada(mensagemClienteAtual, reply) {
+  const perguntouBateria = /bateria/i.test(mensagemClienteAtual || '');
+  if (perguntouBateria) return reply;
+  if (!/\d{1,3}\s*%/.test(reply)) return reply;
+  return reply
+    .replace(/\([^)]*\d{1,3}\s*%[^)]*\)/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .trim();
+}
+
 async function chamarClaude(mensagens) {
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
   const corpo = {
     model: 'claude-sonnet-4-6', max_tokens: 1024,
     system: [{ type: "text", text: systemPromptAtual, cache_control: { type: "ephemeral", ttl: "1h" } }],
     tools: [FERRAMENTA_PARCELAMENTO],
-    messages: mensagens
+    messages: prepararMensagensParaEnvio(mensagens)
   };
   const headers = { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' };
   let response = await axios.post('https://api.anthropic.com/v1/messages', corpo, { headers });
@@ -985,7 +1219,7 @@ async function chamarClaude(mensagens) {
     }
     mensagens.push({ role: 'assistant', content: response.data.content });
     mensagens.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) }] });
-    response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: mensagens }, { headers });
+    response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: prepararMensagensParaEnvio(mensagens) }, { headers });
   }
   return response.data.content.find(b => b.type === 'text')?.text || '';
 }
@@ -1083,7 +1317,15 @@ app.post('/webhook', async (req, res) => {
       if (!transcricao?.trim()) { await enviarMensagem(phone, 'Não consegui entender o áudio. Pode digitar? 😊'); return; }
       conversas[phone].push({ role: 'user', content: transcricao });
       if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
-      const reply = await chamarClaude(conversas[phone]);
+      const tamanhoAntesAudio = conversas[phone].length;
+      let reply = await chamarClaude(conversas[phone]);
+      // Remove mensagens internas de uso de ferramenta (calcular_parcelamento) que
+      // tenham sido adicionadas durante a chamada — elas não são conversa real com
+      // o cliente e não devem consumir espaço no histórico de 20 mensagens.
+      if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
+      if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+      reply = removerApresentacaoRepetida(phone, reply);
+      reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
       await enviarMensagem(phone, reply);
@@ -1094,7 +1336,12 @@ app.post('/webhook', async (req, res) => {
     console.log(`📱 ${phone}: ${message}`);
     conversas[phone].push({ role: 'user', content: message });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
-    const reply = await chamarClaude(conversas[phone]);
+    const tamanhoAntes = conversas[phone].length;
+    let reply = await chamarClaude(conversas[phone]);
+    if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
+    if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+    reply = removerApresentacaoRepetida(phone, reply);
+    reply = removerBateriaNaoSolicitada(message, reply);
     console.log(`🤖 Resposta: ${reply}`);
     conversas[phone].push({ role: 'assistant', content: reply });
     salvarConversas();
