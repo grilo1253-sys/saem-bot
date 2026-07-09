@@ -1060,8 +1060,19 @@ function respostaTemModeloForaDaTabela(reply) {
 
   const tabelaCrua = process.env.PRICE_TABLE || '';
   const tabelaNormalizada = normalizarTexto(tabelaCrua);
-  const replyNormalizado = normalizarTexto(reply);
-  const modelosMencionados = extrairModelosMencionados(replyNormalizado);
+
+  // Divide a resposta em frases/trechos e IGNORA qualquer trecho que já diga
+  // explicitamente que o modelo NÃO está disponível (ex: "não temos o iPhone X").
+  // Isso evita bloquear respostas corretas que citam o modelo indisponível só
+  // como contexto antes de oferecer uma alternativa real.
+  const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
+  const trechos = reply.split(/(?<=[.!?\n])\s*/);
+  let modelosMencionados = [];
+  for (const trecho of trechos) {
+    if (regexNegacao.test(trecho.toLowerCase())) continue;
+    modelosMencionados.push(...extrairModelosMencionados(normalizarTexto(trecho)));
+  }
+  modelosMencionados = [...new Set(modelosMencionados)];
 
   if (modelosMencionados.length === 0) return false;
 
