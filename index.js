@@ -575,7 +575,7 @@ iPhone 16 Plus: Sem defeito 128GB R$3.600, 256GB R$3.700, 512GB R$3.800 | Sem Fa
 iPhone 16 Pro: Sem defeito 128GB R$4.000, 256GB R$4.200, 512GB R$4.400, 1TB R$4.500 | Sem Face ID 128GB R$3.500 | Bat abaixo 80% 128GB R$4.000 | Tela trincada 128GB R$2.600 | Traseira trincada 128GB R$3.000 | Tudo junto R$2.300
 iPhone 16 Pro Max: Sem defeito 256GB R$4.600, 512GB R$4.700, 1TB R$4.800 | Sem Face ID 256GB R$4.000 | Bat abaixo 80% 256GB R$4.400 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$3.000 | Tudo junto R$2.400
 iPhone 17: Sem defeito e bateria acima de 80% 256GB R$4.500 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
-iPhone 17 Pro: Sem defeito e bateria acima de 80% 256GB R$6.000 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
+iPhone 17 Pro: Sem defeito e bateria acima de 80% 256GB R$5.800 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
 iPhone 17 Pro Max: Sem defeito e bateria acima de 80% 256GB R$6.100 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
 
 Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhe para outro número, apenas dizer que irá verificar e retornar em instantes.
