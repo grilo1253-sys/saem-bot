@@ -763,6 +763,8 @@ Xiaomi 12 — R$400 (128GB ou 256GB)
 Xiaomi 12 Pro — R$400 (128GB ou 256GB)
 Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
+xiaomi poco m6 — 128GB ou 256GB: R$350
+redmi a5 — 128GB ou 256GB: R$300
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
 Redmi Note 10 / Note 10s — R$300
@@ -791,6 +793,7 @@ Moto G9 — 128GB ou 256GB: R$250
 Moto G05 — 128GB ou 256GB: R$300
 Moto G9 Play — 128GB ou 256GB: R$200
 Moto G9 Plus — 128GB ou 256GB: R$250
+Moto G22 — 128GB ou 256GB: R$300
 Moto G15 — 128GB: R$400 | 256GB: R$500
 Moto G31 — 128GB: R$300 | 256GB: R$400
 Moto G32 — 128GB: R$300 | 256GB: R$400
@@ -1198,6 +1201,85 @@ function respostaTemModeloForaDaTabela(reply) {
 
 const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
 
+// ==========================================
+// TRAVA DE SEGURANÇA — NEGAÇÃO INCORRETA (MODELO QUE NA VERDADE EXISTE)
+// ==========================================
+// Faz o caminho INVERSO da trava acima: em vez de checar se um modelo OFERECIDO
+// existe na tabela, aqui verificamos se o Cláudio disse "não temos o iPhone X"
+// (ou variações) para um modelo+memória que, na verdade, EXISTE na tabela de
+// preços do Admin (venda). Isso pega o erro real que já aconteceu: dizer que
+// não tem o iPhone 15 Pro quando ele estava lá na tabela. Só dispara quando a
+// combinação modelo+memória negada bate literalmente com uma linha da tabela —
+// evita falso positivo para modelos que realmente não existem.
+// Captura APENAS o modelo mencionado logo em seguida de uma expressão de
+// negação (ex: "não temos o iPhone 15 Pro"), sem pegar o resto da frase —
+// evita confundir com uma alternativa real citada na sequência ("...mas
+// temos o iPhone 17"). Não exige memória/GB, pois o Cláudio costuma negar
+// só "iPhone 15 Pro" sem citar a capacidade.
+function extrairModelosNegados(textoNormalizado) {
+  const regex = /(?:nao tem(?:os)?|não tem(?:os)?|indisponivel|indisponível|sem estoque|esgotado)\D{0,15}?(iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?(?:\s+\d{2,4}\s*gb)?)/g;
+  const matches = [...textoNormalizado.matchAll(regex)];
+  return matches.map(m => m[1]);
+}
+
+function respostaNegaModeloQueExisteNaTabela(reply) {
+  const replyLower = reply.toLowerCase();
+  const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
+  if (!regexNegacao.test(replyLower)) return false;
+
+  const tabelaCrua = process.env.PRICE_TABLE || '';
+  const tabelaNormalizada = normalizarTexto(tabelaCrua);
+  if (!tabelaNormalizada) return false;
+
+  const modelosNegados = [...new Set(extrairModelosNegados(normalizarTexto(reply)))];
+  if (modelosNegados.length === 0) return false;
+
+  for (const modelo of modelosNegados) {
+    // Fronteira de palavra no final para não confundir, por exemplo,
+    // "iphone 15" com "iphone 15 pro" (substring parcial enganosa).
+    const regexBusca = new RegExp(`\\b${modelo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|gb|$)`);
+    if (regexBusca.test(tabelaNormalizada)) {
+      console.log(`⚠️ Negação incorreta bloqueada: Cláudio disse "não temos ${modelo}" mas o modelo existe na tabela`);
+      return true;
+    }
+  }
+  return false;
+}
+
+// Quando a negação incorreta é detectada, pedimos pro Cláudio reler a tabela e
+// corrigir — parecido com gerarRespostaComAlternativa, mas com instrução focada
+// em "esse modelo EXISTE, releia com atenção antes de responder de novo".
+async function gerarRespostaCorrigindoNegacao(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior disse que um modelo não estava disponível, mas esse modelo EXISTE na tabela de preços atual (releia a seção TABELA DE PREÇOS ATUAL com atenção, linha por linha, procurando o modelo e memória exatos que o cliente pediu). Refaça a resposta apresentando esse modelo corretamente, com o preço, condição (Novo/Seminovo) e demais detalhes exatos que constam na tabela — nunca invente nem aproxime valores. Seja breve (1 a 4 frases) e siga o formato normal de apresentação de opções.';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    // Só aceita a correção se ela não cair em nenhuma das duas travas (nem
+    // inventar modelo fora da tabela, nem negar de novo um modelo que existe)
+    if (!respostaTemModeloForaDaTabela(respostaCorrigida) && !respostaNegaModeloQueExisteNaTabela(respostaCorrigida)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir negação incorreta:', e.message);
+  }
+  return null;
+}
+
 // Quando a trava de segurança bloqueia uma resposta (modelo/condição que não existe
 // na tabela), em vez de só dizer "não temos" e mandar o cliente pro catálogo, tentamos
 // pedir pro próprio Cláudio já oferecer uma alternativa REAL da tabela (venda ativa,
@@ -1405,6 +1487,10 @@ app.post('/webhook', async (req, res) => {
       // o cliente e não devem consumir espaço no histórico de 20 mensagens.
       if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+      if (respostaNegaModeloQueExisteNaTabela(reply)) {
+        const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
@@ -1421,6 +1507,10 @@ app.post('/webhook', async (req, res) => {
     let reply = await chamarClaude(conversas[phone]);
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+    if (respostaNegaModeloQueExisteNaTabela(reply)) {
+      const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
     reply = removerApresentacaoRepetida(phone, reply);
     reply = removerBateriaNaoSolicitada(message, reply);
     console.log(`🤖 Resposta: ${reply}`);
