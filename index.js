@@ -559,7 +559,7 @@ iPhone 12 Pro: Sem defeito 128GB R$1.400, 256GB R$1.500, 512GB R$1.600 | Sem Fac
 iPhone 12 Pro Max: Sem defeito 128GB R$1.800, 256GB R$1.900, 512GB R$2.000 | Sem Face ID 128GB R$1.500 | Bat abaixo 80% 128GB R$1.700 | Tela trincada 128GB R$1.200, 512GB R$1.300 | Traseira trincada R$1.200 | Tudo junto R$700
 iPhone 13 Mini: Sem defeito 128GB R$1.200, 256GB R$1.300, 512GB R$1.300 | Sem Face ID 128GB R$900 | Bat abaixo 80% 128GB R$1.200 | Tela trincada 128GB R$800, 256GB R$850, 512GB R$900 | Tudo junto R$500
 iPhone 13: Sem defeito 128GB R$1.500, 256GB R$1.700, 512GB R$1.800 | Sem Face ID 128GB R$1.300, 256GB R$1.350, 512GB R$1.400 | Bat abaixo 80% 128GB R$1.550, 256GB R$1.600, 512GB R$1.650 | Tela trincada 128GB R$1.100, 256GB R$1.200, 512GB R$1.250 | Traseira trincada R$1.100 | Tudo junto R$500
-iPhone 13 Pro: Sem defeito 128GB R$2.000, 256GB R$2.100, 512GB R$2.200, 1TB R$2.300 | Sem Face ID 128GB R$1.700 | Bat abaixo 80% 128GB R$1.900 | Tela trincada 128GB R$1.400, 256GB R$1.450, 512GB R$1.500, 1TB R$1.550 | Tudo junto R$800
+iPhone 13 Pro: Sem defeito 128GB R$2.000, 256GB R$2.100, 512GB R$2.200, 1TB R$2.300 | Sem Face ID 128GB R$1.700 | Bat abaixo 80% 128GB R$1.900 | Tela trincada 128GB R$1.400, 256GB R$1.450, 512GB R$1.500, 1TB R$1.550 | traseira trincada R$1600 | Tudo junto R$800
 iPhone 13 Pro Max: Sem defeito 128GB R$2.500, 256GB R$2.600, 512GB R$2.700, 1TB R$2.800 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2.300 | Tela trincada 128GB R$1.600, 256GB R$1.650, 512GB R$1.700, 1TB R$1.750 | Traseira trincada 128GB R$1.650 | Tudo junto 128GB R$1.000
 iPhone 14: Sem defeito 128GB R$1.800, 256GB R$2.000, 512GB R$2.100 | Sem Face ID 128GB R$1.400 | Bat abaixo 80% 128GB R$1.700, 256GB R$1.900, 512GB R$2.000 | Tela trincada 128GB R$1.100, 256GB R$1.200, 512GB R$1.300 | Tudo junto R$800
 iPhone 14 Plus: Sem defeito 128GB R$2.100, 256GB R$2.200, 512GB R$2.300 | Sem Face ID R$1.700 | Bat abaixo 80% 128GB R$1.900 | Tela trincada R$1.400 | Tudo junto R$700
@@ -576,7 +576,7 @@ iPhone 16 Pro: Sem defeito 128GB R$4.000, 256GB R$4.200, 512GB R$4.400, 1TB R$4.
 iPhone 16 Pro Max: Sem defeito 256GB R$4.600, 512GB R$4.700, 1TB R$4.800 | Sem Face ID 256GB R$4.000 | Bat abaixo 80% 256GB R$4.400 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$3.000 | Tudo junto R$2.400
 iPhone 17: Sem defeito e bateria acima de 80% 256GB R$4.500 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
 iPhone 17 Pro: Sem defeito e bateria acima de 80% 256GB R$6.000 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
-iPhone 17 Pro Max: Sem defeito e bateria acima de 80% 256GB R$6.400 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
+iPhone 17 Pro Max: Sem defeito e bateria acima de 80% 256GB R$6.100 | Qualquer defeito ou bateria abaixo de 80%: informar que vai verificar o valor com a equipe e retorna em instantes
 
 Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhe para outro número, apenas dizer que irá verificar e retornar em instantes.
 
