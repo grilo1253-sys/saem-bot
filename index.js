@@ -174,6 +174,27 @@ function processarRespostaAdmin(message, phoneAdmin) {
 }
 
 // ==========================================
+// REGRA ESPECIAL DE DOMINGO — LOJA TAUBATÉ
+// ==========================================
+// Verifica se hoje (no fuso de São Paulo) é domingo. Se for, retorna um bloco
+// de texto extra que é acrescentado ao final do system prompt, instruindo o
+// Cláudio a encaminhar clientes que queiram visitar/agendar em Taubaté no
+// domingo diretamente para o vendedor Rodrigo. Nos demais dias da semana,
+// retorna string vazia e não afeta em nada o comportamento normal do bot.
+function textoRegraDomingoTaubate() {
+  const diaSemana = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', weekday: 'long' });
+  if (diaSemana === 'Sunday') {
+    return `
+
+━━━━━━━━━━━━━━━━━━━
+REGRA ESPECIAL DE DOMINGO — LOJA TAUBATÉ
+━━━━━━━━━━━━━━━━━━━
+Hoje é domingo. Aos domingos, a loja de Taubaté funciona apenas com atendimento agendado, feito pelo vendedor Rodrigo. Se o cliente disser que quer ir até a loja de Taubaté hoje, quer agendar uma visita, quer ver o aparelho pessoalmente ou fechar a compra presencialmente em Taubaté, informe que aos domingos o atendimento em Taubaté é só com agendamento e encaminhe direto para o Rodrigo: https://wa.me/5512991058245. Essa regra vale APENAS para a loja de Taubaté aos domingos — não se aplica a São José dos Campos nem a outros dias da semana.`;
+  }
+  return '';
+}
+
+// ==========================================
 // SYSTEM PROMPT
 // ==========================================
 const SYSTEM_PROMPT = `VENDEDOR SAEM CELULARES
@@ -1261,7 +1282,7 @@ function removerBateriaNaoSolicitada(mensagemClienteAtual, reply) {
 }
 
 async function chamarClaude(mensagens) {
-  const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '');
+  const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '') + textoRegraDomingoTaubate();
   const corpo = {
     model: 'claude-sonnet-4-6', max_tokens: 1024,
     system: [{ type: "text", text: systemPromptAtual, cache_control: { type: "ephemeral", ttl: "1h" } }],
@@ -1360,7 +1381,7 @@ app.post('/webhook', async (req, res) => {
       const imgMime = body.mimetype || 'image/jpeg';
       const visionResp = await axios.post('https://api.anthropic.com/v1/messages', {
         model: 'claude-sonnet-4-6', max_tokens: 1024,
-        system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral", ttl: "1h" } }],
+        system: [{ type: "text", text: SYSTEM_PROMPT + textoRegraDomingoTaubate(), cache_control: { type: "ephemeral", ttl: "1h" } }],
         messages: [...conversas[phone], { role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } }, { type: 'text', text: body.text?.message || 'Descreva esta imagem.' }] }]
       }, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
       const reply = visionResp.data.content[0].text;
