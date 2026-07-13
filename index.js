@@ -538,6 +538,8 @@ ATENÇÃO CRÍTICA — MODELOS SEM VALOR DE TROCA DEFINIDO: Esta tabela vai até
 
 Atenção: Se o cliente escrever "Mb" ao mencionar a memória de um aparelho, interprete sempre como GB — é erro de digitação muito comum.
 
+ATENÇÃO CRÍTICA — LEIA A LISTA INTEIRA ANTES DE DIZER "NÃO ESTÁ NA TABELA": Esta lista cobre TODOS os iPhones do 7 ao 17, incluindo TODAS as variações Mini, Plus, Pro e Pro Max já lançadas oficialmente (por exemplo: 12 Mini, 13 Mini, 14 Plus, 15 Plus, 16 Plus estão todos aqui). Antes de responder que um modelo "não está na tabela" ou "tem valor diferenciado", releia a lista completa abaixo do início ao fim procurando a linha exata — é comum a IA parar de procurar no meio da lista por engano. Só depois de confirmar que realmente não existe nenhuma linha com esse modelo exato, siga a regra de "aparelho não listado".
+
 iPhone 7: Sem defeito 32/128GB R$200, 256GB R$250 | Sem Face ID 32/128GB R$150, 256GB R$180 | Bat abaixo 80% R$150 | Tela trincada R$100 | Traseira trincada R$150 | Tudo junto R$50 | Face ID+Bateria R$100 | Face ID+Tela R$100 | Face ID+Traseira R$100 | Bateria+Tela R$100 | Bateria+Traseira R$100 | Tela+Traseira R$100
 iPhone 7 Plus: Sem defeito 32/128GB R$250, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$150 | Traseira trincada R$150 | Tudo junto R$70 | Face ID+Bateria R$100 | Face ID+Tela R$100 | Face ID+Traseira R$100 | Bateria+Tela R$100 | Bateria+Traseira R$100 | Tela+Traseira R$100
 iPhone 8: Sem defeito 64GB R$250, 128GB R$270, 256GB R$300 | Sem Face ID R$200 | Bat abaixo 80% R$200 | Tela trincada R$100 | Traseira trincada R$100 | Tudo junto R$50 | Face ID+Bateria R$100 | Face ID+Tela R$100 | Face ID+Traseira R$100 | Bateria+Tela R$100 | Bateria+Traseira R$150 | Tela+Traseira R$100
@@ -576,8 +578,9 @@ iPhone 17: Sem defeito 256GB R$4.400, 512GB R$4.500, 1TB R$4.600 | Sem Face ID R
 iPhone 17 Pro: Sem defeito 256GB R$5.500, 512GB R$5.700, 1TB R$5.900 | Sem Face ID 256GB R$4.800 | Bat abaixo 80% 256GB R$5.300 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$4.500 | Tudo junto R$2.800 | Face ID+Bateria R$4.500 | Face ID+Tela R$3.000 | Face ID+Traseira R$2.800 | Bateria+Tela R$3.000 | Bateria+Traseira R$4.500 | Tela+Traseira R$3.000
 iPhone 17 Pro Max: Sem defeito 256GB R$6.000, 512GB R$6.200, 1TB R$6.400 | Sem Face ID 256GB R$5.000 | Bat abaixo 80% 256GB R$5.500 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$4.500 | Tudo junto R$2.800 | Face ID+Bateria R$4.500 | Face ID+Tela R$3.000 | Face ID+Traseira R$2.800 | Bateria+Tela R$3.000 | Bateria+Traseira R$5.000 | Tela+Traseira R$3.000
 
-
 Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhe para outro número, apenas dizer que irá verificar e retornar em instantes.
+
+ATENÇÃO CRÍTICA — MÚLTIPLOS DEFEITOS AO MESMO TEMPO: A tabela lista o desconto de CADA defeito separadamente (ex: "Tela trincada", "Bat abaixo 80%", "Traseira trincada" como linhas isoladas), mas NUNCA lista o valor combinado para quando dois ou mais desses problemas acontecem juntos no mesmo aparelho (ex: cliente informa "traseira trincada E bateria 75%" ao mesmo tempo). Nesses casos, NUNCA some, subtraia, estime uma média ou tente calcular por conta própria um valor combinado — mesmo que pareça razoável combinar os dois descontos individuais. A tabela só cobre defeitos isolados, um de cada vez ("Tudo junto" é a única exceção, usada apenas quando o cliente relatar TODOS os problemas típicos listados naquela linha específica do modelo). Se o cliente relatar uma combinação de defeitos que não corresponda exatamente a nenhuma linha da tabela (nem um defeito isolado, nem "Tudo junto"), informe que vai verificar o valor com a equipe e que retorna em instantes, seguindo a regra padrão de aparelho/condição não encontrada.
 
 ━━━━━━━━━━━━━━━━━━━
 VALORES DE TROCA - APPLE WATCH, IPAD E SAMSUNG GALAXY WATCH
@@ -1201,6 +1204,121 @@ function respostaTemModeloForaDaTabela(reply) {
 const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
 
 // ==========================================
+// TRAVA DE SEGURANÇA — VALOR DE TROCA ANDROID INVENTADO
+// ==========================================
+// Erro real que já aconteceu: um cliente com "Poco X7" recebeu um valor de
+// troca de R$1.999 (na verdade o preço do iPhone que ele queria comprar,
+// não um valor real de troca — o Poco X7 nem existe na tabela, só o Poco M6
+// a R$350). Esta trava confere se qualquer modelo Android mencionado junto
+// de um valor em R$ (num contexto de troca/entrada) realmente bate com uma
+// linha exata da tabela de troca Android (Samsung, Xiaomi/Poco/Redmi,
+// Motorola, Realme). Se o modelo mencionado não existir na lista abaixo, a
+// resposta é bloqueada e substituída por uma que apenas escala para a
+// equipe — do mesmo jeito que já acontece corretamente noutros casos
+// (ex: Moto G06, Galaxy A02a/A02s).
+const ANDROID_TROCA_MODELOS_VALIDOS = [
+  // Samsung Galaxy S
+  "galaxy s20", "galaxy s20+", "galaxy s20 ultra",
+  "galaxy s21", "galaxy s21+", "galaxy s21 ultra",
+  "galaxy s22", "galaxy s22+", "galaxy s22 ultra",
+  "galaxy s23", "galaxy s23+", "galaxy s23 ultra", "galaxy s23 fe",
+  "galaxy s24", "galaxy s24+", "galaxy s24 ultra", "galaxy s24 fe",
+  "galaxy s25", "galaxy s25 fe", "galaxy s25+", "galaxy s25 ultra",
+  // Samsung Galaxy A
+  "galaxy a02", "galaxy a01", "galaxy a21s", "galaxy a22s",
+  "galaxy a11", "galaxy a12", "galaxy a13", "galaxy a14", "galaxy a15", "galaxy a07",
+  "galaxy a03", "galaxy a03s", "galaxy a04", "galaxy a04s", "galaxy a05", "galaxy a05s",
+  "galaxy a16", "galaxy a22", "galaxy a23", "galaxy a24", "galaxy a32", "galaxy a33",
+  "galaxy a25", "galaxy a26", "galaxy a34", "galaxy a35", "galaxy a36",
+  "galaxy a52", "galaxy a53", "galaxy a54", "galaxy a55", "galaxy a56",
+  "galaxy a72", "galaxy a73",
+  // Xiaomi / Poco / Redmi (linha number + poco/redmi avulsos)
+  "xiaomi 11", "xiaomi 11t", "xiaomi 11t pro",
+  "xiaomi 12", "xiaomi 12 pro", "xiaomi 12t", "xiaomi 12t pro",
+  "poco m6", "redmi a5",
+  // Redmi Note
+  "redmi note 10", "redmi note 10s", "redmi note 10 pro",
+  "redmi note 11", "redmi note 11 pro", "redmi note 11 pro+",
+  "redmi note 12", "redmi note 12 pro", "redmi note 12 pro+",
+  "redmi note 13", "redmi note 13 pro", "redmi note 13 pro+",
+  "redmi note 14", "redmi note 14 pro", "redmi note 14 pro max",
+  // Motorola Moto G
+  "moto g1", "moto g2", "moto g3", "moto g4", "moto g5",
+  "moto g04", "moto g05s", "moto g9", "moto g05",
+  "moto g9 play", "moto g9 plus", "moto g22",
+  "moto g15", "moto g31", "moto g32", "moto g34", "moto g41", "moto g42",
+  "moto g51", "moto g52", "moto g53", "moto g54", "moto g55", "moto g56",
+  "moto g62", "moto g64", "moto g65", "moto g71", "moto g72", "moto g73", "moto g75",
+  "moto g82", "moto g84", "moto g85", "moto g86", "moto g96",
+  // Motorola Edge
+  "edge 20", "edge 20 pro", "edge 30", "edge 30 neo", "edge 30 fusion", "edge 30 ultra",
+  "edge 40", "edge 40 neo", "edge 40 pro",
+  "edge 50", "edge 50 fusion", "edge 50 neo", "edge 50 pro", "edge 50 ultra",
+  "edge 60", "edge 60 fusion", "edge 60 pro", "edge 60 stylus",
+  // Realme
+  "realme c30", "realme c30s", "realme c31", "realme c33", "realme c35",
+  "realme c51", "realme c53", "realme c55", "realme c61", "realme c63", "realme c67", "realme c75",
+].map(normalizarTexto);
+
+// Captura menções a marca+modelo Android na resposta (ex: "poco x7", "moto g54",
+// "galaxy s23", "redmi note 12", "realme c53", "xiaomi 12t pro"). Não exige
+// memória/GB, pois o valor de troca costuma ser citado sem repetir a memória.
+function extrairModelosAndroidMencionados(textoNormalizado) {
+  const regex = /(poco\s+\w+\d*|redmi\s+(?:note\s+\d+\w*(?:\s*pro\+?)?|a\d+\w*)|moto\s+(?:g\s*\d+\w*|edge\s*\d+\w*)|galaxy\s+(?:s\d+\w*(?:\s*ultra)?(?:\s*fe)?|a\d+\w*|z\s*(?:flip|fold)\s*\d*)|realme\s+c\d+\w*|xiaomi\s+\d+\w*(?:\s*(?:t\s*pro|t|pro))?)/g;
+  return textoNormalizado.match(regex) || [];
+}
+
+function respostaInventouValorTrocaAndroid(reply) {
+  // Só verifica quando a resposta parece dar um valor de troca de verdade
+  if (!/r\$/i.test(reply)) return false;
+  const replyLower = reply.toLowerCase();
+  // Se já está encaminhando pra equipe, a resposta já é segura
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  const modelosMencionados = [...new Set(extrairModelosAndroidMencionados(normalizarTexto(reply)))];
+  if (modelosMencionados.length === 0) return false;
+
+  for (const modelo of modelosMencionados) {
+    if (!ANDROID_TROCA_MODELOS_VALIDOS.includes(modelo)) {
+      console.log(`⚠️ Valor de troca Android inventado bloqueado: "${modelo}" não encontrado na tabela de troca`);
+      return true;
+    }
+  }
+  return false;
+}
+
+// Quando a trava acima bloqueia, pedimos pro Cláudio corrigir a resposta
+// escalando corretamente pra equipe, em vez de inventar um valor.
+async function gerarRespostaCorrigindoValorAndroid(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior informou um valor de troca para um aparelho Android que NÃO existe na tabela de troca (releia a seção VALORES DE TROCA - ANDROID com atenção). NUNCA invente, estime ou "empreste" valor de outro produto (nem mesmo do preço de venda do iPhone que o cliente está comprando). Refaça a resposta informando que vai verificar esse valor com a equipe e que retorna em instantes, sem encaminhar para outro número. Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaInventouValorTrocaAndroid(respostaCorrigida)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir valor de troca Android:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — NEGAÇÃO INCORRETA (MODELO QUE NA VERDADE EXISTE)
 // ==========================================
 // Faz o caminho INVERSO da trava acima: em vez de checar se um modelo OFERECIDO
@@ -1284,11 +1402,19 @@ async function gerarRespostaCorrigindoNegacao(mensagens) {
 // pedir pro próprio Cláudio já oferecer uma alternativa REAL da tabela (venda ativa,
 // sem travar a negociação). Essa nova tentativa passa pela MESMA verificação de
 // segurança — se ela também falhar, aí sim usamos o texto genérico como último recurso.
-async function gerarRespostaComAlternativa(mensagens) {
+// Recebe também a resposta original (bloqueada) para poder orientar explicitamente a
+// preservar qualquer valor de TROCA já calculado corretamente nela — o problema quase
+// sempre está isolado na parte de VENDA (modelo que não está mais em estoque), não no
+// valor de troca, que não deve ser perdido/recalculado à toa.
+async function gerarRespostaComAlternativa(mensagens, respostaOriginalBloqueada) {
   try {
     if (mensagens.length === 0) return RESPOSTA_SEGURA_FALLBACK;
 
-    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O modelo/condição/memória que o cliente pediu não está disponível na tabela. NÃO diga apenas "não temos" e NÃO mande o cliente olhar o catálogo agora. Em vez disso, ofereça proativamente 1 ou 2 alternativas REAIS que existam na tabela de preços (modelo parecido, mesma faixa de preço, ou um upgrade), citando modelo, memória, condição (Novo/Seminovo) e preço EXATOS que estejam escritos na tabela — nunca invente nem aproxime valores. Seja breve (1 a 3 frases) e termine com uma pergunta que ajude a fechar a venda.';
+    const contextoRespostaAnterior = respostaOriginalBloqueada
+      ? `\n\nPara referência, sua resposta anterior (bloqueada por citar um modelo de VENDA que não está na tabela) foi: "${respostaOriginalBloqueada}". Se essa resposta já continha um valor de TROCA (quanto a loja paga pelo aparelho do cliente como entrada) calculado a partir da tabela de troca, esse valor está correto e deve ser MANTIDO na nova resposta — não descarte nem recalcule à toa. O problema está isolado na parte de oferta de VENDA (modelo que não existe na tabela de preços do Admin), não no valor de troca.`
+      : '';
+
+    const instrucao = `\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O modelo/condição/memória de VENDA que o cliente pediu não está disponível na tabela. NÃO diga apenas "não temos" e NÃO mande o cliente olhar o catálogo agora. Em vez disso, ofereça proativamente 1 ou 2 alternativas REAIS que existam na tabela de preços (modelo parecido, mesma faixa de preço, ou um upgrade), citando modelo, memória, condição (Novo/Seminovo) e preço EXATOS que estejam escritos na tabela — nunca invente nem aproxime valores.${contextoRespostaAnterior} Seja breve e termine com uma pergunta que ajude a fechar a venda.`;
 
     // Anexa a instrução na ÚLTIMA mensagem já existente (que é do cliente), em vez de
     // criar uma nova mensagem "user" — a API da Anthropic exige alternância estrita
@@ -1485,9 +1611,13 @@ app.post('/webhook', async (req, res) => {
       // tenham sido adicionadas durante a chamada — elas não são conversa real com
       // o cliente e não devem consumir espaço no histórico de 20 mensagens.
       if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
-      if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+      if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       if (respostaNegaModeloQueExisteNaTabela(reply)) {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
+      if (respostaInventouValorTrocaAndroid(reply)) {
+        const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
       reply = removerApresentacaoRepetida(phone, reply);
@@ -1505,9 +1635,13 @@ app.post('/webhook', async (req, res) => {
     const tamanhoAntes = conversas[phone].length;
     let reply = await chamarClaude(conversas[phone]);
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
-    if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone]);
+    if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
     if (respostaNegaModeloQueExisteNaTabela(reply)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaInventouValorTrocaAndroid(reply)) {
+      const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     reply = removerApresentacaoRepetida(phone, reply);
