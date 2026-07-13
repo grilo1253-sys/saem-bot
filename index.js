@@ -1163,12 +1163,21 @@ function respostaTemModeloForaDaTabela(reply) {
   // Isso evita bloquear respostas corretas que citam o modelo indisponível só
   // como contexto antes de oferecer uma alternativa real.
   const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
+  const regexTroca = /\btroca\b|\bentrada\b|valor de troca|na troca|de troca|seu aparelho|aceita(mos)?\s+(o\s+)?seu|pega(mos)?\s+(o\s+)?seu|dar\s+(o|seu)\s+(aparelho|iphone|celular)|troc(ar|ando)\s+(o\s+)?seu/;
+
   const trechos = reply.split(/(?<=[.!?\n])\s*/);
   let modelosMencionados = [];
+  
   for (const trecho of trechos) {
-    if (regexNegacao.test(trecho.toLowerCase())) continue;
+    const trechoLower = trecho.toLowerCase();
+    if (regexNegacao.test(trechoLower)) continue;
+    if (regexTroca.test(trechoLower)) continue;
     modelosMencionados.push(...extrairModelosMencionados(normalizarTexto(trecho)));
   }
+
+
+
+
   modelosMencionados = [...new Set(modelosMencionados)];
 
   if (modelosMencionados.length === 0) return false;
