@@ -1148,12 +1148,21 @@ function dividirTabelaPorCondicao(tabelaCrua) {
   return { novo: normalizarTexto(chunkNovo), seminovo: normalizarTexto(chunkSeminovo) };
 }
 
-function respostaTemModeloForaDaTabela(reply) {
+function respostaTemModeloForaDaTabela(reply, mensagemCliente) {
   // Só verifica respostas que parecem oferecer um produto à venda (têm preço em R$)
   if (!/r\$/i.test(reply)) return false;
   // Não verifica quando o Cláudio já está encaminhando pra equipe (resposta já é segura)
   const replyLower = reply.toLowerCase();
   if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  // Se a MENSAGEM DO CLIENTE deixa claro que o assunto é TROCA (ele está descrevendo
+  // o aparelho dele pra dar de entrada — cita "troca", "sem defeito", "bateria XX", etc),
+  // esta verificação de VENDA não deve rodar: o modelo + R$ na resposta é valor de troca,
+  // não oferta de venda. Sem isso, avaliações de troca de modelos fora de estoque eram
+  // bloqueadas por engano.
+  const clienteLower = (mensagemCliente || '').toLowerCase();
+  const contextoTroca = /\btroca\b|\bentrada\b|dar o meu|dar meu|dou meu|dou o meu|dou na|dar na|meu aparelho|sem defeito|quanto (voce|vc|ce|ce) (pega|paga|da|dou)|quanto pega|quanto paga|bateria\s*\d/.test(clienteLower);
+  if (contextoTroca) return false;
 
   const tabelaCrua = process.env.PRICE_TABLE || '';
   const tabelaNormalizada = normalizarTexto(tabelaCrua);
@@ -1620,7 +1629,7 @@ app.post('/webhook', async (req, res) => {
       // tenham sido adicionadas durante a chamada — elas não são conversa real com
       // o cliente e não devem consumir espaço no histórico de 20 mensagens.
       if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
-      if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
+      if (respostaTemModeloForaDaTabela(reply, transcricao)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       if (respostaNegaModeloQueExisteNaTabela(reply)) {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -1644,7 +1653,7 @@ app.post('/webhook', async (req, res) => {
     const tamanhoAntes = conversas[phone].length;
     let reply = await chamarClaude(conversas[phone]);
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
-    if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
+    if (respostaTemModeloForaDaTabela(reply, message)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
     if (respostaNegaModeloQueExisteNaTabela(reply)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
       if (corrigida) reply = corrigida;
