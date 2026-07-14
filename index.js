@@ -767,6 +767,7 @@ Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
 xiaomi poco m6 — 128GB ou 256GB: R$350
 redmi a5 — 128GB ou 256GB: R$300
+redmi 14 / 14c — 128GB ou 256GB: R$300
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
 Redmi Note 10 / Note 10s — R$300
@@ -789,10 +790,12 @@ Redmi Note 14 Pro Max — R$1.100
 MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 
 Moto g1/g2/g3 — 32gb / 64gb ou 128GB ou 256GB: R$150
+moto e32 / e22 / e20 - 32gb ou 64gb ou 128gb : R$250
 moto g4/ g5 - 32/64/128/256 - R$200
 moto g04/g05s - 128/256 gb - R$300
 Moto G9 — 128GB ou 256GB: R$250
 Moto G05 — 128GB ou 256GB: R$300
+Moto G06 — 128GB ou 256GB: R$300
 Moto G9 Play — 128GB ou 256GB: R$200
 Moto G9 Plus — 128GB ou 256GB: R$250
 Moto G22 — 128GB ou 256GB: R$300
