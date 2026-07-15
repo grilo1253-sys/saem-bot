@@ -771,6 +771,8 @@ redmi a5 — 128GB ou 256GB: R$300
 redmi 14 / 14c — 128GB ou 256GB: R$400
 redmi 15 / 15c ou 256GB: R$500
 
+xiaomi poco f8 / f8 pro 256 / 512gb - R$2000
+
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
 Redmi Note 10 / Note 10s — R$300
@@ -801,6 +803,7 @@ Moto G9 Play — 128GB ou 256GB: R$200
 Moto G9 Plus — 128GB ou 256GB: R$250
 Moto G22 — 128GB ou 256GB: R$300
 Moto G15 — 128GB: R$400 | 256GB: R$500
+moto g17 - 128/256 gb : R$400
 Moto G31 — 128GB: R$300 | 256GB: R$400
 Moto G32 — 128GB: R$300 | 256GB: R$400
 Moto G34 — 128GB: R$300 | 256GB: R$400
