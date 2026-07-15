@@ -716,8 +716,8 @@ Galaxy S23+: R$900
 Galaxy S23 Ultra: R$1.600
 Galaxy S23 FE: R$1.000
 
-Galaxy S24: R$1.450
-Galaxy S24+: R$1.700
+Galaxy S24: R$1.600
+Galaxy S24+: R$1.500
 Galaxy S24 Ultra: R$2.900
 Galaxy S24 FE: R$1.400
 
