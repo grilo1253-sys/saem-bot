@@ -1179,11 +1179,20 @@ function respostaTemModeloForaDaTabela(reply, mensagemCliente) {
 
   const trechos = reply.split(/(?<=[.!?\n])\s*/);
   let modelosMencionados = [];
-  
+
   for (const trecho of trechos) {
     const trechoLower = trecho.toLowerCase();
     if (regexNegacao.test(trechoLower)) continue;
     if (regexTroca.test(trechoLower)) continue;
+    // SÓ verifica modelo que está sendo OFERECIDO — ou seja, que tem um preço em
+    // R$ colado nele no mesmo trecho. Citar o modelo sem preço é só contexto
+    // ("o iPhone X não está no estoque hoje", "infelizmente o X acabou") e não
+    // pode ser tratado como oferta falsa.
+    // MOTIVO: a lista de negação acima nunca dá conta de todas as formas de dizer
+    // "não tem" ("não está no estoque", "acabou", "infelizmente"...). Quando ela
+    // falhava, a trava bloqueava a resposta BOA que oferecia alternativas reais,
+    // e o cliente recebia o texto genérico do catálogo em vez das outras memórias.
+    if (!/r\$/i.test(trecho)) continue;
     modelosMencionados.push(...extrairModelosMencionados(normalizarTexto(trecho)));
   }
 
