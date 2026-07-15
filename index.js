@@ -601,10 +601,10 @@ iPad mini 4: R$500 | iPad mini 5: R$700 | iPad mini 6: R$1.800 | iPad mini A17 P
 iPad Pro 9.7: R$800 | iPad Pro 10.5: R$1.000
 
 SAMSUNG GALAXY WATCH:
-Galaxy Watch 46mm: R$400 | Active: R$300 | Active 2: R$350
-Galaxy Watch 3: R$400 | Watch 4: R$500 | Watch 4 Classic: R$500
-Watch 5: R$600 | Watch 5 Pro: R$800 | Watch 6: R$900
-Watch 6 Classic: R$1.200 | Watch 7: R$1.400 | Watch Ultra: R$1.600
+Galaxy Watch 46mm: R$300 | Active: R$250 | Active 2: R$250
+Galaxy Watch 3: R$300 | Watch 4: R$300 | Watch 4 Classic: R$400
+Watch 5: R$400 | Watch 5 Pro: R$600 | Watch 6: R$600
+Watch 6 Classic: R$450 | Watch 7: R$500 | Watch Ultra: R$1.100
 
 ---
 VALORES DE TROCA - NOTEBOOKS
@@ -721,7 +721,7 @@ Galaxy S24+: R$1.700
 Galaxy S24 Ultra: R$2.900
 Galaxy S24 FE: R$1.400
 
-Galaxy S25: R$2.200
+Galaxy S25: R$2.000
 Galaxy S25 fe : R$2.000
 Galaxy S25+: R$2.400
 Galaxy S25 Ultra: R$4.000
