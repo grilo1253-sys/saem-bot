@@ -587,10 +587,10 @@ VALORES DE TROCA - APPLE WATCH, IPAD E SAMSUNG GALAXY WATCH
 ATENÇÃO: Os valores abaixo são médias de referência para aparelhos em bom estado, totalmente funcionais, sem defeitos e sem detalhes estéticos relevantes. O valor final pode variar conforme estado de conservação, peças trocadas, saúde da bateria, acessórios e demanda de mercado. A avaliação definitiva é feita presencialmente na loja. Se o cliente informar qualquer defeito ou condição especial, NÃO aplique o valor da tabela — informe que o aparelho precisa ser avaliado na loja.
 
 APPLE WATCH:
-Series 3: R$300 | Series 4: R$400 | Series 5: R$550 | Series 6: R$700
-SE 1ª Geração: R$700 | Series 7: R$750 | SE 2ª Geração: R$900
-Series 8: R$1.100 | Ultra: R$2.000 | Series 9: R$1.300
-Ultra 2: R$3.000 | Series 10: R$1.500 | Series 11: R$2.200
+Series 3: R$300 | Series 4: R$400 | Series 5: R$400 | Series 6: R$500
+SE 1ª Geração: R$500 | Series 7: R$600 | SE 2ª Geração: R$700
+Series 8: R$900 | Ultra: R$1800 | Series 9: R$1.100
+Ultra 2: R$2800 | Series 10: R$1.300 | Series 11: R$1900
 
 IPAD:
 iPad 3: R$300 | iPad 4: R$400 | iPad 5: R$500 | iPad 6: R$600
