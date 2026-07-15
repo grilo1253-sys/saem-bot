@@ -791,7 +791,7 @@ Redmi Note 14 Pro Max — R$1.100
 ---
 
 MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
-
+moto e7 / e6 / e5 - 32gb / 64gb /128 gb - R$250
 Moto g1/g2/g3 — 32gb / 64gb ou 128GB ou 256GB: R$150
 moto g4/ g5 - 32/64/128/256 - R$200
 moto g04/g05s - 128/256 gb - R$300
