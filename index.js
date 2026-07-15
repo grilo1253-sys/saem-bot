@@ -1463,6 +1463,197 @@ async function gerarRespostaComAlternativa(mensagens, respostaOriginalBloqueada)
   return RESPOSTA_SEGURA_FALLBACK;
 }
 
+
+// ==========================================
+// TRAVA DE SEGURANÇA — VALOR DE TROCA NÃO BATE COM O MODELO
+// ==========================================
+// ERRO REAL QUE MOTIVOU ESTA TRAVA: um cliente ia dar um Galaxy S24 256GB na
+// troca. A tabela diz Galaxy S24 = R$1.450. O Cláudio respondeu R$2.200 — que
+// é o valor do Galaxy S25 (linha vizinha). O cliente foi até a loja cobrando
+// o valor errado. As travas anteriores não pegaram porque elas só conferiam se
+// o MODELO existia na tabela (e "Galaxy S24" existe) — nunca se o VALOR batia.
+//
+// Esta trava monta, a partir da própria tabela do prompt, um mapa
+// "modelo -> valores que existem na linha daquele modelo". Depois confere,
+// linha por linha da resposta, se todo valor de TROCA citado junto de um
+// modelo realmente existe na linha daquele modelo exato. Se não existir,
+// a resposta é bloqueada e refeita. É determinístico: não depende do modelo
+// "prestar atenção".
+//
+// Cuidados para NÃO bloquear resposta correta (falso positivo):
+//  - Linhas de VENDA (loja/novo/seminovo/disponível) são ignoradas.
+//  - Linhas de cálculo (total, saldo, volta, parcelas Nx) são ignoradas.
+//  - Se o modelo não for encontrado no mapa, não bloqueia (fail-safe).
+
+// Normalização específica para NOME DE MODELO: preserva o "+" (Galaxy S24 e
+// Galaxy S24+ são modelos diferentes, com valores diferentes).
+function _normModelo(txt) {
+  return (txt || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s+]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function _valoresDoTexto(txt) {
+  return [...(txt || '').matchAll(/R\$\s*(\d{1,3}(?:\.\d{3})+|\d+)/g)]
+    .map(m => parseInt(m[1].replace(/\./g, ''), 10))
+    .filter(n => !isNaN(n));
+}
+
+// Monta o mapa modelo -> Set(valores válidos) lendo as tabelas de troca do prompt.
+// Feito uma vez no boot. Se a tabela do prompt mudar, basta redeploy.
+function construirMapaValoresTroca() {
+  const mapa = {};
+  const add = (nome, valores) => {
+    const chave = _normModelo(nome);
+    if (!chave || valores.length === 0) return;
+    const chaves = [chave];
+    // "Galaxy S24+" e "Galaxy S24 Plus" são o MESMO aparelho — registra as duas
+    // formas, porque o cliente (e o Cláudio) escrevem dos dois jeitos.
+    if (chave.includes('+')) chaves.push(chave.replace(/\s*\+/, ' plus').replace(/\s+/g, ' ').trim());
+    for (const c of chaves) {
+      if (!mapa[c]) mapa[c] = new Set();
+      valores.forEach(v => mapa[c].add(v));
+    }
+  };
+
+  const P = SYSTEM_PROMPT;
+
+  // ---- Seção iPhone: 1 linha por modelo; TODOS os valores da linha são desse modelo
+  const iIni = P.indexOf('iPhone 7: Sem defeito');
+  const iFim = P.indexOf('Aparelho não listado ou condição não encontrada');
+  if (iIni > -1 && iFim > iIni) {
+    for (const linha of P.slice(iIni, iFim).split('\n')) {
+      const m = linha.match(/^(iPhone [^:]+):(.*)$/);
+      if (m) add(m[1], _valoresDoTexto(m[2]));
+    }
+  }
+
+  // ---- Seções Apple Watch / iPad / Galaxy Watch: vários "Modelo: R$X" por linha
+  const wIni = P.indexOf('APPLE WATCH:');
+  const wFim = P.indexOf('VALORES DE TROCA - NOTEBOOKS');
+  if (wIni > -1 && wFim > wIni) {
+    for (const linha of P.slice(wIni, wFim).split('\n')) {
+      for (const parte of linha.split('|')) {
+        const m = parte.match(/^\s*([^:]+?)\s*:\s*R\$\s*([\d.]+)\s*$/);
+        if (m) add(m[1], _valoresDoTexto('R$' + m[2]));
+      }
+    }
+  }
+
+  // ---- Seção Android: formatos variados, 1 modelo (ou grupo com "/") por linha
+  const aIni = P.indexOf('SAMSUNG — LINHA GALAXY S');
+  const aFim = P.indexOf('TÉCNICAS DE VENDAS');
+  if (aIni > -1 && aFim > aIni) {
+    for (const linha of P.slice(aIni, aFim).split('\n')) {
+      const valores = _valoresDoTexto(linha);
+      if (valores.length === 0) continue;
+      // nome do modelo = tudo antes do primeiro ":" ou "—" ou "-"
+      const m = linha.match(/^\s*([^:—\-]+?)\s*(?:[:—]|\s-\s)/);
+      if (!m) continue;
+      let nome = m[1].trim();
+      // ignora cabeçalhos e linhas que não são modelo
+      if (/^(SAMSUNG|XIAOMI|MOTOROLA|REALME|Linha|Dobráveis|IMPORTANTE|ATENÇÃO|AJUSTES|\d+GB)/i.test(nome)) continue;
+      // grupos "A02/A01" ou "Redmi Note 10 / Note 10s"
+      for (const parte of nome.split('/')) {
+        const nm = parte.trim();
+        if (!nm) continue;
+        add(nm, valores);
+        // Galaxy A / S costumam ser citados com o prefixo "Galaxy"
+        if (/^[as]\d+/i.test(nm)) add('galaxy ' + nm, valores);
+      }
+    }
+  }
+
+  return mapa;
+}
+
+const MAPA_VALORES_TROCA = (() => {
+  try { return construirMapaValoresTroca(); } catch (e) { console.error('Erro ao montar mapa de troca:', e.message); return {}; }
+})();
+
+// Descobre qual modelo está citado numa linha da resposta (troca).
+// Aceita "S24" sem o "Galaxy" na frente, que é como o Cláudio costuma escrever.
+function _modeloDaLinha(linha) {
+  const t = _normModelo(linha);
+  let m;
+  m = t.match(/iphone\s+\d+e?(?:\s+(?:pro\s+max|pro|plus|mini))?/);
+  if (m) return m[0].replace(/\s+/g, ' ').trim();
+  m = t.match(/galaxy\s+watch\s+\w+/);
+  if (m) return m[0].replace('galaxy ', '').trim();
+  m = t.match(/galaxy\s+[sa]\d+\+?\s*(?:ultra|fe|plus)?/);
+  if (m) return m[0].trim();
+  m = t.match(/\b[sa]\d{2}\+?\s*(?:ultra|fe|plus)?\b/);
+  if (m) return 'galaxy ' + m[0].trim();
+  m = t.match(/(?:moto\s+g\d+\w*|edge\s+\d+\w*(?:\s+\w+)?|redmi\s+note\s+\d+\w*\+?|xiaomi\s+\d+\w*|realme\s+c\d+\w*|poco\s+\w+)/);
+  if (m) return m[0].trim();
+  m = t.match(/ipad(?:\s+(?:air|mini|pro))?\s*[\w.]*/);
+  if (m) return m[0].trim();
+  return null;
+}
+
+function respostaTemValorTrocaErrado(reply) {
+  const replyLower = (reply || '').toLowerCase();
+  // Só analisa quando a resposta está claramente falando de TROCA
+  if (!/troca|entrada/.test(replyLower)) return false;
+  if (!/r\$/i.test(reply)) return false;
+  // Se já está escalando pra equipe, a resposta é segura
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  for (const linha of reply.split('\n')) {
+    const lower = linha.toLowerCase();
+    if (!/r\$/i.test(linha)) continue;
+    // ignora linhas de VENDA
+    if (/loja\s*:|seminovo|\bnovo\b|dispon[ií]vel|cat[áa]logo/.test(lower)) continue;
+    // ignora linhas de cálculo (total, saldo, volta, parcelas, sinal)
+    if (/total|saldo|volta|\d+\s*x\s*r\$|por m[êe]s|sinal|fica(ria)?\s+r\$|desconto/.test(lower)) continue;
+
+    const modelo = _modeloDaLinha(linha);
+    if (!modelo) continue;
+    const validos = MAPA_VALORES_TROCA[_normModelo(modelo)];
+    if (!validos || validos.size === 0) continue; // fail-safe: não conhece o modelo, não bloqueia
+
+    const valores = _valoresDoTexto(linha);
+    for (const v of valores) {
+      if (!validos.has(v)) {
+        console.log(`⚠️ Valor de troca ERRADO bloqueado: "${modelo}" com R$${v} — a tabela só tem [${[...validos].join(', ')}]`);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// Quando a trava acima pega um valor errado, manda o Cláudio refazer conferindo
+// a linha exata do modelo na tabela de troca.
+async function gerarRespostaCorrigindoValorTroca(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior informou um VALOR DE TROCA que NÃO corresponde à linha daquele modelo na tabela. Erro típico: pegar o valor de um modelo vizinho (ex: usar o valor do Galaxy S25 para um Galaxy S24, ou de um iPhone para outro). Refaça a resposta conferindo, modelo por modelo, a LINHA EXATA da tabela de troca — leia o nome do modelo caractere por caractere (S24 é diferente de S25; 12 Pro é diferente de 13 Pro) e use SOMENTE o valor que está escrito naquela linha específica. Se o modelo ou a condição não existir exatamente na tabela, NÃO invente: informe que vai verificar o valor com a equipe e que retorna em instantes. Recalcule também qualquer total que dependa desses valores.';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaTemValorTrocaErrado(respostaCorrigida)) return respostaCorrigida;
+  } catch (e) {
+    console.error('Erro ao corrigir valor de troca:', e.message);
+  }
+  return null;
+}
+
 // ==========================================
 // TRAVA DE SEGURANÇA — SAUDAÇÃO REPETIDA
 // ==========================================
@@ -1641,6 +1832,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaTemValorTrocaErrado(reply)) {
+        const corrigida = await gerarRespostaCorrigindoValorTroca(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
@@ -1663,6 +1858,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaInventouValorTrocaAndroid(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaTemValorTrocaErrado(reply)) {
+      const corrigida = await gerarRespostaCorrigindoValorTroca(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     reply = removerApresentacaoRepetida(phone, reply);
