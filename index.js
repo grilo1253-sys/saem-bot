@@ -729,6 +729,7 @@ Galaxy S25 Ultra: R$4.000
 SAMSUNG — LINHA GALAXY A
 
 A02/A01 — 128GB ou 256GB: R$200
+A17  — 128GB ou 256GB: R$400
 A21s/A22s — 128GB: R$200 | 256GB: R$300
 A11/A12/a13 - 64/128/256 gb : R$250
 a14/a15 - 128/256 gb - r$300
@@ -756,6 +757,8 @@ Galaxy Z Fold 3, 4, 5, 6, 7
 XIAOMI (valores de troca, aparelho sem defeito)
 
 Linha Xiaomi Number (modelo não listado: consultar equipe):
+xiaomi x8 / x8 pro 256gb - R$1600
+xiaomi x8 / x8 pro 512gb  - R$1800
 Xiaomi 11 — R$300 (128GB ou 256GB)
 Xiaomi 11T — R$300 (128GB ou 256GB)
 Xiaomi 11T Pro — R$300 (128GB ou 256GB)
@@ -765,6 +768,9 @@ Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
 xiaomi poco m6 — 128GB ou 256GB: R$350
 redmi a5 — 128GB ou 256GB: R$300
+redmi 14 / 14c — 128GB ou 256GB: R$400
+redmi 15 / 15c ou 256GB: R$500
+
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
 Redmi Note 10 / Note 10s — R$300
