@@ -894,7 +894,7 @@ MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 moto e7 / e6 / e5 - 32gb / 64gb /128 gb - R$250
 Moto g1/g2/g3 — 32gb / 64gb ou 128GB ou 256GB: R$150
 moto g4/ g5 - 32/64/128/256 - R$200
-moto g04/g05s - 128/256 gb - R$300
+moto g04/ g04s /g05s - 128/256 gb - R$300
 Moto G9 — 128GB ou 256GB: R$250
 Moto G05 — 128GB ou 256GB: R$300
 Moto G9 Play — 128GB ou 256GB: R$200
@@ -907,6 +907,7 @@ Moto G32 — 128GB: R$300 | 256GB: R$400
 Moto G34 — 128GB: R$300 | 256GB: R$400
 Moto G41 — 128GB: R$350 | 256GB: R$400
 Moto G42 — 128GB: R$400 | 256GB: R$500
+Moto G50 / g50 fusion  — 128GB: R$400 | 256GB: R$500
 Moto G51 — 128GB: R$400 | 256GB: R$500
 Moto G52 — 128GB: R$400 | 256GB: R$500
 Moto G53 — 128GB: R$450 | 256GB: R$550
