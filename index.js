@@ -17,6 +17,9 @@ const ZAPI_TOKEN = process.env.ZAPI_TOKEN;
 const ZAPI_CLIENT_TOKEN = process.env.ZAPI_CLIENT_TOKEN;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const NUMERO_ADMIN = process.env.NUMERO_ADMIN; // Número pessoal do Saem para receber notificações
+// Número que recebe o aviso de RESERVA CONCLUÍDA. Pode ser trocado pela variável
+// de ambiente NUMERO_RESERVAS no Railway; se não existir, usa o número abaixo.
+const NUMERO_RESERVAS = process.env.NUMERO_RESERVAS || '5512983118100';
 
 // ==========================================
 // PERSISTÊNCIA DAS CONVERSAS
@@ -92,6 +95,96 @@ function salvarPendentes() {
 const conversas = carregarConversas();
 const metaConversas = carregarMetadados();
 const pendentesEquipe = carregarPendentes();
+
+
+// ==========================================
+// NOTIFICAÇÃO DE RESERVA CONCLUÍDA
+// ==========================================
+// Protocolo da reserva (definido no prompt):
+//   1) cliente confirma que quer reservar para HOJE
+//   2) Cláudio informa o sinal de R$100 via Pix
+//   3) cliente escreve "Eu concordo" (ciente da regra do sinal) -> ainda NÃO pagou
+//   4) cliente envia o COMPROVANTE (print) e escreve "Estou de acordo" -> PAGOU
+//
+// Avisamos o número de reservas quando o cliente conclui de fato: ao escrever
+// "Estou de acordo" OU ao mandar o print do comprovante numa conversa que já
+// está tratando de reserva. O "Eu concordo" sozinho não dispara, porque nesse
+// momento o cliente ainda não pagou nada — avisar ali geraria alarme falso.
+
+function detectouReservaConcluida(mensagemCliente) {
+  const m = (mensagemCliente || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return /\bestou\s+de\s+acordo\b/.test(m);
+}
+
+// A conversa está tratando de alguma TAXA que o cliente precisa pagar?
+// São duas situações, e as duas avisam o número de reservas:
+//   - Reserva: sinal de R$100 via Pix
+//   - Entrega/motoboy/transferência entre lojas/cidades: R$70 via Pix
+// Serve para saber se a imagem recebida é provavelmente o comprovante de uma
+// dessas taxas, e não uma foto qualquer (print de oferta, foto do aparelho...).
+function conversaEhSobreReserva(mensagens) {
+  const texto = (mensagens || [])
+    .slice(-8)
+    .map(m => typeof m.content === 'string' ? m.content : '')
+    .join(' ')
+    .toLowerCase();
+  const sobreReserva = /reserva|reservar|sinal|eu concordo|estou de acordo|saemthiago@gmail\.com/.test(texto);
+  const sobreEntrega = /motoboy|entrega|transfer[êe]ncia|taxa|r\$\s*70/.test(texto);
+  const temComprovante = /comprovante/.test(texto);
+  return sobreReserva || sobreEntrega || temComprovante;
+}
+
+// Descobre QUAL taxa está em jogo, para o aviso já chegar com o assunto certo.
+function tipoDaTaxa(mensagens) {
+  const texto = (mensagens || [])
+    .slice(-8)
+    .map(m => typeof m.content === 'string' ? m.content : '')
+    .join(' ')
+    .toLowerCase();
+  const reserva = /reserva|reservar|sinal|r\$\s*100/.test(texto);
+  const entrega = /motoboy|entrega|transfer[êe]ncia|r\$\s*70/.test(texto);
+  if (reserva && entrega) return 'RESERVA + TAXA DE ENTREGA';
+  if (entrega) return 'TAXA DE ENTREGA/MOTOBOY (R$70)';
+  return 'RESERVA (sinal R$100)';
+}
+
+// Procura o aparelho da reserva varrendo a conversa de trás pra frente — o modelo
+// costuma ter sido definido bem antes do "Estou de acordo".
+function extrairAparelhoReserva(mensagens) {
+  const padroes = [
+    /iphone\s+\d+\s*e?(?:\s+(?:pro\s+max|pro|plus|mini))?(?:\s+\d{2,4}\s*gb)?/i,
+    /galaxy\s+[sa]\d+\+?(?:\s+(?:ultra|fe|plus))?/i,
+    /(?:redmi|poco|xiaomi|moto\s+g|edge|realme)\s+[\w+]+/i,
+    /macbook\s+\w+/i, /ipad\s*\w*/i, /apple\s+watch\s*\w*/i,
+    /playstation\s*\d*|ps[345]|xbox\s*\w*/i
+  ];
+  for (let i = (mensagens || []).length - 1; i >= 0; i--) {
+    const texto = typeof mensagens[i].content === 'string' ? mensagens[i].content : '';
+    if (!texto) continue;
+    for (const padrao of padroes) {
+      const achou = texto.match(padrao);
+      if (achou) return achou[0].trim();
+    }
+  }
+  return 'aparelho não identificado';
+}
+
+async function notificarReserva(phoneCliente, aparelho, mensagemCliente, viaPrint, tipo) {
+  if (!NUMERO_RESERVAS) return;
+  try {
+    const agora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const comoVeio = viaPrint ? 'O cliente enviou o *print do comprovante*.' : 'O cliente confirmou com *"Estou de acordo"*.';
+    const msgCliente = (mensagemCliente || '').trim();
+    const linhaMsg = msgCliente ? `\n\n_Mensagem do cliente:_\n"${msgCliente.substring(0, 300)}"` : '';
+    const msg = `🟢 *PAGAMENTO CONFIRMADO PELO CLIENTE*\n\nTipo: *${tipo || 'RESERVA'}*\nAparelho: *${aparelho}*\nCliente: ${phoneCliente}\nHorário: ${agora}\n\n${comoVeio}${linhaMsg}\n\n_Confira o pagamento e efetive._`;
+    await enviarMensagem(NUMERO_RESERVAS, msg);
+    console.log(`🟢 Notificado (${tipo}): ${phoneCliente} — ${aparelho}`);
+  } catch (e) {
+    console.error('Erro ao notificar reserva:', e.message);
+  }
+}
 
 // ==========================================
 // SISTEMA DE NOTIFICAÇÃO PARA O ADMIN
@@ -469,6 +562,11 @@ ENTREGAS
 
 Transferência entre lojas: R$70,00 via motoboy.
 Consultar disponibilidade: https://wa.me/5512981880229
+
+REGRA DA TAXA DE ENTREGA/TRANSFERÊNCIA — CRÍTICA:
+A taxa de R$70,00 (motoboy / transferência entre lojas / entrega) é paga EXCLUSIVAMENTE via Pix e SEMPRE acertada ANTES da entrega. NUNCA diga que essa taxa pode ser paga no cartão, nem que pode ser cobrada junto com o aparelho, nem que pode ser parcelada, nem que pode ser somada ao total. A taxa NUNCA entra em simulação de parcelas e NUNCA é somada ao preço do aparelho em nenhum cálculo — o valor do aparelho e a taxa são cobrados separadamente, por meios diferentes.
+
+EXEMPLO DE ERRO A NUNCA REPETIR: um cliente perguntou "a taxa pode passar junto no cartão?" e uma resposta anterior disse "Sim! A taxa do motoboy (R$70,00) pode ser cobrada junto no cartão" e ainda somou a taxa ao preço do aparelho, oferecendo calcular as parcelas com o total. Isso está ERRADO e promete ao cliente uma condição que a loja não oferece. A resposta correta é: informar que a taxa de entrega é somente via Pix, paga antes, separada do valor do aparelho, e encaminhar para confirmar a disponibilidade da entrega: https://wa.me/5512981880229
 
 -----------------------------
 Regra sobre saúde da bateria
@@ -1822,6 +1920,16 @@ app.post('/webhook', async (req, res) => {
         messages: [...conversas[phone], { role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } }, { type: 'text', text: body.text?.message || 'Descreva esta imagem.' }] }]
       }, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
       const reply = visionResp.data.content[0].text;
+
+      // Se a conversa já está tratando de reserva, essa imagem é (muito
+      // provavelmente) o print do comprovante do sinal -> avisa as reservas.
+      if (conversaEhSobreReserva(conversas[phone]) && !metaConversas[phone].reservaNotificada) {
+        metaConversas[phone].reservaNotificada = true;
+        salvarMetadados();
+        const aparelhoReserva = extrairAparelhoReserva(conversas[phone]);
+        await notificarReserva(phone, aparelhoReserva, body.text?.message || '', true, tipoDaTaxa(conversas[phone]));
+      }
+
       await enviarMensagem(phone, reply);
       salvarConversas();
       return;
@@ -1858,6 +1966,14 @@ app.post('/webhook', async (req, res) => {
       reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
       salvarConversas();
+
+      if (detectouReservaConcluida(transcricao) && !metaConversas[phone].reservaNotificada) {
+        metaConversas[phone].reservaNotificada = true;
+        salvarMetadados();
+        const aparelhoReserva = extrairAparelhoReserva(conversas[phone]);
+        await notificarReserva(phone, aparelhoReserva, transcricao, false, tipoDaTaxa(conversas[phone]));
+      }
+
       await enviarMensagem(phone, reply);
       return;
     }
@@ -1888,6 +2004,13 @@ app.post('/webhook', async (req, res) => {
     conversas[phone].push({ role: 'assistant', content: reply });
     salvarConversas();
     salvarMetadados();
+
+    if (detectouReservaConcluida(message) && !metaConversas[phone].reservaNotificada) {
+      metaConversas[phone].reservaNotificada = true;
+      salvarMetadados();
+      const aparelhoReserva = extrairAparelhoReserva(conversas[phone]);
+      await notificarReserva(phone, aparelhoReserva, message, false, tipoDaTaxa(conversas[phone]));
+    }
 
     if (detectouPendencia(reply, message) && NUMERO_ADMIN && !pendentesEquipe[phone]) {
       const aparelho = extrairAparelhoPendente(conversas[phone]);
