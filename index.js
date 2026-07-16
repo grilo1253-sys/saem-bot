@@ -130,10 +130,55 @@ function conversaEhSobreReserva(mensagens) {
     .map(m => typeof m.content === 'string' ? m.content : '')
     .join(' ')
     .toLowerCase();
-  const sobreReserva = /reserva|reservar|sinal|eu concordo|estou de acordo|saemthiago@gmail\.com/.test(texto);
-  const sobreEntrega = /motoboy|entrega|transfer[êe]ncia|taxa|r\$\s*70/.test(texto);
-  const temComprovante = /comprovante/.test(texto);
-  return sobreReserva || sobreEntrega || temComprovante;
+  // Termos específicos do PROTOCOLO de pagamento. Palavras soltas demais
+  // ("taxa", "entrega") faziam qualquer conversa virar "reserva" e geravam
+  // aviso falso — foi o que aconteceu com um cliente que só mandou print das
+  // configurações do aparelho dele numa conversa de troca.
+  const sobreReserva = /\breserva\b|reservar|sinal de r\$|eu concordo|estou de acordo|saemthiago@gmail\.com/.test(texto);
+  const sobreEntrega = /motoboy|taxa de entrega|taxa de transfer[êe]ncia|transfer[êe]ncia entre lojas/.test(texto);
+  return sobreReserva || sobreEntrega;
+}
+
+// O cliente CONFIRMOU explicitamente? Pelo protocolo do prompt, ele escreve
+// "Eu concordo" (ciente da regra do sinal) e/ou "Estou de acordo" (após pagar).
+// Sem uma dessas frases, não existe reserva — mesmo que ele mande uma imagem.
+function clienteConfirmouProtocolo(mensagens) {
+  const texto = (mensagens || [])
+    .filter(m => m.role === 'user')
+    .map(m => typeof m.content === 'string' ? m.content : '')
+    .join(' ')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return /\beu\s+concordo\b|\bestou\s+de\s+acordo\b/.test(texto);
+}
+
+// Usa a visão do Claude para confirmar que a imagem é REALMENTE um comprovante
+// de pagamento — e não print de conversa, foto do aparelho, print de
+// configurações, oferta, etc. Chamada curta e barata (responde só SIM/NAO).
+// Em caso de erro/dúvida, retorna false (não avisa) — é melhor deixar passar
+// um aviso do que encher o número de alarme falso.
+async function imagemEhComprovante(imgBase64, imgMime) {
+  try {
+    const resp = await axios.post('https://api.anthropic.com/v1/messages', {
+      model: 'claude-sonnet-4-6',
+      max_tokens: 5,
+      system: 'Você classifica imagens. Responda APENAS com a palavra SIM ou a palavra NAO, sem mais nada.',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: imgMime, data: imgBase64 } },
+          { type: 'text', text: 'Esta imagem é um COMPROVANTE DE PAGAMENTO (comprovante de Pix, transferência bancária, recibo de pagamento, print do app do banco mostrando um pagamento efetuado)? Responda apenas SIM ou NAO. Print de conversa, foto de aparelho, print de configurações do celular, oferta ou qualquer outra coisa = NAO.' }
+        ]
+      }]
+    }, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
+    const txt = resp.data.content.find(b => b.type === 'text')?.text || '';
+    const ehComprovante = /\bsim\b/i.test(txt);
+    console.log(`🔎 Classificação da imagem: ${txt.trim()} -> ${ehComprovante ? 'É comprovante' : 'NÃO é comprovante'}`);
+    return ehComprovante;
+  } catch (e) {
+    console.error('Erro ao classificar imagem:', e.message);
+    return false;
+  }
 }
 
 // Descobre QUAL taxa está em jogo, para o aviso já chegar com o assunto certo.
@@ -1922,13 +1967,22 @@ app.post('/webhook', async (req, res) => {
       }, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } });
       const reply = visionResp.data.content[0].text;
 
-      // Se a conversa já está tratando de reserva, essa imagem é (muito
-      // provavelmente) o print do comprovante do sinal -> avisa as reservas.
-      if (conversaEhSobreReserva(conversas[phone]) && !metaConversas[phone].reservaNotificada) {
-        metaConversas[phone].reservaNotificada = true;
-        salvarMetadados();
-        const aparelhoReserva = extrairAparelhoReserva(conversas[phone]);
-        await notificarReserva(phone, aparelhoReserva, body.text?.message || '', true, tipoDaTaxa(conversas[phone]));
+      // Só avisa se as TRÊS coisas forem verdade ao mesmo tempo:
+      //   1) a conversa está tratando de reserva/taxa (protocolo em andamento)
+      //   2) o cliente já escreveu "Eu concordo" ou "Estou de acordo"
+      //   3) a imagem é MESMO um comprovante de pagamento (confirmado na leitura)
+      // Sem isso, dava aviso falso: um cliente mandou print das configurações do
+      // aparelho dele numa conversa de troca e virou "reserva concluída".
+      if (!metaConversas[phone].reservaNotificada
+          && conversaEhSobreReserva(conversas[phone])
+          && clienteConfirmouProtocolo(conversas[phone])) {
+        const ehComprovante = await imagemEhComprovante(imgBase64, imgMime);
+        if (ehComprovante) {
+          metaConversas[phone].reservaNotificada = true;
+          salvarMetadados();
+          const aparelhoReserva = extrairAparelhoReserva(conversas[phone]);
+          await notificarReserva(phone, aparelhoReserva, body.text?.message || '', true, tipoDaTaxa(conversas[phone]));
+        }
       }
 
       await enviarMensagem(phone, reply);
