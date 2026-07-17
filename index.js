@@ -945,18 +945,18 @@ Moto G05 — 128GB ou 256GB: R$300
 Moto G9 Play — 128GB ou 256GB: R$200
 Moto G9 Plus — 128GB ou 256GB: R$250
 Moto G22 — 128GB ou 256GB: R$300
-Moto G15 — 128GB: R$400 | 256GB: R$500
+Moto G15 — 128GB: R$400 | 256GB: R$400
 moto g17 - 128/256 gb : R$400
-Moto G31 — 128GB: R$300 | 256GB: R$400
-Moto G32 — 128GB: R$300 | 256GB: R$400
-Moto G34 — 128GB: R$300 | 256GB: R$400
-Moto G41 — 128GB: R$350 | 256GB: R$400
-Moto G42 — 128GB: R$400 | 256GB: R$500
+Moto G31 — 128GB: R$250 | 256GB: R$300
+Moto G32 — 128GB: R$250 | 256GB: R$300
+Moto G34 — 128GB: R$300 | 256GB: R$300
+Moto G41 — 128GB: R$250 | 256GB: R$300
+Moto G42 — 128GB: R$250 | 256GB: R$300
 Moto G50 / g50 fusion  — 128GB: R$400 | 256GB: R$500
-Moto G51 — 128GB: R$400 | 256GB: R$500
-Moto G52 — 128GB: R$400 | 256GB: R$500
-Moto G53 — 128GB: R$450 | 256GB: R$550
-Moto G54 — 128GB: R$500 | 256GB: R$600
+Moto G51 — 128GB: R$300 | 256GB: R$300
+Moto G52 — 128GB: R$300 | 256GB: R$300
+Moto G53 — 128GB: R$300 | 256GB: R$300
+Moto G54 — 128GB: R$350 | 256GB: R$400
 Moto G55 — 128GB: R$500 | 256GB: R$600
 Moto G56 — 128GB: R$600 | 256GB: R$700
 Moto G62 — 128GB: R$500 | 256GB: R$550
@@ -969,8 +969,8 @@ Moto G75 — 128GB: R$500 | 256GB: R$550
 Moto G82 — 128GB: R$500 | 256GB: R$550
 Moto G84 — 128GB: R$600 | 256GB: R$700
 Moto G85 — 128GB: R$650 | 256GB: R$700
-Moto G86 — 128GB: R$1.200 | 256GB: R$1.300
-Moto G96 — 128GB: R$1.400 | 256GB: R$1.500
+Moto G86 — 128GB: R$800 | 256GB: R$800
+Moto G96 — 128GB: R$1.200 | 256GB: R$1.200
 
 MOTOROLA - Linha Edge (valores de troca, aparelho sem defeito)
 
@@ -979,10 +979,10 @@ Edge 20 Pro — 128GB: R$450 | 256GB: R$500
 Edge 30 — 128GB: R$600 | 256GB: R$700
 Edge 30 Neo — 128GB: R$700 | 256GB: R$700
 Edge 30 Fusion — 128GB: R$700 | 256GB: R$700
-Edge 30 Ultra — 256GB: R$1.400
+Edge 30 Ultra — 256GB: R$1.200
 Edge 40 — 128GB: R$700 | 256GB: R$800
 Edge 40 Neo — 128GB: R$600 | 256GB: R$650
-Edge 40 Pro — 256GB: R$900
+Edge 40 Pro — 256GB: R$700
 Edge 50 — 128GB: R$900 | 256GB: R$950
 Edge 50 Fusion — 128GB: R$700 | 256GB: R$800
 Edge 50 Neo — 128GB: R$800 | 256GB: R$900
@@ -990,25 +990,25 @@ Edge 50 Pro — 128GB: R$1.200 | 256GB: R$1300
 Edge 50 Ultra — 256GB: R$1700
 Edge 60 — 128GB: R$1.000| 256GB: R$1.200
 Edge 60 Fusion — 128GB: R$700 | 256GB: R$850
-Edge 60 Pro — 256GB: R$1700
+Edge 60 Pro — 256GB: R$1500
 Edge 60 Stylus — 128GB: R$1.300 | 256GB: R$1.400
 
 ---
 
 REALME (valores de troca, aparelho sem defeito — modelo não listado: consultar equipe)
 
-Realme C30 — 64GB: R$200
-Realme C30s — 64GB: R$200
-Realme C31 — 64GB: R$300
-Realme C33 — 64GB: R$300 | 128GB: R$400
-Realme C35 — 64GB: R$350 | 128GB: R$400
-Realme C51 — 64GB: R$300 | 128GB: R$400
-Realme C53 — 64GB: R$400 | 128GB: R$500
-Realme C55 — 64GB: R$400 | 128GB: R$500
-Realme C61 — 64GB: R$450 | 128GB: R$550
-Realme C63 — 64GB: R$500 | 128GB: R$600
-Realme C67 — 64GB: R$600 | 128GB: R$700
-Realme C75 — 64GB: R$800 | 128GB: R$900
+Realme C30 — 64GB/ 128 / 256 gb: R$200
+Realme C30s — 64GB/ 128 / 256 gb: R$200
+Realme C31 — 64GB/ 128 / 256 gb : R$300
+Realme C33 — 64GB: R$300 | 128GB/ 256 gb: R$350
+Realme C35 — 64GB: R$350 | 128GB/ 256 gb: R$350
+Realme C51 — 64GB: R$300 | 128GB/ 256 gb: R$350
+Realme C53 — 64GB: R$300 | 128GB/ 256 gb: R$350
+Realme C55 — 64GB: R$300 | 128GB/ 256 gb: R$350
+Realme C61 — 64GB: R$300 | 128GB/ 256 gb: R$350
+Realme C63 — 64GB: R$300 | 128GB/ 256 gb: R$350
+Realme C67 — 64GB: R$350 | 128GB/ 256 gb: R$350
+Realme C75 — 64GB: R$350 | 128GB/ 256 gb : R$400
 
 ATENÇÃO: se o modelo Android que o cliente mencionar não estiver EXATAMENTE listado nas tabelas acima (Samsung, Xiaomi, Motorola ou Realme), NÃO invente um valor nem estime por aproximação com um modelo parecido. Diga que esse modelo específico precisa ser avaliado presencialmente na loja, e que o valor será informado depois de verificado pela equipe.
 
