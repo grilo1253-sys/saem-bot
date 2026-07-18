@@ -1239,8 +1239,32 @@ function mensagemPareceTroca(mensagemCliente) {
   return padroesTroca.some(p => p.test(texto));
 }
 
-function respostaTrocaTratadaComoVenda(mensagemCliente, reply) {
-  if (!mensagemPareceTroca(mensagemCliente)) return false;
+// ERRO REAL QUE MOTIVOU ESTE COMPLEMENTO: o próprio Cláudio perguntou "Me
+// conta: qual aparelho você tem para dar de entrada, e qual iPhone você tá
+// pensando em levar?". O cliente respondeu só "iPhone 11 Pro 64gb 86% de
+// bateria e sem defeitos" — sem nenhuma palavra de troca na frase, porque ele
+// só está respondendo a pergunta que o próprio Cláudio fez. A trava anterior
+// não pegava esse caso, pois só analisava a linguagem da mensagem do cliente
+// isoladamente. Esta função olha a ÚLTIMA mensagem do assistente ANTES da
+// mensagem atual do cliente: se o próprio Cláudio pediu o aparelho de
+// entrada/troca, qualquer resposta do cliente descrevendo um aparelho
+// (modelo, memória, bateria) deve ser tratada como troca, mesmo sem palavras-
+// chave de troca na frase do cliente.
+function assistentePerguntouSobreAparelhoDeTroca(mensagens) {
+  if (!Array.isArray(mensagens) || mensagens.length < 2) return false;
+  // a última posição é a mensagem atual do cliente; olhamos a anterior a ela
+  for (let i = mensagens.length - 2; i >= 0; i--) {
+    const m = mensagens[i];
+    if (m.role !== 'assistant') continue;
+    const texto = normalizarTexto(typeof m.content === 'string' ? m.content : '');
+    return /qual\s+aparelho\s+voce\s+tem\s+para\s+dar\s+de\s+entrada|dar\s+de\s+entrada|entrada\s+na\s+compra|tem\s+algum\s+aparelho\s+para\s+troca|modelo,?\s+memoria\s+e\s+estado|saude\s+da\s+bateria\s+tambem/.test(texto);
+  }
+  return false;
+}
+
+function respostaTrocaTratadaComoVenda(mensagemCliente, reply, mensagens) {
+  const pareceTroca = mensagemPareceTroca(mensagemCliente) || assistentePerguntouSobreAparelhoDeTroca(mensagens);
+  if (!pareceTroca) return false;
   const replyLower = reply.toLowerCase();
   // Se a resposta já encaminha pra equipe (comportamento correto e seguro), não é o bug
   if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
@@ -1692,7 +1716,7 @@ app.post('/webhook', async (req, res) => {
       // tenham sido adicionadas durante a chamada — elas não são conversa real com
       // o cliente e não devem consumir espaço no histórico de 20 mensagens.
       if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
-      if (respostaTrocaTratadaComoVenda(transcricao, reply)) {
+      if (respostaTrocaTratadaComoVenda(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
@@ -1720,7 +1744,7 @@ app.post('/webhook', async (req, res) => {
     const tamanhoAntes = conversas[phone].length;
     let reply = await chamarClaude(conversas[phone]);
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
-    if (respostaTrocaTratadaComoVenda(message, reply)) {
+    if (respostaTrocaTratadaComoVenda(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
