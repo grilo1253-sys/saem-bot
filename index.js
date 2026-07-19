@@ -991,30 +991,38 @@ async function executarReativacao(janela) {
 }
 
 // ==========================================
-// CHECAGEM DE HORÁRIO DA REATIVAÇÃO (CORRIGIDA)
+// CHECAGEM DE HORÁRIO DA REATIVAÇÃO — DESATIVADA
 // ==========================================
-setInterval(() => {
-  const agora = new Date();
-  const hora = agora.getHours();
-
-  if (hora >= 18 && hora < 21 && !reativacaoRodandoHoje) {
-    reativacaoRodandoHoje = true;
-    executarReativacao('tarde').catch(console.error);
-  }
-
-  if (hora >= 10 && hora < 13 && !reativacaoRodandoAmanha) {
-    reativacaoRodandoAmanha = true;
-    executarReativacao('manha').catch(console.error);
-  }
-
-  if (hora === 0) {
-    if (reativacaoRodandoHoje || reativacaoRodandoAmanha) {
-      reativacaoRodandoHoje = false;
-      reativacaoRodandoAmanha = false;
-      try { fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8')); } catch (e) {}
-    }
-  }
-}, 60000);
+// Disparo automático de reativação DESLIGADO a pedido do Saem (não estava
+// dando retorno que justificasse o custo de API). As funções acima
+// (executarReativacao, deveReativar, gerarMensagemReativacao etc) continuam
+// existindo no código, só não são mais chamadas automaticamente por nenhum
+// setInterval — ou seja, nenhuma mensagem de reativação é mais enviada
+// sozinha. Se um dia quiser voltar a usar, é só reativar o bloco comentado
+// abaixo.
+//
+// setInterval(() => {
+//   const agora = new Date();
+//   const hora = agora.getHours();
+//
+//   if (hora >= 18 && hora < 21 && !reativacaoRodandoHoje) {
+//     reativacaoRodandoHoje = true;
+//     executarReativacao('tarde').catch(console.error);
+//   }
+//
+//   if (hora >= 10 && hora < 13 && !reativacaoRodandoAmanha) {
+//     reativacaoRodandoAmanha = true;
+//     executarReativacao('manha').catch(console.error);
+//   }
+//
+//   if (hora === 0) {
+//     if (reativacaoRodandoHoje || reativacaoRodandoAmanha) {
+//       reativacaoRodandoHoje = false;
+//       reativacaoRodandoAmanha = false;
+//       try { fs.writeFileSync(ARQUIVO_NOITE_ANTERIOR, fs.readFileSync(ARQUIVO_CONVERSAS, 'utf8')); } catch (e) {}
+//     }
+//   }
+// }, 60000);
 
 // ==========================================
 // TRANSCRIÇÃO DE ÁUDIO
