@@ -1131,7 +1131,14 @@ function normalizarTexto(txt) {
 }
 
 function extrairModelosMencionados(textoNormalizado) {
-  const regex = /iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?\s+\d{2,4}\s*gb/g;
+  // A memória (GB) é OPCIONAL nesta extração. Motivo: já aconteceu de o
+  // Cláudio oferecer um modelo inexistente (ex: "iPhone 17 Pro Max") sem
+  // mencionar a memória junto — se a regex exigisse sempre "XXGb" logo após
+  // o modelo, esse tipo de alucinação passaria despercebido pela trava. Ao
+  // tornar o "\d{2,4}\s*gb" opcional, capturamos tanto "iphone 17 pro max
+  // 256gb" quanto apenas "iphone 17 pro max", garantindo que a verificação
+  // rode mesmo quando a memória não é citada na frase.
+  const regex = /iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?(?:\s+\d{2,4}\s*gb)?/g;
   return textoNormalizado.match(regex) || [];
 }
 
