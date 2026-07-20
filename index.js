@@ -275,15 +275,12 @@ PRINCÍPIO GERAL — RESPONDA SÓ O BÁSICO DO QUE FOI PERGUNTADO, APROFUNDE SÓ
 - Se o cliente reclamar que já mandou informações antes e não obteve resposta, ou reclamar de demora, NUNCA diga que vai "verificar com a equipe" como se fosse uma pendência de valor. Peça desculpas pela demora de forma breve e natural, e tente resolver a dúvida dele diretamente agora, com base no que ele já informou na conversa.
 - REGRA DE ACESSÓRIOS:
 Quando o cliente perguntar sobre acessórios (carregadores, capas, películas, etc), responda: "Temos todas as linhas de acessórios! É só entrar no nosso site na aba de acessórios e conferir os valores: https://www.saemcelulares.net — Qualquer dúvida é só chamar! 😊"
-- REGRA DE XIAOMI NOVOS (SOB ENCOMENDA):
-Os Xiaomis Novos (linha "Xiaomis Encomendas" da tabela) NÃO são pronta entrega e NÃO ficam em estoque físico na loja como os seminovos. Sempre que mencionar ou oferecer qualquer Xiaomi novo dessa lista, deixe claro que é sob encomenda — não fale como se fosse um produto disponível na hora, igual aos seminovos que já estão na loja. NUNCA informe ou estime prazo de entrega (não diga "leva X dias", "chega em tal data" ou qualquer prazo aproximado) — não existe prazo padrão definido. Se o cliente perguntar quanto tempo demora, diga que o prazo exato será confirmado com a equipe após o pedido, sem chutar nenhum número. Exemplo de como comunicar corretamente: "Esse aí é sob encomenda, não é um modelo que já temos pronto na loja — o prazo de entrega a equipe confirma direitinho quando você fechar o pedido. Quer seguir com ele?"
 - REGRA DE RECLAMAÇÃO CONTRA A LOJA:
 Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crítica à loja, NUNCA concorde com a reclamação, NUNCA diga "você tem razão" sobre algo negativo da loja e NUNCA prometa repassar feedback para a equipe como se fosse um erro real. Defenda a loja de forma educada e firme. Explique a situação de forma positiva. Exemplo: se o cliente reclamar do anúncio de "36 vezes no boleto", explique que é uma modalidade real de financiamento aprovada, onde o cliente paga parcelas mensais via boleto após análise de crédito — não é propaganda enganosa, é uma forma de pagamento legítima oferecida pela loja.
 - REGRA DE OFERTAS EM IMAGENS:
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
 - REGRA DE VALOR CONFIRMADO PELA EQUIPE:
 Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
-
 
 ━━━━━━━━━━━━━━━━━━━
 LOJAS E HORÁRIOS
@@ -1442,8 +1439,67 @@ async function gerarRespostaCorrigindoValorAndroid(mensagens) {
 }
 
 // ==========================================
-// TRAVA DE SEGURANÇA — NEGAÇÃO INCORRETA (MODELO QUE NA VERDADE EXISTE)
+// TRAVA DE SEGURANÇA — VALOR DE MANUTENÇÃO ANDROID INVENTADO
 // ==========================================
+// Erro real que já aconteceu: cliente perguntou quanto custa a troca de tela
+// do Moto G24 e o Cláudio respondeu com um valor (R$150,00) que não existe em
+// lugar nenhum — a tabela de preços de manutenção é EXCLUSIVA para iPhones
+// (ver REGRA DE MANUTENÇÃO ANDROID no prompt). Diferente da trava de troca
+// (ANDROID_TROCA_MODELOS_VALIDOS), aqui não existe "valor certo" pra
+// comparar: QUALQUER preço de conserto/manutenção pra aparelho Android é
+// proibido, sempre deve escalar pro Breno. Esta trava roda em runtime,
+// independente da instrução do prompt, pra não depender só do modelo seguir
+// a regra corretamente.
+const REGEX_MARCA_ANDROID = /(samsung|galaxy|xiaomi|redmi|poco|motorola|\bmoto\s|realme)/i;
+const REGEX_CONTEXTO_MANUTENCAO_ANDROID = /(tela|display|modulo|módulo|bateria|conector|carga|camera|câmera|conserto|reparo|consertar|trocar a tela|troca de tela|troca de peça)/i;
+
+function respostaTemPrecoManutencaoAndroidInventado(reply) {
+  // Só verifica quando a resposta parece dar um valor de verdade
+  if (!/r\$/i.test(reply)) return false;
+  const replyLower = reply.toLowerCase();
+  // Se já está encaminhando pro Breno/equipe técnica, a resposta já é segura
+  if (replyLower.includes('breno')) return false;
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('tecnica') || replyLower.includes('técnica'))) return false;
+  // Precisa mencionar marca/modelo Android E contexto de manutenção junto com o preço
+  if (!REGEX_MARCA_ANDROID.test(reply)) return false;
+  if (!REGEX_CONTEXTO_MANUTENCAO_ANDROID.test(reply)) return false;
+
+  console.log('⚠️ Valor de manutenção Android inventado bloqueado (tabela de manutenção é exclusiva para iPhones)');
+  return true;
+}
+
+// Quando a trava acima bloqueia, pedimos pro Cláudio corrigir a resposta
+// escalando corretamente pro Breno, em vez de inventar um valor de conserto.
+async function gerarRespostaCorrigindoManutencaoAndroid(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior informou um valor de manutenção/conserto (tela, bateria, módulo, conector, etc) para um aparelho Android. A tabela de preços de manutenção é EXCLUSIVA para iPhones — NUNCA invente, estime ou "empreste" valor de conserto Android de nenhuma tabela. Refaça a resposta informando que esse valor precisa ser verificado com a equipe técnica e encaminhe para o Breno: https://wa.me/5512981919584. Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaTemPrecoManutencaoAndroidInventado(respostaCorrigida)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir valor de manutenção Android:', e.message);
+  }
+  return null;
+}
+
+
 // Faz o caminho INVERSO da trava acima: em vez de checar se um modelo OFERECIDO
 // existe na tabela, aqui verificamos se o Cláudio disse "não temos o iPhone X"
 // (ou variações) para um modelo+memória que, na verdade, EXISTE na tabela de
@@ -1747,6 +1803,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
+        const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
@@ -1773,6 +1833,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaInventouValorTrocaAndroid(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
+      const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     reply = removerApresentacaoRepetida(phone, reply);
