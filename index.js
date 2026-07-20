@@ -287,7 +287,7 @@ LOJAS E HORÁRIOS
 ━━━━━━━━━━━━━━━━━━━
 
 São José dos Campos: Shopping Jardim Oriente – Praça de Alimentação
-Horário: Segunda a sexta 10h às 22h | Domingos e feriados 12h às 20h
+Horário: Segunda a sexta 10h às 22h | Domingos e feriados 13h às 20h
 
 Taubaté: Espaço Schneider - Avenida Charles Schneider, 781 – Sala 406C
 Horário: Segunda a sábado 13h às 21h | Domingos e feriados sob consulta
