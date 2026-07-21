@@ -281,10 +281,6 @@ Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crít
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
 - REGRA DE VALOR CONFIRMADO PELA EQUIPE:
 Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
-- REGRA DE VENDA DE APARELHO SEM TROCA (SÓ VENDER, NÃO COMPRAR NADA):
-A Saem Celulares NÃO compra aparelhos "à vista" isolados — só aceita aparelho usado como ENTRADA/TROCA dentro de uma compra (o cliente dá o aparelho velho e leva outro, pagando a diferença). Se o cliente disser que quer só VENDER o aparelho dele (sem levar nada em troca, sem comprar nada da loja), deixe isso claro logo de cara, de forma educada, e direcione para o WhatsApp abaixo, que é o número certo pra esse tipo de negociação: https://wa.me/5512983118100
-Exemplo de como responder: "Aqui na loja a gente trabalha só com troca — você dá seu aparelho como entrada e leva outro, pagando a diferença 😊 Pra vender o aparelho sem levar nada em troca, o número certo é esse aqui: https://wa.me/5512983118100"
-NÃO tente negociar, avaliar ou dar valor de compra direta nessa situação — encaminhe direto para o número acima.
 
 ━━━━━━━━━━━━━━━━━━━
 LOJAS E HORÁRIOS
@@ -1171,6 +1167,120 @@ function dividirTabelaPorCondicao(tabelaCrua) {
   return { novo: normalizarTexto(chunkNovo), seminovo: normalizarTexto(chunkSeminovo) };
 }
 
+// ==========================================
+// TRAVA DE SEGURANÇA — COR ERRADA PARA O MODELO (MODELO CERTO, COR/PREÇO DE OUTRA LINHA)
+// ==========================================
+// Erro real que já aconteceu: cliente pediu "14 Pro Max 128GB Roxo" e o
+// Cláudio respondeu "iPhone 14 Pro Max 128GB Roxo — R$2.999,00", só que na
+// tabela o 14 Pro Max 128GB só existe em Dourado (R$3.499,00) — o "Roxo" e o
+// preço R$2.999 são, na verdade, do iPhone 14 PRO (sem "Max") 128GB. Ou seja,
+// o modelo citado existe na tabela, mas a COR foi emprestada de outra linha
+// (outro modelo/condição). A trava de "modelo fora da tabela" não pega esse
+// caso porque ela só confere se o texto "modelo+gb" existe em algum lugar da
+// tabela — não confere se a cor citada junto realmente pertence àquela linha
+// específica. Esta trava faz exatamente essa checagem extra.
+const CORES_CONHECIDAS = [
+  'preto', 'branco', 'azul', 'verde', 'rosa', 'roxo', 'dourado', 'prateado',
+  'vermelho', 'amarelo', 'laranja', 'lilas', 'cinza', 'natural', 'titanium',
+  'desert', 'red',
+];
+
+// Divide a tabela crua em blocos (um por produto, separados por linha em
+// branco) e, pra cada bloco, identifica o "modelo+gb" e quais cores estão
+// listadas nele (linhas que começam com ✅ ⤴️ ou ☑️).
+function construirMapaModeloCor(tabelaCrua) {
+  const mapa = {};
+  const blocos = tabelaCrua.split(/\n\s*\n/);
+  for (const bloco of blocos) {
+    const blocoNormalizado = normalizarTexto(bloco);
+    const modeloMatch = blocoNormalizado.match(/iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?\s+\d{2,4}\s*gb/);
+    if (!modeloMatch) continue;
+    const modelo = modeloMatch[0];
+    if (!mapa[modelo]) mapa[modelo] = new Set();
+
+    const linhas = bloco.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const linha of linhas) {
+      if (!/^[✅⤴️☑️]/.test(linha)) continue;
+      const linhaNormalizada = normalizarTexto(linha);
+      for (const cor of CORES_CONHECIDAS) {
+        if (new RegExp(`\\b${cor}\\b`).test(linhaNormalizada)) {
+          mapa[modelo].add(cor);
+        }
+      }
+    }
+  }
+  return mapa;
+}
+
+function respostaTemCorErradaParaModelo(reply) {
+  if (!/r\$/i.test(reply)) return false;
+  const replyLower = reply.toLowerCase();
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  const tabelaCrua = process.env.PRICE_TABLE || '';
+  if (!tabelaCrua) return false;
+  const mapaModeloCor = construirMapaModeloCor(tabelaCrua);
+
+  const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
+  const trechos = reply.split(/(?<=[.!?\n])\s*/);
+  for (const trecho of trechos) {
+    if (regexNegacao.test(trecho.toLowerCase())) continue;
+    const trechoNormalizado = normalizarTexto(trecho);
+
+    // Só considera quando o trecho cita o modelo JUNTO com a memória (GB) —
+    // é preciso saber a linha exata da tabela pra validar a cor certinho.
+    const modelos = extrairModelosMencionados(trechoNormalizado).filter(m => /\d{2,4}gb/.test(m));
+    if (modelos.length === 0) continue;
+
+    const coresNoTrecho = CORES_CONHECIDAS.filter(cor => new RegExp(`\\b${cor}\\b`).test(trechoNormalizado));
+    if (coresNoTrecho.length === 0) continue;
+
+    for (const modelo of modelos) {
+      const coresValidas = mapaModeloCor[modelo];
+      if (!coresValidas) continue; // modelo não encontrado no mapa — outra trava cuida disso
+      for (const cor of coresNoTrecho) {
+        if (!coresValidas.has(cor)) {
+          console.log(`⚠️ Cor incorreta bloqueada: "${cor}" não é uma cor válida para "${modelo}"`);
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+// Quando a trava acima bloqueia, pedimos pro Cláudio corrigir a resposta
+// usando a cor (e o preço correspondente) que realmente existe pra aquele
+// modelo+memória exatos na tabela, em vez de emprestar de outra linha.
+async function gerarRespostaCorrigindoCorModelo(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior citou uma COR que não pertence à linha exata do modelo+memória mencionado na tabela de preços (a cor foi emprestada de outro modelo, outra memória ou outra condição). Releia a tabela com atenção e confira, pra esse modelo+memória exatos, quais cores e qual preço estão realmente listados juntos. Se a cor que o cliente pediu não existir para esse modelo+memória, informe isso claramente e ofereça a(s) cor(es) que realmente estão disponíveis para esse modelo, com o preço correto. NUNCA misture cor de uma linha com preço de outra. Seja breve (1 a 3 frases) e termine com uma pergunta que ajude a fechar a venda.';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaTemCorErradaParaModelo(respostaCorrigida)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir cor do modelo:', e.message);
+  }
+  return null;
+}
+
 function respostaTemModeloForaDaTabela(reply) {
   // Só verifica respostas que parecem oferecer um produto à venda (têm preço em R$)
   if (!/r\$/i.test(reply)) return false;
@@ -1799,6 +1909,10 @@ app.post('/webhook', async (req, res) => {
         if (corrigida) reply = corrigida;
       }
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
+      if (respostaTemCorErradaParaModelo(reply)) {
+        const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaNegaModeloQueExisteNaTabela(reply)) {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -1831,6 +1945,10 @@ app.post('/webhook', async (req, res) => {
       if (corrigida) reply = corrigida;
     }
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
+    if (respostaTemCorErradaParaModelo(reply)) {
+      const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
     if (respostaNegaModeloQueExisteNaTabela(reply)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
       if (corrigida) reply = corrigida;
