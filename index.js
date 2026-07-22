@@ -798,42 +798,42 @@ Xiaomi 12 — R$400 (128GB ou 256GB)
 Xiaomi 12 Pro — R$400 (128GB ou 256GB)
 Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
-Xiaomi 13 — R$ (128GB ou 256GB)
-Xiaomi 13 Pro — R$ (128GB ou 256GB)
-Xiaomi 13T — R$ (128GB ou 256GB)
-Xiaomi 13T Pro — R$ (128GB ou 256GB)
-Xiaomi 14 — R$ (128GB ou 256GB)
-Xiaomi 14 Pro — R$ (128GB ou 256GB)
-Xiaomi 14T — R$ (128GB ou 256GB)
-Xiaomi 14T Pro — R$ (128GB ou 256GB)
-Xiaomi 14 Ultra — R$ (256GB ou 512GB)
-Xiaomi 15 — R$ (128GB ou 256GB)
-Xiaomi 15 Pro — R$ (128GB ou 256GB)
-Xiaomi 15 Ultra — R$ (256GB ou 512GB)
+Xiaomi 13 — R$300 (independente de 64/128/256GB)
+Xiaomi 13 Pro — R$350 (independente de 64/128/256GB)
+Xiaomi 13T — R$350 (independente de 64/128/256GB)
+Xiaomi 13T Pro — R$400 (independente de 64/128/256GB)
+Xiaomi 14 — R$500 (independente de 64/128/256GB)
+Xiaomi 14 Pro — R$600 (independente de 64/128/256GB)
+Xiaomi 14T — R$400 (independente de 64/128/256GB)
+Xiaomi 14T Pro — R$350 (independente de 64/128/256GB)
+Xiaomi 14 Ultra — R$500 (independente de 64/128/256GB)
+Xiaomi 15 — R$600 (independente de 64/128/256GB)
+Xiaomi 15 Pro — R$750 (independente de 64/128/256GB)
+Xiaomi 15 Ultra — R$800 (independente de 64/128/256GB)
 xiaomi poco m6 — 128GB ou 256GB: R$350
-Poco X3 — R$ (128GB ou 256GB)
-Poco X4 — R$ (128GB ou 256GB)
-Poco X5 — R$ (128GB ou 256GB)
-Poco X6 — R$ (128GB ou 256GB)
-Poco X7 — R$ (128GB ou 256GB)
-Poco F3 — R$ (128GB ou 256GB)
-Poco F4 — R$ (128GB ou 256GB)
-Poco F5 — R$ (128GB ou 256GB)
-Poco F6 — R$ (128GB ou 256GB)
-Poco M3 — R$ (32GB ou 64GB)
-Poco M4 — R$ (64GB ou 128GB)
-Poco M5 — R$ (64GB ou 128GB)
-Poco M6 Pro — R$ (128GB ou 256GB)
+Poco X3 — R$300 (independente de 64/128/256GB)
+Poco X4 — R$350 (independente de 64/128/256GB)
+Poco X5 — R$400 (independente de 64/128/256GB)
+Poco X6 — R$550 (independente de 64/128/256GB)
+Poco X7 — R$900 (independente de 64/128/256GB)
+Poco F3 — R$400 (independente de 64/128/256GB)
+Poco F4 — R$500 (independente de 64/128/256GB)
+Poco F5 — R$600 (independente de 64/128/256GB)
+Poco F6 — R$1.000 (independente de 64/128/256GB)
+Poco M3 — R$300 (independente de 64/128/256GB)
+Poco M4 — R$400 (independente de 64/128/256GB)
+Poco M5 — R$400 (independente de 64/128/256GB)
+Poco M6 Pro — R$400 (independente de 64/128/256GB)
 redmi a5 — 128GB ou 256GB: R$300
-Redmi 9 — R$ (32GB ou 64GB)
-Redmi 9A — R$ (32GB ou 64GB)
-Redmi 9C — R$ (64GB ou 128GB)
-Redmi 10 — R$ (64GB ou 128GB)
-Redmi 10C — R$ (64GB ou 128GB)
-Redmi 12 — R$ (128GB ou 256GB)
-Redmi 12C — R$ (64GB ou 128GB)
-Redmi 13 — R$ (128GB ou 256GB)
-Redmi 13C — R$ (128GB ou 256GB)
+Redmi 9 — R$250 (independente de 64/128/256GB)
+Redmi 9A — R$250 (independente de 64/128/256GB)
+Redmi 9C — R$250 (independente de 64/128/256GB)
+Redmi 10 — R$250 (independente de 64/128/256GB)
+Redmi 10C — R$250 (independente de 64/128/256GB)
+Redmi 12 — R$200 (independente de 64/128/256GB)
+Redmi 12C — R$200 (independente de 64/128/256GB)
+Redmi 13 — R$250 (independente de 64/128/256GB)
+Redmi 13C — R$250 (independente de 64/128/256GB)
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
 Redmi Note 10 / Note 10s — R$300
@@ -1572,7 +1572,14 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   // Xiaomi / Poco / Redmi (linha number + poco/redmi avulsos)
   "xiaomi 11", "xiaomi 11t", "xiaomi 11t pro",
   "xiaomi 12", "xiaomi 12 pro", "xiaomi 12t", "xiaomi 12t pro",
-  "poco m6", "redmi a5",
+  "xiaomi 13", "xiaomi 13 pro", "xiaomi 13t", "xiaomi 13t pro",
+  "xiaomi 14", "xiaomi 14 pro", "xiaomi 14t", "xiaomi 14t pro", "xiaomi 14 ultra",
+  "xiaomi 15", "xiaomi 15 pro", "xiaomi 15 ultra",
+  "poco m6", "poco x3", "poco x4", "poco x5", "poco x6", "poco x7",
+  "poco f3", "poco f4", "poco f5", "poco f6",
+  "poco m3", "poco m4", "poco m5", "poco m6 pro",
+  "redmi a5", "redmi 9", "redmi 9a", "redmi 9c",
+  "redmi 10", "redmi 10c", "redmi 12", "redmi 12c", "redmi 13", "redmi 13c",
   // Redmi Note
   "redmi note 10", "redmi note 10s", "redmi note 10 pro",
   "redmi note 11", "redmi note 11 pro", "redmi note 11 pro+",
@@ -1614,7 +1621,7 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
 // "galaxy s23", "redmi note 12", "realme c53", "xiaomi 12t pro"). Não exige
 // memória/GB, pois o valor de troca costuma ser citado sem repetir a memória.
 function extrairModelosAndroidMencionados(textoNormalizado) {
-  const regex = /(poco\s+\w+\d*|redmi\s+(?:note\s+\d+\w*(?:\s*pro\+?)?|a\d+\w*)|moto\s+(?:g\s*\d+\w*(?:\s*(?:play|plus|power))?|edge\s*\d+\w*|e\s*\d+\w*|one\s+(?:action|fusion\+?|hyper|macro)|razr\w*)|galaxy\s+(?:s\d+\w*(?:\s*ultra)?(?:\s*fe)?|a\d+\w*|m\d+\w*|note\s*\d+\w*(?:\s*ultra|\s*lite|\s*\+)?|j\d+\w*(?:\s*prime)?|z\s*(?:flip|fold)\s*\d*)|realme\s+c\d+\w*|xiaomi\s+\d+\w*(?:\s*(?:t\s*pro|t|pro))?)/g;
+  const regex = /(poco\s+\w+\d*(?:\s*pro)?|redmi\s+(?:note\s+\d+\w*(?:\s*pro\+?)?|a\d+\w*|\d+\w*)|moto\s+(?:g\s*\d+\w*(?:\s*(?:play|plus|power))?|edge\s*\d+\w*|e\s*\d+\w*|one\s+(?:action|fusion\+?|hyper|macro)|razr\w*)|galaxy\s+(?:s\d+\w*(?:\s*ultra)?(?:\s*fe)?|a\d+\w*|m\d+\w*|note\s*\d+\w*(?:\s*ultra|\s*lite|\s*\+)?|j\d+\w*(?:\s*prime)?|z\s*(?:flip|fold)\s*\d*)|realme\s+c\d+\w*|xiaomi\s+\d+\w*(?:\s*(?:t\s*pro|t|pro|ultra))?)/g;
   return textoNormalizado.match(regex) || [];
 }
 
