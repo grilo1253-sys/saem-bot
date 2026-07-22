@@ -281,6 +281,12 @@ Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crít
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
 - REGRA DE VALOR CONFIRMADO PELA EQUIPE:
 Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
+- REGRA DE XIAOMI NOVO/LACRADO — SEM CÁLCULO DE TROCA:
+Os Xiaomis Novos/Lacrados (linha "Xiaomis Encomendas" da tabela) são pronta entrega normalmente, como qualquer outro produto da loja. Porém, o Cláudio NÃO tem autorização para calcular valor de troca nem para aceitar o aparelho do cliente como entrada nessa negociação — mesmo que o cliente ofereça um Android ou iPhone pra trocar. Isso é diferente de vender um seminovo, onde a troca funciona normalmente. Se o cliente quiser negociar a compra de um Xiaomi novo/lacrado dando outro aparelho como entrada, NÃO monte simulação, NÃO estime valor de troca e NÃO diga que vai verificar com a equipe. Encaminhe direto para o WhatsApp: https://wa.me/5512983118100 — quem fecha esse tipo de negociação é a equipe direto por lá. Essa regra vale SOMENTE para o cálculo de troca de Xiaomi novo/lacrado; para todo o resto (venda normal desses Xiaomis, seminovos, iPhones, outros Android), tudo continua normal.
+- REGRA DE VENDA DE APARELHO SEM TROCA (SÓ VENDER, NÃO COMPRAR NADA):
+A Saem Celulares NÃO compra aparelhos "à vista" isolados — só aceita aparelho usado como ENTRADA/TROCA dentro de uma compra (o cliente dá o aparelho velho e leva outro, pagando a diferença). Se o cliente disser que quer só VENDER o aparelho dele (sem levar nada em troca, sem comprar nada da loja), deixe isso claro logo de cara, de forma educada, e direcione para o WhatsApp abaixo, que é o número certo pra esse tipo de negociação: https://wa.me/5512983118100
+Exemplo de como responder: "Aqui na loja a gente trabalha só com troca — você dá seu aparelho como entrada e leva outro, pagando a diferença 😊 Pra vender o aparelho sem levar nada em troca, o número certo é esse aqui: https://wa.me/5512983118100"
+NÃO tente negociar, avaliar ou dar valor de compra direta nessa situação — encaminhe direto para o número acima.
 
 ━━━━━━━━━━━━━━━━━━━
 LOJAS E HORÁRIOS
@@ -753,6 +759,29 @@ A55: R$600 (128GB ou 256GB)
 A56: R$800 (128GB ou 256GB)
 A72, A73: R$400 (128GB ou 256GB)
 
+A20, A20s, A21 — 32/64GB: R$200
+A30, A30s, A31 — 64/128GB: R$200
+A50, A50s, A51 — 64/128/256GB: R$250
+A70, A71 — 128GB: R$250
+
+SAMSUNG — LINHA GALAXY M
+
+M12, M13, M14 — 64/128GB: R$200
+M22, M23, M24 — 128GB: R$250
+M32, M33, M34 — 128/256GB: R$300
+M52, M53, M54, M55 — 128/256GB: R$300
+
+SAMSUNG — LINHA GALAXY NOTE
+
+Note 10, Note 10 Lite: R$400
+Note 10+: R$450
+Note 20: R$600
+Note 20 Ultra: R$900
+
+SAMSUNG — LINHA GALAXY J
+
+J5, J6, J7, J7 Prime, J8: R$150
+
 Dobráveis (NÃO aceitamos na troca):
 Galaxy Z Flip 3, 4, 5, 6, 7
 Galaxy Z Fold 3, 4, 5, 6, 7
@@ -769,8 +798,42 @@ Xiaomi 12 — R$400 (128GB ou 256GB)
 Xiaomi 12 Pro — R$400 (128GB ou 256GB)
 Xiaomi 12T — R$400 (128GB ou 256GB)
 Xiaomi 12T Pro — R$400 (128GB ou 256GB)
+Xiaomi 13 — R$ (128GB ou 256GB)
+Xiaomi 13 Pro — R$ (128GB ou 256GB)
+Xiaomi 13T — R$ (128GB ou 256GB)
+Xiaomi 13T Pro — R$ (128GB ou 256GB)
+Xiaomi 14 — R$ (128GB ou 256GB)
+Xiaomi 14 Pro — R$ (128GB ou 256GB)
+Xiaomi 14T — R$ (128GB ou 256GB)
+Xiaomi 14T Pro — R$ (128GB ou 256GB)
+Xiaomi 14 Ultra — R$ (256GB ou 512GB)
+Xiaomi 15 — R$ (128GB ou 256GB)
+Xiaomi 15 Pro — R$ (128GB ou 256GB)
+Xiaomi 15 Ultra — R$ (256GB ou 512GB)
 xiaomi poco m6 — 128GB ou 256GB: R$350
+Poco X3 — R$ (128GB ou 256GB)
+Poco X4 — R$ (128GB ou 256GB)
+Poco X5 — R$ (128GB ou 256GB)
+Poco X6 — R$ (128GB ou 256GB)
+Poco X7 — R$ (128GB ou 256GB)
+Poco F3 — R$ (128GB ou 256GB)
+Poco F4 — R$ (128GB ou 256GB)
+Poco F5 — R$ (128GB ou 256GB)
+Poco F6 — R$ (128GB ou 256GB)
+Poco M3 — R$ (32GB ou 64GB)
+Poco M4 — R$ (64GB ou 128GB)
+Poco M5 — R$ (64GB ou 128GB)
+Poco M6 Pro — R$ (128GB ou 256GB)
 redmi a5 — 128GB ou 256GB: R$300
+Redmi 9 — R$ (32GB ou 64GB)
+Redmi 9A — R$ (32GB ou 64GB)
+Redmi 9C — R$ (64GB ou 128GB)
+Redmi 10 — R$ (64GB ou 128GB)
+Redmi 10C — R$ (64GB ou 128GB)
+Redmi 12 — R$ (128GB ou 256GB)
+Redmi 12C — R$ (64GB ou 128GB)
+Redmi 13 — R$ (128GB ou 256GB)
+Redmi 13C — R$ (128GB ou 256GB)
 
 Linha Redmi Note (valor igual independente de 128/256/512GB):
 Redmi Note 10 / Note 10s — R$300
@@ -794,12 +857,18 @@ MOTOROLA - Linha Moto G (valores de troca, aparelho sem defeito)
 
 Moto g1/g2/g3 — 32gb / 64gb ou 128GB ou 256GB: R$150
 moto g4/ g5 - 32/64/128/256 - R$200
+Moto G6, G6 Play, G6 Plus — 32/64GB: R$200
+Moto G7, G7 Play, G7 Power — 32/64GB: R$200
+Moto G8, G8 Play, G8 Power — 32/64GB: R$200
 moto g04/g05s - 128/256 gb - R$300
 Moto G9 — 128GB ou 256GB: R$250
+Moto G10 — 128GB: R$250
 Moto G05 — 128GB ou 256GB: R$300
 Moto G9 Play — 128GB ou 256GB: R$200
 Moto G9 Plus — 128GB ou 256GB: R$250
+Moto G20 — 128GB: R$250
 Moto G22 — 128GB ou 256GB: R$300
+Moto G30 — 128GB: R$300
 Moto G15 — 128GB: R$400 | 256GB: R$500
 Moto G31 — 128GB: R$300 | 256GB: R$400
 Moto G32 — 128GB: R$300 | 256GB: R$400
@@ -825,6 +894,24 @@ Moto G85 — 128GB: R$650 | 256GB: R$700
 Moto G86 — 128GB: R$1.200 | 256GB: R$1.300
 Moto G96 — 128GB: R$1.400 | 256GB: R$1.500
 
+MOTOROLA - Linha Moto E (valores de troca, aparelho sem defeito)
+
+Moto E4, E5, E6, E7 — 16/32GB: R$200
+Moto E13 — 32/64GB: R$200
+Moto E14 — 64/128GB: R$250
+Moto E15 — 64/128GB: R$250
+Moto E22 — 64/128GB: R$200
+Moto E32 — 64/128GB: R$200
+Moto E40 — 64/128GB: R$250
+
+MOTOROLA - Linha One (valores de troca, aparelho sem defeito)
+
+Moto One Action — 128GB: R$200
+Moto One Fusion — 128GB: R$250
+Moto One Fusion+ — 128GB: R$250
+Moto One Hyper — 128GB: R$200
+Moto One Macro — 64GB: R$200
+
 MOTOROLA - Linha Edge (valores de troca, aparelho sem defeito)
 
 Edge 20 — 128GB: R$400 | 256GB: R$500
@@ -845,6 +932,8 @@ Edge 60 — 128GB: R$1.000| 256GB: R$1.200
 Edge 60 Fusion — 128GB: R$700 | 256GB: R$850
 Edge 60 Pro — 256GB: R$1700
 Edge 60 Stylus — 128GB: R$1.300 | 256GB: R$1.400
+
+Moto Razr (dobrável, todas as gerações) — NÃO aceitamos na troca
 
 ━━━━━━━━━━━━━━━━━━━
 
@@ -1466,6 +1555,20 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   "galaxy a25", "galaxy a26", "galaxy a34", "galaxy a35", "galaxy a36",
   "galaxy a52", "galaxy a53", "galaxy a54", "galaxy a55", "galaxy a56",
   "galaxy a72", "galaxy a73",
+  "galaxy a20", "galaxy a20s", "galaxy a21",
+  "galaxy a30", "galaxy a30s", "galaxy a31",
+  "galaxy a50", "galaxy a50s", "galaxy a51",
+  "galaxy a70", "galaxy a71",
+  // Samsung Galaxy M
+  "galaxy m12", "galaxy m13", "galaxy m14",
+  "galaxy m22", "galaxy m23", "galaxy m24",
+  "galaxy m32", "galaxy m33", "galaxy m34",
+  "galaxy m52", "galaxy m53", "galaxy m54", "galaxy m55",
+  // Samsung Galaxy Note
+  "galaxy note 10", "galaxy note 10 lite", "galaxy note 10+",
+  "galaxy note 20", "galaxy note 20 ultra",
+  // Samsung Galaxy J
+  "galaxy j5", "galaxy j6", "galaxy j7", "galaxy j7 prime", "galaxy j8",
   // Xiaomi / Poco / Redmi (linha number + poco/redmi avulsos)
   "xiaomi 11", "xiaomi 11t", "xiaomi 11t pro",
   "xiaomi 12", "xiaomi 12 pro", "xiaomi 12t", "xiaomi 12t pro",
@@ -1484,6 +1587,15 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   "moto g51", "moto g52", "moto g53", "moto g54", "moto g55", "moto g56",
   "moto g62", "moto g64", "moto g65", "moto g71", "moto g72", "moto g73", "moto g75",
   "moto g82", "moto g84", "moto g85", "moto g86", "moto g96",
+  "moto g6", "moto g6 play", "moto g6 plus",
+  "moto g7", "moto g7 play", "moto g7 power",
+  "moto g8", "moto g8 play", "moto g8 power",
+  "moto g10", "moto g20", "moto g30",
+  // Motorola Moto E
+  "moto e4", "moto e5", "moto e6", "moto e7",
+  "moto e13", "moto e14", "moto e15", "moto e22", "moto e32", "moto e40",
+  // Motorola One
+  "moto one action", "moto one fusion", "moto one fusion+", "moto one hyper", "moto one macro",
   // Motorola Edge
   "edge 20", "edge 20 pro", "edge 30", "edge 30 neo", "edge 30 fusion", "edge 30 ultra",
   "edge 40", "edge 40 neo", "edge 40 pro",
@@ -1494,11 +1606,15 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   "realme c51", "realme c53", "realme c55", "realme c61", "realme c63", "realme c67", "realme c75",
 ].map(normalizarTexto);
 
+// Moto Razr (dobrável) propositalmente NÃO está na whitelist acima — assim
+// como os dobráveis Galaxy Z Flip/Z Fold, qualquer valor de troca citado
+// para ele já cai automaticamente na trava abaixo (modelo fora da lista).
+
 // Captura menções a marca+modelo Android na resposta (ex: "poco x7", "moto g54",
 // "galaxy s23", "redmi note 12", "realme c53", "xiaomi 12t pro"). Não exige
 // memória/GB, pois o valor de troca costuma ser citado sem repetir a memória.
 function extrairModelosAndroidMencionados(textoNormalizado) {
-  const regex = /(poco\s+\w+\d*|redmi\s+(?:note\s+\d+\w*(?:\s*pro\+?)?|a\d+\w*)|moto\s+(?:g\s*\d+\w*|edge\s*\d+\w*)|galaxy\s+(?:s\d+\w*(?:\s*ultra)?(?:\s*fe)?|a\d+\w*|z\s*(?:flip|fold)\s*\d*)|realme\s+c\d+\w*|xiaomi\s+\d+\w*(?:\s*(?:t\s*pro|t|pro))?)/g;
+  const regex = /(poco\s+\w+\d*|redmi\s+(?:note\s+\d+\w*(?:\s*pro\+?)?|a\d+\w*)|moto\s+(?:g\s*\d+\w*(?:\s*(?:play|plus|power))?|edge\s*\d+\w*|e\s*\d+\w*|one\s+(?:action|fusion\+?|hyper|macro)|razr\w*)|galaxy\s+(?:s\d+\w*(?:\s*ultra)?(?:\s*fe)?|a\d+\w*|m\d+\w*|note\s*\d+\w*(?:\s*ultra|\s*lite|\s*\+)?|j\d+\w*(?:\s*prime)?|z\s*(?:flip|fold)\s*\d*)|realme\s+c\d+\w*|xiaomi\s+\d+\w*(?:\s*(?:t\s*pro|t|pro))?)/g;
   return textoNormalizado.match(regex) || [];
 }
 
