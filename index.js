@@ -96,10 +96,42 @@ const pendentesEquipe = carregarPendentes();
 // ==========================================
 // SISTEMA DE NOTIFICAÇÃO PARA O ADMIN
 // ==========================================
+// Extrai apenas o MOTIVO real da escalação a partir da resposta do Cláudio,
+// em vez de mandar a resposta inteira (que costuma vir cheia de saudação,
+// pergunta pro cliente, emoji, etc). Prioriza frases que mencionem defeito
+// (tela, bateria, traseira, funcionamento) ou modelo/memória fora da tabela
+// — que são os dois únicos motivos válidos de escalação. Se nenhuma frase
+// bater com essas palavras-chave, cai de volta pra resposta inteira (melhor
+// mandar algo do que nada).
+function extrairMotivoPendencia(reply) {
+  const palavrasDefeito = [
+    'defeito', 'tela trincada', 'tela quebrada', 'traseira trincada',
+    'traseira quebrada', 'bateria abaixo', 'bateria ruim', 'não funciona',
+    'nao funciona', 'face id', 'nfc', 'câmera', 'camera', 'nao liga',
+    'não liga', 'trincad', 'quebrad', '%',
+  ];
+  const palavrasForaDaTabela = [
+    'não está na tabela', 'nao esta na tabela', 'não encontrado', 'nao encontrado',
+    'fora da tabela', 'não temos esse modelo', 'nao temos esse modelo',
+    'avaliado presencialmente', 'não está listado', 'nao esta listado',
+  ];
+  const trechos = reply.split(/(?<=[.!?\n])\s*/).map(t => t.trim()).filter(Boolean);
+
+  const trechoDefeito = trechos.find(t => palavrasDefeito.some(p => t.toLowerCase().includes(p)));
+  if (trechoDefeito) return `(defeito relatado) ${trechoDefeito}`;
+
+  const trechoForaDaTabela = trechos.find(t => palavrasForaDaTabela.some(p => t.toLowerCase().includes(p)));
+  if (trechoForaDaTabela) return `(modelo/memória fora da tabela) ${trechoForaDaTabela}`;
+
+  // Fallback: nenhuma palavra-chave bateu — manda a resposta inteira mesmo,
+  // é melhor que ficar sem contexto nenhum.
+  return reply;
+}
+
 async function notificarAdmin(phoneCliente, aparelho, contexto) {
   if (!NUMERO_ADMIN) return;
   try {
-    const msg = `🔔 *Valor necessário para cliente*\n\nCliente: ${phoneCliente}\nAparelho: *${aparelho}*\n\nContexto: ${contexto}\n\n_Responda com o valor no formato:_\n*valor ${phoneCliente} 300*\n_(substitua 300 pelo valor real)_`;
+    const msg = `🔔 *Valor necessário para cliente*\n\nCliente: ${phoneCliente}\nAparelho: *${aparelho}*\n\nMotivo: ${contexto}\n\n_Responda com o valor no formato:_\n*valor ${phoneCliente} 300*\n_(substitua 300 pelo valor real)_`;
     await enviarMensagem(NUMERO_ADMIN, msg);
     console.log(`📲 Admin notificado sobre ${aparelho} para cliente ${phoneCliente}`);
   } catch (e) {
@@ -873,6 +905,7 @@ Moto G15 — 128GB: R$400 | 256GB: R$500
 Moto G31 — 128GB: R$300 | 256GB: R$400
 Moto G32 — 128GB: R$300 | 256GB: R$400
 Moto G34 — 128GB: R$300 | 256GB: R$400
+Moto G35 — 128GB ou 256GB: R$350
 Moto G41 — 128GB: R$350 | 256GB: R$400
 Moto G42 — 128GB: R$400 | 256GB: R$500
 Moto G51 — 128GB: R$400 | 256GB: R$500
@@ -1590,7 +1623,7 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   "moto g1", "moto g2", "moto g3", "moto g4", "moto g5",
   "moto g04", "moto g05s", "moto g9", "moto g05",
   "moto g9 play", "moto g9 plus", "moto g22",
-  "moto g15", "moto g31", "moto g32", "moto g34", "moto g41", "moto g42",
+  "moto g15", "moto g31", "moto g32", "moto g34", "moto g35", "moto g41", "moto g42",
   "moto g51", "moto g52", "moto g53", "moto g54", "moto g55", "moto g56",
   "moto g62", "moto g64", "moto g65", "moto g71", "moto g72", "moto g73", "moto g75",
   "moto g82", "moto g84", "moto g85", "moto g86", "moto g96",
@@ -2095,7 +2128,19 @@ app.post('/webhook', async (req, res) => {
       const aparelho = extrairAparelhoPendente(conversas[phone]);
       pendentesEquipe[phone] = { aparelho, aguardando: true };
       salvarPendentes();
-      await notificarAdmin(phone, aparelho, message);
+      // Usamos a RESPOSTA do Cláudio como contexto, não a mensagem crua do
+      // cliente. Motivo: o cliente pode estar no meio de uma pergunta sobre
+      // outro assunto (ex: perguntando por um modelo diferente pra comprar)
+      // no exato momento em que a pendência de troca é detectada — nesse
+      // caso, a mensagem dele não explica o problema real. A resposta do
+      // próprio Cláudio, por outro lado, já contém a explicação certa do
+      // motivo da escalação (ex: "tem dois defeitos combinados, preciso
+      // verificar com a equipe"), então é uma contexto muito mais útil e
+      // relevante pra quem vai avaliar.
+      // Extraímos só o MOTIVO real (defeito ou modelo fora da tabela) da
+      // resposta do Cláudio, em vez de mandar a resposta inteira ou a
+      // mensagem crua do cliente — assim você vê direto qual é o problema.
+      await notificarAdmin(phone, aparelho, extrairMotivoPendencia(reply));
     }
 
     await enviarMensagem(phone, reply);
