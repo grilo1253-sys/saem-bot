@@ -93,6 +93,16 @@ const conversas = carregarConversas();
 const metaConversas = carregarMetadados();
 const pendentesEquipe = carregarPendentes();
 
+// Rastreia mensagens que o PRÓPRIO bot acabou de enviar, pra diferenciar do
+// eco "fromMe" (que o Z-API manda de volta toda vez que uma mensagem sai
+// desse número, seja ela do bot ou digitada manualmente por alguém da
+// equipe). Sem isso, uma resposta manual da equipe (ex: Saem respondendo o
+// cliente direto pelo WhatsApp enquanto o bot estava fora do ar por falta de
+// crédito da API) é simplesmente descartada e o Cláudio, ao voltar, responde
+// de novo a mesma pergunta que já tinha sido resolvida manualmente —
+// causando duplicidade (ex: valor de troca informado duas vezes).
+const mensagensEnviadasPeloBot = {};
+
 // ==========================================
 // SISTEMA DE NOTIFICAÇÃO PARA O ADMIN
 // ==========================================
@@ -1726,6 +1736,90 @@ async function gerarRespostaCorrigindoValorAndroid(mensagens) {
 }
 
 // ==========================================
+// TRAVA DE SEGURANÇA — VALOR TROCADO ENTRE MODELOS DA LINHA REDMI NOTE
+// ==========================================
+// Erro real que já aconteceu: cliente perguntou o valor de troca do "Redmi
+// Note 14 256GB" (modelo base) e o Cláudio respondeu R$800 — que é o valor
+// do "Redmi Note 14 PRO" (o Note 14 base vale R$600). A trava
+// ANDROID_TROCA_MODELOS_VALIDOS não pega esse tipo de erro porque "redmi
+// note 14" existe na lista de modelos válidos — o problema não é o modelo
+// não existir, é o valor citado pertencer à linha de OUTRO modelo da mesma
+// família. A linha Redmi Note é a mais arriscada pra esse tipo de troca
+// porque tem vários modelos com nomes quase idênticos (Note 14 / Note 14
+// Pro / Note 14 Pro Max) e valores próximos, então essa trava roda em
+// runtime comparando o valor citado com o valor EXATO daquele modelo
+// específico, independente do que o prompt diga.
+const VALORES_TROCA_REDMI_NOTE = {
+  '10': 300, '10s': 300, '10 pro': 300,
+  '11': 400, '11 pro': 400, '11 pro+': 400,
+  '12': 400, '12 pro': 400, '12 pro+': 400,
+  '13': 400, '13 pro': 500, '13 pro+': 600,
+  '14': 600, '14 pro': 800, '14 pro max': 1100,
+};
+
+function respostaTemValorTrocaRedmiNoteErrado(reply) {
+  if (!/r\$/i.test(reply)) return false;
+  const replyLower = reply.toLowerCase();
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  const regexMencao = /redmi\s*note\s*(10s?|11|12|13|14)\s*(pro\s*max|pro\+?)?/gi;
+
+  let match;
+  while ((match = regexMencao.exec(reply)) !== null) {
+    const numero = match[1].toLowerCase();
+    const sufixo = (match[2] || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const chave = sufixo ? `${numero} ${sufixo}` : numero;
+    const valorEsperado = VALORES_TROCA_REDMI_NOTE[chave];
+    if (valorEsperado === undefined) continue; // combinação não mapeada, não valida
+
+    // Pega uma janela de caracteres ao redor da menção (em vez de dividir por
+    // frase) pra achar o valor R$ citado perto dela — dividir por frase quebra
+    // errado quando o valor usa ponto como separador de milhar (ex: "R$1.100"
+    // seria cortado em "R$1." + "100" por causa do ponto).
+    const inicioJanela = Math.max(0, match.index - 15);
+    const fimJanela = Math.min(reply.length, match.index + match[0].length + 60);
+    const janela = reply.slice(inicioJanela, fimJanela);
+    const valorMatch = janela.match(/r\$[^\d]{0,3}([\d]{1,3}(?:\.\d{3})*(?:,\d{1,2})?)/i);
+    if (!valorMatch) continue;
+    const valorCitado = parseFloat(valorMatch[1].replace(/\./g, '').replace(',', '.'));
+    if (Math.abs(valorCitado - valorEsperado) > 0.01) {
+      console.log(`⚠️ Valor de troca trocado entre modelos Redmi Note bloqueado: "${match[0]}" deveria ser R$${valorEsperado}, mas citou R$${valorCitado}`);
+      return true;
+    }
+  }
+  return false;
+}
+
+async function gerarRespostaCorrigindoValorRedmiNote(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior citou um valor de troca da linha Redmi Note que pertence a OUTRO modelo da mesma família (ex: deu o valor do "Pro" para o modelo base, ou vice-versa). Releia a seção "Linha Redmi Note" da tabela VALORES DE TROCA - ANDROID com muita atenção ao nome EXATO do modelo (Note 14, Note 14 Pro e Note 14 Pro Max são modelos DIFERENTES com valores DIFERENTES — o mesmo vale para as demais gerações). Refaça a resposta usando o valor da linha que corresponde EXATAMENTE ao modelo que o cliente mencionou, sem confundir com o modelo "Pro"/"Pro+"/"Pro Max" vizinho. Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaTemValorTrocaRedmiNoteErrado(respostaCorrigida)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir valor de troca Redmi Note:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — VALOR DE MANUTENÇÃO ANDROID INVENTADO
 // ==========================================
 // Erro real que já aconteceu: cliente perguntou quanto custa a troca de tela
@@ -1984,6 +2078,13 @@ async function enviarMensagem(phone, message) {
     { phone, message },
     { headers: { 'Client-Token': ZAPI_CLIENT_TOKEN } }
   );
+  // Registra que essa mensagem saiu por conta do bot, pra quando o eco
+  // "fromMe" chegar no webhook a gente saber que já foi contabilizada e não
+  // tratá-la como resposta manual da equipe. Mantém só as últimas 10 por
+  // número pra não crescer sem limite.
+  if (!mensagensEnviadasPeloBot[phone]) mensagensEnviadasPeloBot[phone] = [];
+  mensagensEnviadasPeloBot[phone].push(message);
+  if (mensagensEnviadasPeloBot[phone].length > 10) mensagensEnviadasPeloBot[phone].shift();
 }
 
 // ==========================================
@@ -1991,7 +2092,31 @@ async function enviarMensagem(phone, message) {
 // ==========================================
 app.post('/webhook', async (req, res) => {
   const body = req.body;
-  if (body.fromMe) return res.sendStatus(200);
+  if (body.fromMe) {
+    const phoneDestino = body.phone;
+    const textoEnviado = body.text?.message || body.text || '';
+    if (phoneDestino && textoEnviado && phoneDestino !== NUMERO_ADMIN) {
+      const enviadosBot = mensagensEnviadasPeloBot[phoneDestino] || [];
+      const idx = enviadosBot.indexOf(textoEnviado);
+      if (idx !== -1) {
+        // Eco da própria mensagem que o bot mandou — já está no histórico
+        // (foi salvo no momento do envio), então só consome o registro e
+        // ignora, sem duplicar.
+        enviadosBot.splice(idx, 1);
+      } else {
+        // Mensagem enviada manualmente pela equipe direto pro cliente (ex:
+        // Saem respondendo enquanto o bot estava fora do ar). Registra no
+        // histórico como resposta do assistente, pra quando o Cláudio voltar
+        // a ativo ele já saber que essa pergunta foi respondida e não
+        // responder de novo (duplicado) a mesma coisa.
+        if (!conversas[phoneDestino]) conversas[phoneDestino] = [];
+        conversas[phoneDestino].push({ role: 'assistant', content: `[RESPOSTA MANUAL DA EQUIPE]: ${textoEnviado}` });
+        if (conversas[phoneDestino].length > 20) conversas[phoneDestino] = conversas[phoneDestino].slice(-20);
+        salvarConversas();
+      }
+    }
+    return res.sendStatus(200);
+  }
 
   console.log('BODY:', JSON.stringify(body).substring(0, 300));
 
@@ -2094,6 +2219,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaTemValorTrocaRedmiNoteErrado(reply)) {
+        const corrigida = await gerarRespostaCorrigindoValorRedmiNote(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
         const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -2130,6 +2259,10 @@ app.post('/webhook', async (req, res) => {
       const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
+    if (respostaTemValorTrocaRedmiNoteErrado(reply)) {
+      const corrigida = await gerarRespostaCorrigindoValorRedmiNote(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
     if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
       const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
       if (corrigida) reply = corrigida;
@@ -2164,6 +2297,17 @@ app.post('/webhook', async (req, res) => {
 
   } catch (error) {
     console.error('Erro:', error.response?.data || error.message);
+    // Antes esse erro (ex: crédito da API acabou, erro 401/429/500) ficava só
+    // no log do Railway, sem avisar ninguém — o cliente ficava sem resposta
+    // e só se descobria o problema quando alguém notava manualmente. Agora
+    // avisa o admin na hora, pra responder manualmente enquanto o problema
+    // não é resolvido (a resposta manual já fica registrada corretamente
+    // graças ao tratamento de fromMe acima, sem duplicar depois).
+    if (NUMERO_ADMIN && phone && phone !== NUMERO_ADMIN) {
+      try {
+        await enviarMensagem(NUMERO_ADMIN, `⚠️ Erro ao processar mensagem do cliente ${phone}. O Cláudio pode estar fora do ar (crédito da API, erro de conexão, etc). Responda manualmente por enquanto:\n\nErro: ${error.response?.data?.error?.message || error.message}`);
+      } catch (e) {}
+    }
   }
 });
 
