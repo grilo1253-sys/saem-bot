@@ -796,6 +796,7 @@ A20, A20s, A21 — 32/64GB: R$200
 A30, A30s, A31 — 64/128GB: R$200
 A50, A50s, A51 — 64/128/256GB: R$250
 A70, A71 — 128GB: R$250
+A17 — 128GB ou 256GB: R$400
 
 SAMSUNG — LINHA GALAXY M
 
@@ -844,6 +845,7 @@ Xiaomi 15 — R$600 (independente de 64/128/256GB)
 Xiaomi 15 Pro — R$750 (independente de 64/128/256GB)
 Xiaomi 15 Ultra — R$800 (independente de 64/128/256GB)
 xiaomi poco m6 — 128GB ou 256GB: R$350
+Poco C71 — R$350 (independente de 64/128/256GB)
 Poco X3 — R$300 (independente de 64/128/256GB)
 Poco X4 — R$350 (independente de 64/128/256GB)
 Poco X5 — R$400 (independente de 64/128/256GB)
@@ -901,6 +903,7 @@ Moto G9 Play — 128GB ou 256GB: R$200
 Moto G9 Plus — 128GB ou 256GB: R$250
 Moto G20 — 128GB: R$250
 Moto G22 — 128GB ou 256GB: R$300
+Moto G24 — 128GB: R$300
 Moto G30 — 128GB: R$300
 Moto G15 — 128GB: R$400 | 256GB: R$500
 Moto G31 — 128GB: R$300 | 256GB: R$400
@@ -1605,7 +1608,7 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   "galaxy a20", "galaxy a20s", "galaxy a21",
   "galaxy a30", "galaxy a30s", "galaxy a31",
   "galaxy a50", "galaxy a50s", "galaxy a51",
-  "galaxy a70", "galaxy a71",
+  "galaxy a70", "galaxy a71", "galaxy a17",
   // Samsung Galaxy M
   "galaxy m12", "galaxy m13", "galaxy m14",
   "galaxy m22", "galaxy m23", "galaxy m24",
@@ -1622,7 +1625,7 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   "xiaomi 13", "xiaomi 13 pro", "xiaomi 13t", "xiaomi 13t pro",
   "xiaomi 14", "xiaomi 14 pro", "xiaomi 14t", "xiaomi 14t pro", "xiaomi 14 ultra",
   "xiaomi 15", "xiaomi 15 pro", "xiaomi 15 ultra",
-  "poco m6", "poco x3", "poco x4", "poco x5", "poco x6", "poco x7",
+  "poco m6", "poco c71", "poco x3", "poco x4", "poco x5", "poco x6", "poco x7",
   "poco f3", "poco f4", "poco f5", "poco f6",
   "poco m3", "poco m4", "poco m5", "poco m6 pro",
   "redmi a5", "redmi 9", "redmi 9a", "redmi 9c",
@@ -1636,7 +1639,7 @@ const ANDROID_TROCA_MODELOS_VALIDOS = [
   // Motorola Moto G
   "moto g1", "moto g2", "moto g3", "moto g4", "moto g5",
   "moto g04", "moto g05s", "moto g9", "moto g05",
-  "moto g9 play", "moto g9 plus", "moto g22",
+  "moto g9 play", "moto g9 plus", "moto g22", "moto g24",
   "moto g15", "moto g31", "moto g32", "moto g34", "moto g35", "moto g41", "moto g42",
   "moto g51", "moto g52", "moto g53", "moto g54", "moto g55", "moto g56",
   "moto g62", "moto g64", "moto g65", "moto g71", "moto g72", "moto g73", "moto g75",
