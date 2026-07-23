@@ -1504,12 +1504,25 @@ function mensagemPareceTroca(mensagemCliente) {
 // chave de troca na frase do cliente.
 function assistentePerguntouSobreAparelhoDeTroca(mensagens) {
   if (!Array.isArray(mensagens) || mensagens.length < 2) return false;
-  // a última posição é a mensagem atual do cliente; olhamos a anterior a ela
-  for (let i = mensagens.length - 2; i >= 0; i--) {
-    const m = mensagens[i];
+  // Erro real que já aconteceu: o assistente estabeleceu que era uma troca
+  // duas mensagens atrás ("Boa! Então você pode dar ele como entrada na
+  // troca 😊 Me conta: qual a memória..."), mas na mensagem seguinte só
+  // pediu um detalhe que faltou (a memória), sem repetir a palavra "troca"
+  // ou "entrada". O cliente respondeu só "128gb" a essa pergunta de detalhe,
+  // e a verificação antiga olhava SÓ a mensagem do assistente imediatamente
+  // anterior — que não tinha nenhuma palavra-chave de troca — e já retornava
+  // false ali, sem continuar procurando pra trás. Corrigido: agora continua
+  // escaneando várias mensagens do assistente pra trás (não só a mais
+  // recente) até achar uma que estabeleça claramente que é uma negociação
+  // de troca, olhando as últimas ~8 mensagens do histórico.
+  const regexPerguntaSobreAparelhoTroca = /dar\s+(ele\s+)?(como\s+)?(de\s+)?entrada|entrada\s+na\s+(troca|compra)|qual\s+aparelho\s+voce\s+tem\s+para\s+dar\s+de\s+entrada|tem\s+algum\s+aparelho\s+para\s+troca|modelo,?\s+memoria\s+e\s+estado|saude\s+da\s+bateria\s+tambem|(memoria|bateria|tela|traseira)\s+do\s+seu\s+\w+|tela\s*,?\s*traseira\s*,?\s*bateria/;
+
+  const ultimasMensagens = mensagens.slice(-9, -1); // últimas ~8, excluindo a mensagem atual do cliente
+  for (let i = ultimasMensagens.length - 1; i >= 0; i--) {
+    const m = ultimasMensagens[i];
     if (m.role !== 'assistant') continue;
     const texto = normalizarTexto(typeof m.content === 'string' ? m.content : '');
-    return /qual\s+aparelho\s+voce\s+tem\s+para\s+dar\s+de\s+entrada|dar\s+de\s+entrada|entrada\s+na\s+compra|tem\s+algum\s+aparelho\s+para\s+troca|modelo,?\s+memoria\s+e\s+estado|saude\s+da\s+bateria\s+tambem/.test(texto);
+    if (regexPerguntaSobreAparelhoTroca.test(texto)) return true;
   }
   return false;
 }
