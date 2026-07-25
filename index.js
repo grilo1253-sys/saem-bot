@@ -1528,7 +1528,17 @@ function assistentePerguntouSobreAparelhoDeTroca(mensagens) {
   // escaneando várias mensagens do assistente pra trás (não só a mais
   // recente) até achar uma que estabeleça claramente que é uma negociação
   // de troca, olhando as últimas ~8 mensagens do histórico.
-  const regexPerguntaSobreAparelhoTroca = /dar\s+(ele\s+)?(como\s+)?(de\s+)?entrada|entrada\s+na\s+(troca|compra)|qual\s+aparelho\s+voce\s+tem\s+para\s+dar\s+de\s+entrada|tem\s+algum\s+aparelho\s+para\s+troca|modelo,?\s+memoria\s+e\s+estado|saude\s+da\s+bateria\s+tambem|(memoria|bateria|tela|traseira)\s+do\s+seu\s+\w+|tela\s*,?\s*traseira\s*,?\s*bateria/;
+  // ERRO REAL QUE JÁ ACONTECEU: um cliente pediu pra trocar o iPhone 12 Pro
+  // Max por um 15 Pro Max, o Cláudio perguntou corretamente "Me conta um
+  // pouco sobre o seu iPhone 12 Pro Max: Quantos GB é o seu? Saúde da
+  // bateria (em %)? Tem algum defeito (tela, traseira, Face ID, etc)?" — mas
+  // essa frase não batia com NENHUM padrão abaixo (não tem "dar de entrada",
+  // não tem "tela, traseira, bateria" em sequência, não tem "do seu" logo
+  // após bateria/tela). O cliente respondeu só "256 / 75% / Nenhum defeito"
+  // e essa resposta foi tratada como pergunta de VENDA, dizendo que não
+  // tínhamos o modelo. Adicionados os padrões que faltavam pra cobrir esse
+  // formato real de pergunta de avaliação.
+  const regexPerguntaSobreAparelhoTroca = /dar\s+(ele\s+)?(como\s+)?(de\s+)?entrada|entrada\s+na\s+(troca|compra)|qual\s+aparelho\s+voce\s+tem\s+para\s+dar\s+de\s+entrada|tem\s+algum\s+aparelho\s+para\s+troca|modelo,?\s+memoria\s+e\s+estado|saude\s+da\s+bateria|quantos\s+gb\s+e\s+o\s+seu|conta\s+(um\s+pouco\s+)?sobre\s+o\s+seu\s+\w+|(memoria|bateria|tela|traseira)\s+do\s+seu\s+\w+|tela\s*,?\s*traseira\s*,?\s*bateria/;
 
   const ultimasMensagens = mensagens.slice(-9, -1); // últimas ~8, excluindo a mensagem atual do cliente
   for (let i = ultimasMensagens.length - 1; i >= 0; i--) {
@@ -2115,6 +2125,18 @@ app.post('/webhook', async (req, res) => {
         salvarConversas();
       }
     }
+    return res.sendStatus(200);
+  }
+
+  // Quando o cliente EDITA uma mensagem já enviada, o Z-API dispara um novo
+  // webhook pra esse evento (com isEdit: true), separado do webhook original
+  // da mensagem. Sem esse tratamento, o bot processava a edição como se
+  // fosse uma mensagem nova — chamando o Cláudio de novo e mandando uma
+  // segunda resposta em cima da primeira, gerando respostas duplicadas ou
+  // conflitantes (ex: já ter respondido sobre o modelo e, na edição,
+  // perguntar de novo "qual modelo é esse?"). Ignoramos esses eventos.
+  if (body.isEdit) {
+    console.log(`✏️ Mensagem editada por ${body.phone} — ignorada para evitar resposta duplicada.`);
     return res.sendStatus(200);
   }
 
