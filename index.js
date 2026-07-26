@@ -2059,7 +2059,45 @@ function removerBateriaNaoSolicitada(mensagemClienteAtual, reply) {
     .trim();
 }
 
-async function chamarClaude(mensagens) {
+// ==========================================
+// REPARO DE HISTÓRICO — TOOL_USE ÓRFÃO (SEM TOOL_RESULT)
+// ==========================================
+// Antes da correção acima, algumas conversas já ficaram salvas com um
+// tool_use sem o tool_result correspondente (o bug das simulações duplas).
+// Essas conversas ficam permanentemente travadas — toda nova mensagem desse
+// cliente falha com o mesmo erro, mesmo depois do código corrigido, porque o
+// problema já está gravado no arquivo de conversas salvo. Esta função roda
+// antes de qualquer chamada à API e remove automaticamente qualquer mensagem
+// de assistente com tool_use cujo par de tool_result (na mensagem seguinte)
+// esteja incompleto ou ausente — "curando" o histórico sozinho, sem precisar
+// apagar a conversa toda nem mexer manualmente no arquivo salvo no Railway.
+function repararHistoricoToolUse(mensagens) {
+  const resultado = [];
+  for (let i = 0; i < mensagens.length; i++) {
+    const m = mensagens[i];
+    const temToolUse = m.role === 'assistant' && Array.isArray(m.content) && m.content.some(b => b.type === 'tool_use');
+    if (!temToolUse) {
+      resultado.push(m);
+      continue;
+    }
+    const idsToolUse = m.content.filter(b => b.type === 'tool_use').map(b => b.id);
+    const proxima = mensagens[i + 1];
+    const idsToolResult = (proxima && Array.isArray(proxima.content))
+      ? proxima.content.filter(b => b.type === 'tool_result').map(b => b.tool_use_id)
+      : [];
+    const todosResolvidos = idsToolUse.every(id => idsToolResult.includes(id));
+    if (todosResolvidos) {
+      resultado.push(m);
+    } else {
+      console.log('⚠️ Removendo do histórico um tool_use órfão (sem tool_result correspondente) — reparo automático');
+      i++; // pula também a próxima mensagem (tool_result incompleto), se existir
+    }
+  }
+  return resultado;
+}
+
+async function chamarClaude(mensagensOriginais) {
+  const mensagens = repararHistoricoToolUse(mensagensOriginais);
   const systemPromptAtual = SYSTEM_PROMPT.replace('${process.env.PRICE_TABLE || \'\'}', process.env.PRICE_TABLE || '') + textoRegraDomingoTaubate();
   const corpo = {
     model: 'claude-sonnet-4-6', max_tokens: 1024,
@@ -2070,14 +2108,27 @@ async function chamarClaude(mensagens) {
   const headers = { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' };
   let response = await axios.post('https://api.anthropic.com/v1/messages', corpo, { headers });
   while (response.data.stop_reason === 'tool_use') {
-    const toolUseBlock = response.data.content.find(b => b.type === 'tool_use');
-    let resultadoFerramenta = {};
-    if (toolUseBlock.name === 'calcular_parcelamento') {
-      const { saldo, parcelas } = toolUseBlock.input;
-      resultadoFerramenta = calcularParcelamento(saldo, parcelas);
-    }
+    // ATENÇÃO: uma única resposta pode conter MAIS DE UM bloco tool_use ao
+    // mesmo tempo (ex: cliente pediu duas simulações de parcelamento juntas,
+    // "quero saber das duas formas"). Bug real que já aconteceu: o código
+    // pegava só o PRIMEIRO tool_use com .find(), mas empurrava a resposta
+    // inteira (com todos os tool_use) pra conversa — o segundo tool_use
+    // ficava sem tool_result correspondente, e a API da Anthropic rejeitava
+    // a próxima chamada com erro "tool_use ids were found without
+    // tool_result blocks". Corrigido: agora processamos TODOS os blocos
+    // tool_use da resposta e mandamos um tool_result pra cada um, todos
+    // juntos na mesma mensagem seguinte (exigência da API).
+    const toolUseBlocks = response.data.content.filter(b => b.type === 'tool_use');
+    const toolResults = toolUseBlocks.map(toolUseBlock => {
+      let resultadoFerramenta = {};
+      if (toolUseBlock.name === 'calcular_parcelamento') {
+        const { saldo, parcelas } = toolUseBlock.input;
+        resultadoFerramenta = calcularParcelamento(saldo, parcelas);
+      }
+      return { type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) };
+    });
     mensagens.push({ role: 'assistant', content: response.data.content });
-    mensagens.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUseBlock.id, content: JSON.stringify(resultadoFerramenta) }] });
+    mensagens.push({ role: 'user', content: toolResults });
     response = await axios.post('https://api.anthropic.com/v1/messages', { ...corpo, messages: prepararMensagensParaEnvio(mensagens) }, { headers });
   }
   return response.data.content.find(b => b.type === 'text')?.text || '';
