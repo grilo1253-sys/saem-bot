@@ -1474,6 +1474,68 @@ function respostaTemModeloForaDaTabela(reply) {
 const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
 
 // ==========================================
+// TRAVA DE SEGURANÇA — LOOP DE RESPOSTA REPETIDA
+// ==========================================
+// Erro real que já aconteceu: o Cláudio travou repetindo a MESMA resposta
+// (geralmente o fallback de "modelo não disponível... catálogo...") pra
+// várias mensagens seguidas do cliente, mesmo quando o cliente já tinha
+// mudado de assunto completamente (ex: perguntou "pode me mandar foto?" e
+// "meu Deus moço" depois, e recebeu a mesma resposta de antes, idêntica,
+// como se o Cláudio tivesse parado de ler as mensagens novas). Isso é um
+// padrão de "eco" que pode acontecer quando o modelo se ancora demais no
+// próprio histórico de respostas repetidas. Esta trava compara a resposta
+// atual com a(s) última(s) resposta(s) do assistente no histórico — se forem
+// idênticas (ou quase), força uma nova geração com instrução explícita pra
+// parar de repetir e responder de verdade a mensagem mais recente do cliente.
+function normalizarParaComparacao(txt) {
+  return (txt || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function respostaRepetidaEmLoop(reply, mensagens) {
+  if (!Array.isArray(mensagens) || mensagens.length === 0) return false;
+  const replyNormalizada = normalizarParaComparacao(reply);
+  if (!replyNormalizada) return false;
+
+  // Olha as últimas mensagens do assistente no histórico (antes da atual)
+  const ultimasAssistente = mensagens
+    .filter(m => m.role === 'assistant' && typeof m.content === 'string')
+    .slice(-2);
+
+  return ultimasAssistente.some(m => normalizarParaComparacao(m.content) === replyNormalizada);
+}
+
+// Quando a trava acima detecta o loop, pedimos pro Cláudio parar de repetir e
+// responder de verdade à mensagem mais recente do cliente.
+async function gerarRespostaQuebrandoLoop(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior repetiu EXATAMENTE a mesma mensagem de antes, ignorando o que o cliente acabou de escrever. Isso é um erro grave. Releia com atenção a ÚLTIMA mensagem do cliente (a mais recente, não uma anterior) e responda especificamente a ELA — se for um comentário casual, responda com naturalidade; se for um pedido de foto, mande o link do site; se for sobre outro modelo, verifique a tabela de novo do zero. NÃO repita nenhuma frase que você já usou nas últimas respostas desta conversa. Seja breve e direto ao que foi perguntado agora.';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaRepetidaEmLoop(respostaCorrigida, mensagens)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao quebrar loop de resposta repetida:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — PERGUNTA DE TROCA TRATADA COMO VENDA
 // ==========================================
 // Erro real que já aconteceu: cliente perguntou "e quanto cê pega meu iPhone
@@ -2276,6 +2338,10 @@ app.post('/webhook', async (req, res) => {
       // tenham sido adicionadas durante a chamada — elas não são conversa real com
       // o cliente e não devem consumir espaço no histórico de 20 mensagens.
       if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
+      if (respostaRepetidaEmLoop(reply, conversas[phone])) {
+        const corrigida = await gerarRespostaQuebrandoLoop(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaTrocaTratadaComoVenda(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -2316,6 +2382,10 @@ app.post('/webhook', async (req, res) => {
     const tamanhoAntes = conversas[phone].length;
     let reply = await chamarClaude(conversas[phone]);
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
+    if (respostaRepetidaEmLoop(reply, conversas[phone])) {
+      const corrigida = await gerarRespostaQuebrandoLoop(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
     if (respostaTrocaTratadaComoVenda(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
       if (corrigida) reply = corrigida;
