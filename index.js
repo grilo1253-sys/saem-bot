@@ -277,7 +277,7 @@ function extrairModeloDesejado(mensagens) {
     for (const m of matches) {
       const antes = texto.slice(Math.max(0, m.index - 8), m.index).toLowerCase();
       const depois = texto.slice(m.index, m.index + m[0].length + 30).toLowerCase();
-      const ehPossessivo = /\b(meu|minha)\s*$/.test(antes);
+      const ehPossessivo = /\b(meu|minha|seu|sua|dele|dela)\s*$/.test(antes);
       const ehDefeito = palavrasDefeito.some(p => depois.includes(p));
       if (!ehPossessivo && !ehDefeito) candidatos.push({ texto: m[0], index: m.index });
     }
