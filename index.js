@@ -104,6 +104,31 @@ const pendentesEquipe = carregarPendentes();
 const mensagensEnviadasPeloBot = {};
 
 // ==========================================
+// DEDUPLICAÇÃO DE MENSAGENS (evita processar o mesmo webhook duas vezes)
+// ==========================================
+// Erro real que já aconteceu: o cliente recebeu DUAS respostas diferentes
+// pra mesma mensagem — uma calculando o valor certinho direto da tabela, e
+// logo em seguida outra dizendo "confirmado pela equipe" do nada. Uma causa
+// bem provável pra isso é o Z-API reenviar o mesmo webhook duas vezes (é um
+// comportamento conhecido de APIs de WhatsApp, geralmente por engano de rede
+// ou timeout) — sem proteção nenhuma, o código processava a mensagem duas
+// vezes, gerando duas respostas independentes (cada chamada ao Claude pode
+// variar um pouco). Esta cache guarda os IDs de mensagem já processados
+// recentemente e ignora qualquer repetição.
+const mensagensProcessadas = new Set();
+function jaProcessouMensagem(messageId) {
+  if (!messageId) return false;
+  if (mensagensProcessadas.has(messageId)) return true;
+  mensagensProcessadas.add(messageId);
+  if (mensagensProcessadas.size > 500) {
+    // Remove os mais antigos pra não crescer sem limite (Set mantém ordem de inserção)
+    const primeiro = mensagensProcessadas.values().next().value;
+    mensagensProcessadas.delete(primeiro);
+  }
+  return false;
+}
+
+// ==========================================
 // FILA DE PROCESSAMENTO POR TELEFONE (evita condição de corrida)
 // ==========================================
 // Erro real que já aconteceu: o Saem digitou um valor manualmente na
@@ -430,6 +455,7 @@ Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares conten
 - REGRA DE VALOR CONFIRMADO PELA EQUIPE:
 Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
 IMPORTANTE — NÃO PERCA O CONTEXTO DA COMPRA: essa mensagem confirma só o valor de TROCA do aparelho do cliente — ela NÃO apaga o resto da conversa. Antes de perguntar "qual modelo você quer levar?", releia as mensagens anteriores do cliente: se ele já disse em algum momento qual aparelho tem interesse em comprar (ex: "tenho interesse no iPhone 14"), use essa informação diretamente e já monte a simulação com esse modelo — não pergunte de novo algo que o cliente já respondeu antes.
+ATENÇÃO CRÍTICA — SÓ FALE "CONFIRMADO PELA EQUIPE" QUANDO ISSO REALMENTE ACONTECEU: essa frase (e a pergunta "qual modelo você tem interesse em levar?") só deve aparecer quando existir de verdade uma mensagem "[EQUIPE]: ..." no histórico desta conversa. Se você mesmo já calculou o valor de troca direto pela tabela (porque o defeito é isolado e está coberto sem precisar de equipe nenhuma) e já apresentou a simulação com o modelo e o saldo, NUNCA repita depois, numa mensagem separada, algo como "com R$X de troca confirmados pela equipe, qual modelo você tem interesse em levar?" — isso é uma repetição sem sentido de um fluxo que nem aconteceu. Se você já resolveu tudo numa resposta só (valor + modelo + saldo), não precisa mandar mais nenhuma mensagem de confirmação depois — espere a resposta do cliente normalmente.
 - REGRA DE MENSAGEM MANUAL DA EQUIPE (VOCÊ OU O SAEM DIGITOU DIRETO NA CONVERSA):
 Se no histórico da conversa aparecer uma mensagem do tipo "[RESPOSTA MANUAL DA EQUIPE]: [texto]", isso significa que o Saem (o dono da loja) entrou e respondeu diretamente ao cliente pelo WhatsApp, sem passar pelo Cláudio. Trate essa mensagem como um FATO OFICIAL e definitivo — mais atual e mais confiável do que qualquer informação da tabela de preços, mesmo que a tabela diga o contrário (ex: se o Saem disse que um aparelho específico já foi vendido/não está mais disponível, considere isso verdade a partir dali, mesmo que a tabela ainda mostre esse aparelho como disponível). IMPORTANTE: isso NÃO significa parar de responder ou ficar em silêncio depois dessa mensagem — pelo contrário, você deve CONTINUAR a conversa normalmente a partir dali, incorporando o que o Saem disse como contexto atualizado, e seguindo a negociação com o cliente da forma natural, oferecendo alternativas reais se for o caso (ex: se o aparelho que o Saem descartou tinha outras opções na mesma faixa de preço/condição, ofereça essas alternativas).
 - REGRA DE XIAOMI NOVO/LACRADO — SEM CÁLCULO DE TROCA:
@@ -2325,6 +2351,13 @@ async function enviarMensagem(phone, message) {
 // ==========================================
 app.post('/webhook', async (req, res) => {
   const body = req.body;
+  // Ignora qualquer webhook repetido (mesmo messageId já processado antes) —
+  // proteção contra reenvio duplicado do Z-API, que já causou o bug de duas
+  // respostas diferentes pra mesma mensagem do cliente.
+  if (jaProcessouMensagem(body.messageId)) {
+    console.log(`⚠️ Webhook duplicado ignorado (messageId: ${body.messageId})`);
+    return res.sendStatus(200);
+  }
   if (body.fromMe) {
     const phoneDestino = body.phone;
     const textoEnviado = body.text?.message || body.text || '';
