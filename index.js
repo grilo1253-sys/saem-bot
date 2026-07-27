@@ -2400,7 +2400,7 @@ async function enviarMensagem(phone, message) {
   // de novo e gerando uma resposta duplicada pro cliente. Registrando ANTES
   // de mandar, garantimos que o registro já existe assim que o eco chegar.
   if (!mensagensEnviadasPeloBot[phone]) mensagensEnviadasPeloBot[phone] = [];
-  mensagensEnviadasPeloBot[phone].push(message);
+  mensagensEnviadasPeloBot[phone].push({ texto: message, ts: Date.now() });
   if (mensagensEnviadasPeloBot[phone].length > 10) mensagensEnviadasPeloBot[phone].shift();
 
   await axios.post(
@@ -2437,7 +2437,28 @@ app.post('/webhook', async (req, res) => {
     // nessa conversa de teste era silenciosamente ignorada.
     if (phoneDestino && textoEnviado) {
       const enviadosBot = mensagensEnviadasPeloBot[phoneDestino] || [];
-      const idx = enviadosBot.indexOf(textoEnviado);
+      // Normaliza (trim + colapsa espaços/quebras de linha) antes de comparar.
+      // Erro real que já aconteceu: o eco que o Z-API manda de volta às vezes
+      // não bate 100% caractere a caractere com o texto original (espaço a
+      // mais, quebra de linha diferente, etc). Quando isso acontecia, o
+      // sistema não reconhecia como eco e tratava a PRÓPRIA resposta do bot
+      // como se fosse uma mensagem manual sua — o Cláudio então "respondia"
+      // a si mesmo, gerando uma segunda mensagem indevida pro cliente.
+      const normalizar = (t) => (t || '').trim().replace(/\s+/g, ' ');
+      const textoNormalizado = normalizar(textoEnviado);
+      let idx = enviadosBot.findIndex(e => normalizar(e.texto) === textoNormalizado);
+      // Rede de segurança: se não achou nem por igualdade normalizada, mas
+      // existe um envio do bot pra esse mesmo número nos últimos 12 segundos
+      // ainda não consumido, é praticamente certo que seja eco também (não
+      // faz sentido você digitar manualmente no exato momento em que o bot
+      // acabou de responder) — melhor descartar do que arriscar o bot se
+      // autoelogiar/responder a si mesmo.
+      if (idx === -1) {
+        idx = enviadosBot.findIndex(e => Date.now() - e.ts < 12000);
+        if (idx !== -1) {
+          console.log(`⚠️ Eco não bateu texto exato, mas dentro da janela de segurança — ignorando (${phoneDestino})`);
+        }
+      }
       if (idx !== -1) {
         // Eco da própria mensagem que o bot mandou — já está no histórico
         // (foi salvo no momento do envio), então só consome o registro e
