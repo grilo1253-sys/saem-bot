@@ -2264,7 +2264,17 @@ app.post('/webhook', async (req, res) => {
   if (body.fromMe) {
     const phoneDestino = body.phone;
     const textoEnviado = body.text?.message || body.text || '';
-    if (phoneDestino && textoEnviado && phoneDestino !== NUMERO_ADMIN) {
+    // Removemos a exclusão "phoneDestino !== NUMERO_ADMIN" que existia aqui
+    // antes. Ela foi pensada pra evitar tratar as notificações do próprio
+    // bot pro Saem (ex: "Valor necessário para cliente") como se fossem uma
+    // resposta manual seguir — mas isso já é resolvido corretamente pela
+    // checagem de eco logo abaixo (mensagensEnviadasPeloBot), já que TODA
+    // mensagem que o bot manda (inclusive pro admin) já fica registrada ali.
+    // A exclusão extra era redundante e causava um bug real: se o Saem
+    // testasse o bot usando o PRÓPRIO número (que também é o NUMERO_ADMIN)
+    // como se fosse cliente, qualquer mensagem manual que ele digitasse
+    // nessa conversa de teste era silenciosamente ignorada.
+    if (phoneDestino && textoEnviado) {
       const enviadosBot = mensagensEnviadasPeloBot[phoneDestino] || [];
       const idx = enviadosBot.indexOf(textoEnviado);
       if (idx !== -1) {
