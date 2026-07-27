@@ -2308,7 +2308,16 @@ app.post('/webhook', async (req, res) => {
           // Sem valor numérico — é um comentário/correção geral. Registra
           // como observação da equipe, que o prompt já trata como fato
           // oficial (REGRA DE MENSAGEM MANUAL DA EQUIPE).
-          conversas[phoneDestino].push({ role: 'assistant', content: `[RESPOSTA MANUAL DA EQUIPE]: ${textoEnviado}` });
+          // ATENÇÃO: usar role 'user' aqui é essencial, não 'assistant'. A
+          // API da Anthropic exige alternância estrita entre mensagens
+          // 'user' e 'assistant' — a última resposta real do Cláudio antes
+          // dessa já era 'assistant', então salvar essa observação TAMBÉM
+          // como 'assistant' cria duas mensagens seguidas do mesmo papel, o
+          // que a API rejeita. Isso já causou um bug real: a chamada
+          // seguinte pro chamarClaude falhava silenciosamente (erro pego
+          // pelo catch, sem avisar ninguém), e o Cláudio nunca respondia
+          // nada depois de um comentário manual sem valor.
+          conversas[phoneDestino].push({ role: 'user', content: `[RESPOSTA MANUAL DA EQUIPE]: ${textoEnviado}` });
         }
 
         if (conversas[phoneDestino].length > 20) conversas[phoneDestino] = conversas[phoneDestino].slice(-20);
