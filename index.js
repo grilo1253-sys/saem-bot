@@ -2325,7 +2325,14 @@ app.post('/webhook', async (req, res) => {
         enfileirarPorTelefone(phoneDestino, async () => {
           try {
             const msgs = conversas[phoneDestino];
-            const reply = await chamarClaude([...msgs]);
+            let reply = await chamarClaude([...msgs]);
+            // Erro real que já aconteceu: esse caminho (continuar a conversa
+            // depois de uma mensagem manual) esquecia de passar pela mesma
+            // trava de "não se apresentar de novo" que o fluxo normal já
+            // usa — o Cláudio acabava se apresentando de novo no meio de
+            // uma negociação já em andamento. Corrigido aplicando a mesma
+            // trava aqui também.
+            reply = removerApresentacaoRepetida(phoneDestino, reply);
             conversas[phoneDestino].push({ role: 'assistant', content: reply });
             salvarConversas();
             await enviarMensagem(phoneDestino, reply);
@@ -2398,7 +2405,8 @@ app.post('/webhook', async (req, res) => {
         salvarConversas();
 
         const msgs = conversas[phoneCliente];
-        const reply = await chamarClaude([...msgs]);
+        let reply = await chamarClaude([...msgs]);
+        reply = removerApresentacaoRepetida(phoneCliente, reply);
         conversas[phoneCliente].push({ role: 'assistant', content: reply });
         salvarConversas();
         await enviarMensagem(phoneCliente, reply);
