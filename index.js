@@ -219,9 +219,34 @@ function extrairAparelhoPendente(mensagens) {
   const texto = ultimasMsgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ');
   const padroes = [
     /poco\s+\w+/i, /redmi\s+\w+/i, /galaxy\s+\w+/i, /moto\s+\w+/i,
-    /iphone\s+\d+\s*\w*/i, /macbook\s+\w+/i, /ipad\s+\w*/i,
+    /iphone\s+\d+[a-z]*(?:\s+(?:pro\s*max|pro|plus|mini))?/i, /macbook\s+\w+/i, /ipad\s+\w*/i,
     /notebook\s+\w*/i, /ps[34]/i, /xbox\s+\w*/i, /apple\s+watch/i
   ];
+  // Erro real que já aconteceu: quando o cliente menciona DOIS aparelhos na
+  // mesma frase — o que ele quer COMPRAR e o que ele quer DAR de entrada
+  // (ex: "tenho interesse no iPhone 14 se eu der meu 11 64GB com tela
+  // desligada") — a extração antiga pegava sempre o PRIMEIRO modelo citado
+  // no texto, que na prática costuma ser o de COMPRA, não o de TROCA. Isso
+  // fez o valor de troca confirmado ficar associado ao aparelho errado
+  // (iPhone 14 em vez do iPhone 11), confundindo o Cláudio logo depois.
+  // Corrigido: agora damos prioridade a um match que apareça logo depois de
+  // "meu"/"minha" (o aparelho que o cliente POSSUI) ou perto de palavras de
+  // defeito (tela, bateria, trincad, etc) — só caindo pro comportamento
+  // antigo (primeiro match de qualquer jeito) se nenhum desses sinais bater.
+  const regexPossessivo = /\b(meu|minha)\s+((?:poco|redmi|galaxy|moto|iphone|macbook|ipad|notebook|ps[34]|xbox|apple\s+watch)(?:\s+\w+){0,3})(?=\s|$|,|\.|!|\?)/i;
+  const matchPossessivo = texto.match(regexPossessivo);
+  if (matchPossessivo) return matchPossessivo[2].trim();
+
+  const palavrasDefeito = ['tela', 'bateria', 'trincad', 'quebrad', 'defeito', 'riscad', 'desligand', 'traseira'];
+  for (const padrao of padroes) {
+    const regexGlobal = new RegExp(padrao.source, 'gi');
+    const matches = [...texto.matchAll(regexGlobal)];
+    for (const m of matches) {
+      const janelaSeguinte = texto.slice(m.index, m.index + m[0].length + 40).toLowerCase();
+      if (palavrasDefeito.some(p => janelaSeguinte.includes(p))) return m[0];
+    }
+  }
+
   for (const padrao of padroes) {
     const match = texto.match(padrao);
     if (match) return match[0];
@@ -366,6 +391,7 @@ Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crít
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
 - REGRA DE VALOR CONFIRMADO PELA EQUIPE:
 Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
+IMPORTANTE — NÃO PERCA O CONTEXTO DA COMPRA: essa mensagem confirma só o valor de TROCA do aparelho do cliente — ela NÃO apaga o resto da conversa. Antes de perguntar "qual modelo você quer levar?", releia as mensagens anteriores do cliente: se ele já disse em algum momento qual aparelho tem interesse em comprar (ex: "tenho interesse no iPhone 14"), use essa informação diretamente e já monte a simulação com esse modelo — não pergunte de novo algo que o cliente já respondeu antes.
 - REGRA DE MENSAGEM MANUAL DA EQUIPE (VOCÊ OU O SAEM DIGITOU DIRETO NA CONVERSA):
 Se no histórico da conversa aparecer uma mensagem do tipo "[RESPOSTA MANUAL DA EQUIPE]: [texto]", isso significa que o Saem (o dono da loja) entrou e respondeu diretamente ao cliente pelo WhatsApp, sem passar pelo Cláudio. Trate essa mensagem como um FATO OFICIAL e definitivo — mais atual e mais confiável do que qualquer informação da tabela de preços, mesmo que a tabela diga o contrário (ex: se o Saem disse que um aparelho específico já foi vendido/não está mais disponível, considere isso verdade a partir dali, mesmo que a tabela ainda mostre esse aparelho como disponível). IMPORTANTE: isso NÃO significa parar de responder ou ficar em silêncio depois dessa mensagem — pelo contrário, você deve CONTINUAR a conversa normalmente a partir dali, incorporando o que o Saem disse como contexto atualizado, e seguindo a negociação com o cliente da forma natural, oferecendo alternativas reais se for o caso (ex: se o aparelho que o Saem descartou tinha outras opções na mesma faixa de preço/condição, ofereça essas alternativas).
 - REGRA DE XIAOMI NOVO/LACRADO — SEM CÁLCULO DE TROCA:
