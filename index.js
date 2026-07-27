@@ -2389,18 +2389,25 @@ async function chamarClaude(mensagensOriginais) {
 }
 
 async function enviarMensagem(phone, message) {
+  // ATENÇÃO CRÍTICA: registramos a mensagem em mensagensEnviadasPeloBot ANTES
+  // de mandar pro Z-API, não depois. Erro real que já aconteceu: com a
+  // configuração "Notificar as enviadas por mim também" ativada no Z-API, o
+  // eco "fromMe" da PRÓPRIA resposta do bot pode chegar no nosso webhook
+  // quase instantaneamente — às vezes antes do código terminar de registrar
+  // que essa mensagem foi enviada pelo bot. Nesse intervalo mínimo, o
+  // sistema não reconhecia o eco como "mensagem do próprio bot" e tratava
+  // como se fosse uma mensagem manual do Saem, disparando o processamento
+  // de novo e gerando uma resposta duplicada pro cliente. Registrando ANTES
+  // de mandar, garantimos que o registro já existe assim que o eco chegar.
+  if (!mensagensEnviadasPeloBot[phone]) mensagensEnviadasPeloBot[phone] = [];
+  mensagensEnviadasPeloBot[phone].push(message);
+  if (mensagensEnviadasPeloBot[phone].length > 10) mensagensEnviadasPeloBot[phone].shift();
+
   await axios.post(
     `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`,
     { phone, message },
     { headers: { 'Client-Token': ZAPI_CLIENT_TOKEN } }
   );
-  // Registra que essa mensagem saiu por conta do bot, pra quando o eco
-  // "fromMe" chegar no webhook a gente saber que já foi contabilizada e não
-  // tratá-la como resposta manual da equipe. Mantém só as últimas 10 por
-  // número pra não crescer sem limite.
-  if (!mensagensEnviadasPeloBot[phone]) mensagensEnviadasPeloBot[phone] = [];
-  mensagensEnviadasPeloBot[phone].push(message);
-  if (mensagensEnviadasPeloBot[phone].length > 10) mensagensEnviadasPeloBot[phone].shift();
 }
 
 // ==========================================
