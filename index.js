@@ -104,6 +104,30 @@ const pendentesEquipe = carregarPendentes();
 const mensagensEnviadasPeloBot = {};
 
 // ==========================================
+// FILA DE PROCESSAMENTO POR TELEFONE (evita condição de corrida)
+// ==========================================
+// Erro real que já aconteceu: o Saem digitou um valor manualmente na
+// conversa E o cliente mandou uma mensagem nova quase no mesmo segundo. Como
+// os dois eventos chegam por webhooks separados e cada um processa de forma
+// assíncrona (lendo/escrevendo em conversas[phone] e chamando a API), eles
+// podem rodar EM PARALELO — um deles pode ler o histórico antes do outro
+// terminar de gravar sua parte, gerando uma resposta que ignora o que acabou
+// de ser dito (ex: o Cláudio pediu de novo informações que o Saem já tinha
+// acabado de responder). Esta fila garante que todo processamento de um
+// mesmo número de telefone aconteça em SEQUÊNCIA, nunca em paralelo — cada
+// nova tarefa só começa depois que a anterior (do mesmo telefone) terminou.
+const filaPorTelefone = {};
+function enfileirarPorTelefone(phone, tarefa) {
+  const anterior = filaPorTelefone[phone] || Promise.resolve();
+  const atual = anterior.then(tarefa, tarefa);
+  filaPorTelefone[phone] = atual.catch(e => {
+    console.error(`Erro na fila de processamento de ${phone}:`, e.message);
+  });
+  return filaPorTelefone[phone];
+}
+
+
+// ==========================================
 // SISTEMA DE NOTIFICAÇÃO PARA O ADMIN
 // ==========================================
 // Extrai apenas o MOTIVO real da escalação a partir da resposta do Cláudio,
@@ -2286,8 +2310,9 @@ app.post('/webhook', async (req, res) => {
 
         // Continua a conversa imediatamente com o cliente, incorporando o
         // que o Saem acabou de dizer — não espera o cliente mandar outra
-        // mensagem pra reagir.
-        (async () => {
+        // mensagem pra reagir. Enfileirado por telefone pra não rodar em
+        // paralelo com uma mensagem do cliente chegando no mesmo instante.
+        enfileirarPorTelefone(phoneDestino, async () => {
           try {
             const msgs = conversas[phoneDestino];
             const reply = await chamarClaude([...msgs]);
@@ -2297,7 +2322,7 @@ app.post('/webhook', async (req, res) => {
           } catch (e) {
             console.error('Erro ao continuar conversa após mensagem manual:', e.message);
           }
-        })();
+        });
       }
     }
     return res.sendStatus(200);
@@ -2333,6 +2358,16 @@ app.post('/webhook', async (req, res) => {
   if (!phone) return res.sendStatus(200);
   res.sendStatus(200);
 
+  // Determina qual telefone é o "dono" desse processamento — normalmente é
+  // quem mandou a mensagem, mas no caso de resposta do admin no formato
+  // "valor TELEFONE VALOR", quem realmente é afetado é o TELEFONE DO CLIENTE
+  // citado ali dentro, não o número do admin. Enfileiramos pelo telefone
+  // certo pra evitar a mesma condição de corrida entre isso e uma mensagem
+  // nova do cliente chegando ao mesmo tempo.
+  const respostaAdminPreview = (NUMERO_ADMIN && phone === NUMERO_ADMIN && message) ? processarRespostaAdmin(message, phone) : null;
+  const chaveFila = respostaAdminPreview ? respostaAdminPreview.phoneCliente : phone;
+
+  await enfileirarPorTelefone(chaveFila, async () => {
   try {
     if (NUMERO_ADMIN && phone === NUMERO_ADMIN && message) {
       const resposta = processarRespostaAdmin(message, phone);
@@ -2514,6 +2549,7 @@ app.post('/webhook', async (req, res) => {
       } catch (e) {}
     }
   }
+  });
 });
 
 // ==========================================
