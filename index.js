@@ -1672,6 +1672,62 @@ async function gerarRespostaQuebrandoLoop(mensagens) {
 }
 
 // ==========================================
+// TRAVA DE SEGURANÇA — PEDIR CONFIRMAÇÃO DE ALGO QUE JÁ FOI CONFIRMADO
+// ==========================================
+// Erro real que já aconteceu, repetidas vezes: mesmo depois de um valor de
+// troca ser confirmado (via mensagem manual ou "[EQUIPE]: valor..."), umas
+// mensagens depois — depois do cliente já ter escolhido modelo, cor, loja
+// — o Cláudio "esquece" de novo e volta a falar "assim que a equipe
+// confirmar o valor..." ou "vou verificar com a equipe", como se o valor
+// ainda estivesse pendente. Isso é um hábito de linguagem do modelo que as
+// instruções de prompt sozinhas não eliminaram por completo. Esta trava
+// verifica se a resposta atual fala em "esperar"/"assim que a equipe
+// confirmar" sobre um valor, MAS já existe uma mensagem "[EQUIPE]:" real no
+// histórico desta conversa — ou seja, o valor JÁ foi confirmado antes, e
+// essa fala é uma regressão, não uma pendência de verdade.
+function respostaPedeConfirmacaoJaConfirmada(reply, mensagens) {
+  const replyLower = reply.toLowerCase();
+  const falaDeEspera = /assim que a equipe confirmar|vou verificar (o valor )?com a equipe|aguard\w* a? confirma[çc][ãa]o da equipe|preciso que a equipe avalie/i.test(replyLower);
+  if (!falaDeEspera) return false;
+
+  const jaTemValorConfirmado = Array.isArray(mensagens) && mensagens.some(m =>
+    typeof m.content === 'string' && m.content.startsWith('[EQUIPE]:')
+  );
+  return jaTemValorConfirmado;
+}
+
+// Quando a trava acima detecta a regressão, pedimos pro Cláudio corrigir
+// usando o valor que JÁ foi confirmado, sem voltar a pedir confirmação.
+async function gerarRespostaCorrigindoConfirmacaoRegressao(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior falou em "esperar a equipe confirmar" um valor de troca — mas esse valor JÁ FOI CONFIRMADO antes nesta mesma conversa (procure no histórico por uma mensagem "[EQUIPE]: O valor de troca..."). Isso é um erro: releia o histórico, encontre esse valor já confirmado, e refaça a resposta USANDO esse valor diretamente na simulação (com o modelo, cor e loja que o cliente já escolheu), sem pedir confirmação de novo. Seja breve e direto, mostrando o saldo final e as opções de parcelamento.';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaPedeConfirmacaoJaConfirmada(respostaCorrigida, mensagens)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir regressão de confirmação:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — PERGUNTA DE TROCA TRATADA COMO VENDA
 // ==========================================
 // Erro real que já aconteceu: cliente perguntou "e quanto cê pega meu iPhone
@@ -2401,14 +2457,19 @@ app.post('/webhook', async (req, res) => {
           // Anexamos aqui, na MESMA mensagem, qual modelo o cliente já
           // confirmou querer comprar (se identificável) — pra não depender
           // do Cláudio "lembrar" sozinho lá atrás na conversa e evitar que
-          // ele pergunte de novo algo que o cliente já respondeu.
+          // ele pergunte de novo algo que o cliente já respondeu. Erro real
+          // que já aconteceu: colocar esse lembrete DEPOIS do valor não
+          // bastava — o modelo focava em responder sobre o valor e ignorava
+          // a instrução no final. Corrigido: agora o lembrete do modelo vem
+          // ANTES do valor, e o nome do modelo é repetido de novo no final
+          // pra reforçar ainda mais.
           const modeloDesejado = extrairModeloDesejado(conversas[phoneDestino]);
-          const complementoModelo = modeloDesejado
-            ? ` O cliente já confirmou interesse em levar o ${modeloDesejado} — monte a simulação completa AGORA com esse modelo, sem perguntar de novo qual ele quer.`
-            : '';
+          const mensagemValor = modeloDesejado
+            ? `[EQUIPE]: O cliente já confirmou interesse em levar o ${modeloDesejado}. O valor de troca do ${aparelhoPendente} é R$${valor.toFixed(2).replace('.', ',')}. Monte a simulação completa AGORA usando o modelo ${modeloDesejado} e esse valor de troca — NÃO pergunte de novo qual modelo ele quer, ele já respondeu isso.`
+            : `[EQUIPE]: O valor de troca do ${aparelhoPendente} é R$${valor.toFixed(2).replace('.', ',')}`;
           conversas[phoneDestino].push({
             role: 'user',
-            content: `[EQUIPE]: O valor de troca do ${aparelhoPendente} é R$${valor.toFixed(2).replace('.', ',')}${complementoModelo}`
+            content: mensagemValor
           });
         } else {
           // Sem valor numérico — é um comentário/correção geral. Registra
@@ -2508,18 +2569,19 @@ app.post('/webhook', async (req, res) => {
         if (!conversas[phoneCliente]) conversas[phoneCliente] = [];
 
         // Mesma correção do fluxo manual: anexamos o modelo que o cliente já
-        // confirmou querer comprar (se identificável) na mesma mensagem de
-        // valor, pra não depender do Cláudio "lembrar" sozinho.
+        // confirmou querer comprar (se identificável), mas dessa vez ANTES
+        // do valor (não depois) — colocar só no final não bastava, o modelo
+        // focava em responder sobre o valor e ignorava a instrução.
         const aparelhoPendenteAdmin = pendentesEquipe[phoneCliente]?.aparelho
           || extrairAparelhoPendente(conversas[phoneCliente])
           || 'aparelho';
         const modeloDesejadoAdmin = extrairModeloDesejado(conversas[phoneCliente]);
-        const complementoModeloAdmin = modeloDesejadoAdmin
-          ? ` O cliente já confirmou interesse em levar o ${modeloDesejadoAdmin} — monte a simulação completa AGORA com esse modelo, sem perguntar de novo qual ele quer.`
-          : '';
+        const mensagemValorAdmin = modeloDesejadoAdmin
+          ? `[EQUIPE]: O cliente já confirmou interesse em levar o ${modeloDesejadoAdmin}. O valor de troca do ${aparelhoPendenteAdmin} é R$${valor.toFixed(2).replace('.', ',')}. Monte a simulação completa AGORA usando o modelo ${modeloDesejadoAdmin} e esse valor de troca — NÃO pergunte de novo qual modelo ele quer, ele já respondeu isso.`
+          : `[EQUIPE]: O valor de troca do ${aparelhoPendenteAdmin} é R$${valor.toFixed(2).replace('.', ',')}`;
         conversas[phoneCliente].push({
           role: 'user',
-          content: `[EQUIPE]: O valor de troca do ${aparelhoPendenteAdmin} é R$${valor.toFixed(2).replace('.', ',')}${complementoModeloAdmin}`
+          content: mensagemValorAdmin
         });
 
         if (pendentesEquipe[phoneCliente]) {
@@ -2581,6 +2643,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaQuebrandoLoop(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaPedeConfirmacaoJaConfirmada(reply, conversas[phone])) {
+        const corrigida = await gerarRespostaCorrigindoConfirmacaoRegressao(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaTrocaTratadaComoVenda(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -2623,6 +2689,10 @@ app.post('/webhook', async (req, res) => {
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
     if (respostaRepetidaEmLoop(reply, conversas[phone])) {
       const corrigida = await gerarRespostaQuebrandoLoop(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaPedeConfirmacaoJaConfirmada(reply, conversas[phone])) {
+      const corrigida = await gerarRespostaCorrigindoConfirmacaoRegressao(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTrocaTratadaComoVenda(message, reply, conversas[phone])) {
