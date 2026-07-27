@@ -254,6 +254,44 @@ function extrairAparelhoPendente(mensagens) {
   return 'aparelho não identificado';
 }
 
+// Erro real que já aconteceu VÁRIAS vezes: mesmo depois do valor de troca
+// ser confirmado, o Cláudio perguntava de novo "qual modelo você quer
+// levar?" — repetidamente, mesmo o cliente já tendo respondido isso antes
+// (ex: "iPhone 14", depois "amarelo"). Só instruir no prompt pra "reler o
+// histórico" não bastou pra evitar isso de forma confiável. Esta função
+// extrai automaticamente o modelo de COMPRA que o cliente já confirmou —
+// diferente da função acima, que extrai o aparelho de TROCA — pra gente
+// já anexar essa informação diretamente na mensagem de valor confirmado,
+// em vez de depender do modelo "lembrar" sozinho.
+function extrairModeloDesejado(mensagens) {
+  const ultimasMsgs = mensagens.slice(-10);
+  const texto = ultimasMsgs.map(m => typeof m.content === 'string' ? m.content : '').join(' ');
+  const padroes = [
+    /iphone\s+\d+[a-z]*(?:\s+(?:pro\s*max|pro|plus|mini))?/gi,
+    /poco\s+\w+/gi, /redmi\s+\w+/gi, /galaxy\s+\w+/gi, /moto\s+\w+/gi,
+  ];
+  const palavrasDefeito = ['tela', 'bateria', 'trincad', 'quebrad', 'defeito', 'riscad', 'desligand', 'traseira', 'face id'];
+  let candidatos = [];
+  for (const padrao of padroes) {
+    const matches = [...texto.matchAll(padrao)];
+    for (const m of matches) {
+      const antes = texto.slice(Math.max(0, m.index - 8), m.index).toLowerCase();
+      const depois = texto.slice(m.index, m.index + m[0].length + 30).toLowerCase();
+      const ehPossessivo = /\b(meu|minha)\s*$/.test(antes);
+      const ehDefeito = palavrasDefeito.some(p => depois.includes(p));
+      if (!ehPossessivo && !ehDefeito) candidatos.push({ texto: m[0], index: m.index });
+    }
+  }
+  if (candidatos.length === 0) return null;
+  candidatos.sort((a, b) => b.index - a.index); // prioriza a menção mais recente
+  let modelo = candidatos[0].texto;
+  const cores = ['amarelo', 'preto', 'branco', 'azul', 'verde', 'rosa', 'roxo', 'dourado', 'prateado', 'vermelho', 'laranja', 'cinza'];
+  const restante = texto.slice(candidatos[0].index);
+  const corMatch = cores.find(c => new RegExp(`\\b${c}\\b`, 'i').test(restante));
+  if (corMatch) modelo += ` ${corMatch.charAt(0).toUpperCase() + corMatch.slice(1)}`;
+  return modelo;
+}
+
 function processarRespostaAdmin(message, phoneAdmin) {
   const match = message.trim().match(/^valor\s+(\d+)\s+(\d+(?:[.,]\d+)?)/i);
   if (!match) return null;
@@ -2326,9 +2364,17 @@ app.post('/webhook', async (req, res) => {
           const aparelhoPendente = pendentesEquipe[phoneDestino]?.aparelho
             || extrairAparelhoPendente(conversas[phoneDestino])
             || 'aparelho';
+          // Anexamos aqui, na MESMA mensagem, qual modelo o cliente já
+          // confirmou querer comprar (se identificável) — pra não depender
+          // do Cláudio "lembrar" sozinho lá atrás na conversa e evitar que
+          // ele pergunte de novo algo que o cliente já respondeu.
+          const modeloDesejado = extrairModeloDesejado(conversas[phoneDestino]);
+          const complementoModelo = modeloDesejado
+            ? ` O cliente já confirmou interesse em levar o ${modeloDesejado} — monte a simulação completa AGORA com esse modelo, sem perguntar de novo qual ele quer.`
+            : '';
           conversas[phoneDestino].push({
             role: 'user',
-            content: `[EQUIPE]: O valor de troca do ${aparelhoPendente} é R$${valor.toFixed(2).replace('.', ',')}`
+            content: `[EQUIPE]: O valor de troca do ${aparelhoPendente} é R$${valor.toFixed(2).replace('.', ',')}${complementoModelo}`
           });
         } else {
           // Sem valor numérico — é um comentário/correção geral. Registra
@@ -2427,9 +2473,19 @@ app.post('/webhook', async (req, res) => {
         const { phoneCliente, valor } = resposta;
         if (!conversas[phoneCliente]) conversas[phoneCliente] = [];
 
+        // Mesma correção do fluxo manual: anexamos o modelo que o cliente já
+        // confirmou querer comprar (se identificável) na mesma mensagem de
+        // valor, pra não depender do Cláudio "lembrar" sozinho.
+        const aparelhoPendenteAdmin = pendentesEquipe[phoneCliente]?.aparelho
+          || extrairAparelhoPendente(conversas[phoneCliente])
+          || 'aparelho';
+        const modeloDesejadoAdmin = extrairModeloDesejado(conversas[phoneCliente]);
+        const complementoModeloAdmin = modeloDesejadoAdmin
+          ? ` O cliente já confirmou interesse em levar o ${modeloDesejadoAdmin} — monte a simulação completa AGORA com esse modelo, sem perguntar de novo qual ele quer.`
+          : '';
         conversas[phoneCliente].push({
           role: 'user',
-          content: `[EQUIPE]: O valor de troca do aparelho é R$${valor.toFixed(2).replace('.', ',')}`
+          content: `[EQUIPE]: O valor de troca do ${aparelhoPendenteAdmin} é R$${valor.toFixed(2).replace('.', ',')}${complementoModeloAdmin}`
         });
 
         if (pendentesEquipe[phoneCliente]) {
