@@ -215,6 +215,25 @@ function processarRespostaAdmin(message, phoneAdmin) {
   return { phoneCliente, valor };
 }
 
+// Extrai um valor monetário plausível de um texto CASUAL (ex: "Da pegar por
+// 1500", "1500 tá bom", "R$1.500"). Diferente de processarRespostaAdmin, que
+// exige o formato rígido "valor TELEFONE VALOR", esta função é usada quando
+// o Saem digita direto na conversa do cliente (não no número admin) — o
+// texto pode vir em qualquer ordem/formato. Só é chamada quando já existe uma
+// pendência aberta pra esse cliente, então o risco de pegar um número errado
+// (tipo GB de memória) é baixo, mas ainda assim aplicamos uma faixa de
+// sanidade (entre R$30 e R$50.000) pra evitar capturar números aleatórios.
+function extrairValorDeMensagemLivre(texto) {
+  const matchComCifrao = texto.match(/r\$\s*([\d.]+(?:,\d{2})?)/i);
+  const bruto = matchComCifrao
+    ? matchComCifrao[1]
+    : (texto.match(/\b(\d{2,6}(?:[.,]\d{2})?)\b/) || [])[1];
+  if (!bruto) return null;
+  const valor = parseFloat(bruto.replace(/\.(?=\d{3}\b)/g, '').replace(',', '.'));
+  if (isNaN(valor) || valor < 30 || valor > 50000) return null;
+  return valor;
+}
+
 // ==========================================
 // REGRA ESPECIAL DE DOMINGO — LOJA TAUBATÉ
 // ==========================================
@@ -2230,15 +2249,55 @@ app.post('/webhook', async (req, res) => {
         // ignora, sem duplicar.
         enviadosBot.splice(idx, 1);
       } else {
-        // Mensagem enviada manualmente pela equipe direto pro cliente (ex:
-        // Saem respondendo enquanto o bot estava fora do ar). Registra no
-        // histórico como resposta do assistente, pra quando o Cláudio voltar
-        // a ativo ele já saber que essa pergunta foi respondida e não
-        // responder de novo (duplicado) a mesma coisa.
+        // Qualquer mensagem que o Saem digitar manualmente direto na
+        // conversa com o cliente (seja um valor, uma correção, um
+        // comentário, o que for) agora é tratada como se ele estivesse
+        // participando da conversa junto com o Cláudio: o texto é registrado
+        // no histórico e o Cláudio já continua a conversa na hora,
+        // incorporando o que foi dito — sem inventar nada, usando
+        // exatamente o que o Saem escreveu.
+        const valor = extrairValorDeMensagemLivre(textoEnviado);
         if (!conversas[phoneDestino]) conversas[phoneDestino] = [];
-        conversas[phoneDestino].push({ role: 'assistant', content: `[RESPOSTA MANUAL DA EQUIPE]: ${textoEnviado}` });
+
+        if (valor !== null) {
+          // Se o texto contém um valor numérico plausível, formatamos como
+          // "[EQUIPE]: valor..." — o mesmo formato confiável que o prompt já
+          // trata como oficial e usa exatamente sem arredondar/estimar nada.
+          const aparelhoPendente = pendentesEquipe[phoneDestino]?.aparelho
+            || extrairAparelhoPendente(conversas[phoneDestino])
+            || 'aparelho';
+          conversas[phoneDestino].push({
+            role: 'user',
+            content: `[EQUIPE]: O valor de troca do ${aparelhoPendente} é R$${valor.toFixed(2).replace('.', ',')}`
+          });
+        } else {
+          // Sem valor numérico — é um comentário/correção geral. Registra
+          // como observação da equipe, que o prompt já trata como fato
+          // oficial (REGRA DE MENSAGEM MANUAL DA EQUIPE).
+          conversas[phoneDestino].push({ role: 'assistant', content: `[RESPOSTA MANUAL DA EQUIPE]: ${textoEnviado}` });
+        }
+
         if (conversas[phoneDestino].length > 20) conversas[phoneDestino] = conversas[phoneDestino].slice(-20);
+        if (pendentesEquipe[phoneDestino]) {
+          delete pendentesEquipe[phoneDestino];
+          salvarPendentes();
+        }
         salvarConversas();
+
+        // Continua a conversa imediatamente com o cliente, incorporando o
+        // que o Saem acabou de dizer — não espera o cliente mandar outra
+        // mensagem pra reagir.
+        (async () => {
+          try {
+            const msgs = conversas[phoneDestino];
+            const reply = await chamarClaude([...msgs]);
+            conversas[phoneDestino].push({ role: 'assistant', content: reply });
+            salvarConversas();
+            await enviarMensagem(phoneDestino, reply);
+          } catch (e) {
+            console.error('Erro ao continuar conversa após mensagem manual:', e.message);
+          }
+        })();
       }
     }
     return res.sendStatus(200);
