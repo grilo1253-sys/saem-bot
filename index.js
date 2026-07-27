@@ -2672,6 +2672,16 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      // Checagem final de loop: as travas acima (ex: modelo fora da tabela)
+      // podem, na correção, cair de volta no MESMO texto genérico de
+      // fallback que já foi usado numa resposta anterior — e como essa
+      // substituição acontece DEPOIS da checagem de loop lá em cima, ela
+      // passava despercebida. Confere de novo aqui, bem no final, antes de
+      // mandar pro cliente.
+      if (respostaRepetidaEmLoop(reply, conversas[phone])) {
+        console.log('⚠️ Loop final detectado (fallback repetido) — usando resposta de recuperação');
+        reply = 'Peço desculpas, acho que me perdi aqui! Pode me confirmar de novo, com suas palavras, qual é exatamente a sua dúvida ou o que você precisa? Assim já te ajudo certinho 😊';
+      }
       reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
       conversas[phone].push({ role: 'assistant', content: reply });
@@ -2719,6 +2729,11 @@ app.post('/webhook', async (req, res) => {
     if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
       const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
       if (corrigida) reply = corrigida;
+    }
+    // Checagem final de loop (mesma explicação do fluxo de áudio acima).
+    if (respostaRepetidaEmLoop(reply, conversas[phone])) {
+      console.log('⚠️ Loop final detectado (fallback repetido) — usando resposta de recuperação');
+      reply = 'Peço desculpas, acho que me perdi aqui! Pode me confirmar de novo, com suas palavras, qual é exatamente a sua dúvida ou o que você precisa? Assim já te ajudo certinho 😊';
     }
     reply = removerApresentacaoRepetida(phone, reply);
     reply = removerBateriaNaoSolicitada(message, reply);
