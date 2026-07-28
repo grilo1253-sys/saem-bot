@@ -89,9 +89,75 @@ function salvarPendentes() {
   } catch (e) {}
 }
 
+// ==========================================
+// CONVERSAS ENCERRADAS (boleto / limite de DDD fora da região)
+// ==========================================
+// Guarda os números que já foram encaminhados pro número de análise e não
+// devem receber mais respostas do Cláudio — economiza crédito de API com
+// gente que já foi direcionada pra outro atendimento.
+const ARQUIVO_ENCERRADAS = path.join(PASTA_DADOS, 'conversas_encerradas.json');
+function carregarEncerradas() {
+  try {
+    if (fs.existsSync(ARQUIVO_ENCERRADAS)) {
+      return JSON.parse(fs.readFileSync(ARQUIVO_ENCERRADAS, 'utf8'));
+    }
+  } catch (e) {}
+  return {};
+}
+function salvarEncerradas() {
+  try {
+    fs.writeFileSync(ARQUIVO_ENCERRADAS, JSON.stringify(conversasEncerradas), 'utf8');
+  } catch (e) {}
+}
+
+// Conta quantas mensagens um número de DDD fora da região da loja (DDD 12)
+// já mandou, pra aplicar o limite de conversa antes de encaminhar.
+const ARQUIVO_CONTADORES_FORA = path.join(PASTA_DADOS, 'contadores_fora_regiao.json');
+function carregarContadoresForaRegiao() {
+  try {
+    if (fs.existsSync(ARQUIVO_CONTADORES_FORA)) {
+      return JSON.parse(fs.readFileSync(ARQUIVO_CONTADORES_FORA, 'utf8'));
+    }
+  } catch (e) {}
+  return {};
+}
+function salvarContadoresForaRegiao() {
+  try {
+    fs.writeFileSync(ARQUIVO_CONTADORES_FORA, JSON.stringify(contadoresForaRegiao), 'utf8');
+  } catch (e) {}
+}
+
 const conversas = carregarConversas();
 const metaConversas = carregarMetadados();
 const pendentesEquipe = carregarPendentes();
+const conversasEncerradas = carregarEncerradas();
+const contadoresForaRegiao = carregarContadoresForaRegiao();
+
+// Número de análise pra onde encaminhamos: pedidos de pagamento no boleto e
+// clientes de DDD fora da região que estourarem o limite de mensagens.
+const NUMERO_ANALISE = '12983118100';
+// DDD da região onde ficam as lojas (São José dos Campos / Taubaté).
+const DDD_REGIAO = '12';
+// Máximo de mensagens que um cliente de DDD fora da região pode trocar com o
+// Cláudio antes de ser encaminhado pro número de análise.
+const LIMITE_MENSAGENS_FORA_REGIAO = 10;
+
+// Extrai o DDD a partir do telefone no formato que o Z-API manda
+// (ex: "5512988887777" -> "12"). Remove o código do país (55) quando
+// presente antes de pegar os dois primeiros dígitos.
+function extrairDDD(phone) {
+  if (!phone) return null;
+  const numeros = phone.replace(/\D/g, '');
+  const semPais = (numeros.startsWith('55') && numeros.length > 10) ? numeros.slice(2) : numeros;
+  return semPais.slice(0, 2) || null;
+}
+
+// Detecta menção a pagamento via boleto, em qualquer variação comum de
+// escrita (com ou sem acento, "bolet", etc).
+function mencionaBoleto(texto) {
+  if (!texto) return false;
+  return /boleto/i.test(texto);
+}
 
 // Rastreia mensagens que o PRÓPRIO bot acabou de enviar, pra diferenciar do
 // eco "fromMe" (que o Z-API manda de volta toda vez que uma mensagem sai
@@ -743,19 +809,19 @@ iPhone 11: Sem defeito 64GB R$600, 128GB R$700, 256GB R$800 | Sem Face ID 64GB R
 iPhone 11 Pro: Sem defeito 64GB R$800, 256GB R$900, 512GB R$1.000 | Sem Face ID 64GB R$600 | Bat abaixo 80% 64GB R$700 | Tela trincada 64GB R$500, 256GB R$550, 512GB R$600 | Traseira trincada R$500 | Tudo junto R$300 | Face ID+Bateria R$600 | Face ID+Tela R$500 | Face ID+Traseira R$600 | Bateria+Tela R$600 | Bateria+Traseira R$650 | Tela+Traseira R$600
 iPhone 11 Pro Max: Sem defeito 64GB R$1.200, 256GB R$1.300, 512GB R$1.400 | Sem Face ID 64GB R$900, 256GB R$1.000, 512GB R$1.100 | Bat abaixo 80% 64GB R$1.000, 256GB R$1.100, 512GB R$1.200 | Tela trincada 64GB R$700, 256GB R$750, 512GB R$800 | Traseira trincada R$700 | Tudo junto R$400 | Face ID+Bateria R$700 | Face ID+Tela R$700 | Face ID+Traseira R$700 | Bateria+Tela R$700 | Bateria+Traseira R$700 | Tela+Traseira R$600
 iPhone 12 Mini: Sem defeito 64GB R$800, 128GB R$900, 256GB R$1.000 | Sem Face ID 64GB R$600, 128GB R$650, 256GB R$700 | Bat abaixo 80% 64GB R$700, 128GB R$750, 256GB R$800 | Tela trincada 64GB R$450, 128GB R$500, 256GB R$550 | Traseira trincada R$450 | Tudo junto R$300 | Face ID+Bateria R$600 | Face ID+Tela R$500 | Face ID+Traseira R$600 | Bateria+Tela R$500 | Bateria+Traseira R$600 | Tela+Traseira R$600
-iPhone 12: Sem defeito 64GB R$1.000, 128GB R$1.200, 256GB R$1.300 | Sem Face ID 64GB R$800, 128GB R$900, 256GB R$1.000 | Bat abaixo 80% 64GB R$850, 128GB R950, 256GB R$1.100 | Tela trincada 64GB R$600, 128GB R$700, 256GB R$800 | Traseira trincada R$600 | Tudo junto R$400 | Face ID+Bateria R$800 | Face ID+Tela R$600 | Face ID+Traseira R$500 | Bateria+Tela R$600 | Bateria+Traseira R$700 | Tela+Traseira R$600
+iPhone 12: Sem defeito 64GB R$1.000, 128GB R$1.200, 256GB R$1.300 | Sem Face ID 64GB R$800, 128GB R$900, 256GB R$1.000 | Bat abaixo 80% 64GB R$1.000, 128GB R$1.100, 256GB R$1.200 | Tela trincada 64GB R$600, 128GB R$700, 256GB R$800 | Traseira trincada R$600 | Tudo junto R$400 | Face ID+Bateria R$800 | Face ID+Tela R$600 | Face ID+Traseira R$500 | Bateria+Tela R$600 | Bateria+Traseira R$700 | Tela+Traseira R$600
 iPhone 12 Pro: Sem defeito 128GB R$1.400, 256GB R$1.500, 512GB R$1.600 | Sem Face ID 128GB R$1.200 | Bat abaixo 80% 128GB R$1.300 | Tela trincada 128GB R$900, 256GB R$1.000, 512GB R$1.100 | Traseira trincada 128GB R$1.000 | Tudo junto R$600 | Face ID+Bateria R$1.200 | Face ID+Tela R$1.000 | Face ID+Traseira R$900 | Bateria+Tela R$1.000 | Bateria+Traseira R$1.100 | Tela+Traseira R$800
 iPhone 12 Pro Max: Sem defeito 128GB R$1.800, 256GB R$1.900, 512GB R$2.000 | Sem Face ID 128GB R$1.500 | Bat abaixo 80% 128GB R$1.700 | Tela trincada 128GB R$1.200, 512GB R$1.300 | Traseira trincada R$1.200 | Tudo junto R$700 | Face ID+Bateria R$1.400 | Face ID+Tela R$1.200 | Face ID+Traseira R$1.000 | Bateria+Tela R$1.200 | Bateria+Traseira R$1.300 | Tela+Traseira R$1.100
 iPhone 13 Mini: Sem defeito 128GB R$1.200, 256GB R$1.300, 512GB R$1.300 | Sem Face ID 128GB R$900 | Bat abaixo 80% 128GB R$1.200 | Tela trincada 128GB R$800, 256GB R$850, 512GB R$900 | Traseira trincada R$1.000 | Tudo junto R$500 | Face ID+Bateria R$1.000 | Face ID+Tela R$800 | Face ID+Traseira R$900 | Bateria+Tela R$700 | Bateria+Traseira R$1.000 | Tela+Traseira R$700
 iPhone 13: Sem defeito 128GB R$1.500, 256GB R$1.700, 512GB R$1.800 | Sem Face ID 128GB R$1.300, 256GB R$1.350, 512GB R$1.400 | Bat abaixo 80% 128GB R$1.400, 256GB R$1.500, 512GB R$1.600 | Tela trincada 128GB R$1.100, 256GB R$1.200, 512GB R$1.250 | Traseira trincada R$1.100 | Tudo junto R$500 | Face ID+Bateria R$1.000 | Face ID+Tela R$900 | Face ID+Traseira R$1.000 | Bateria+Tela R$1.000 | Bateria+Traseira R$1.200 | Tela+Traseira R$1.000
 iPhone 13 Pro: Sem defeito 128GB R$2.000, 256GB R$2.100, 512GB R$2.200, 1TB R$2.300 | Sem Face ID 128GB R$1.700 | Bat abaixo 80% 128GB R$1.900 | Tela trincada 128GB R$1.400, 256GB R$1.450, 512GB R$1.500, 1TB R$1.550 | Traseira trincada R$1.600 | Tudo junto R$800 | Face ID+Bateria R$1.700 | Face ID+Tela R$1.500 | Face ID+Traseira R$1.500 | Bateria+Tela R$1.600 | Bateria+Traseira R$1.800 | Tela+Traseira R$1.500
-iPhone 13 Pro Max: Sem defeito 128GB R$2.400, 256GB R$2.500, 512GB R$2.700, 1TB R$2.800 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2.300 | Tela trincada 128GB R$1.600, 256GB R$1.650, 512GB R$1.700, 1TB R$1.750 | Traseira trincada 128GB R$1.650 | Tudo junto 128GB R$1.000 | Face ID+Bateria R$1.900 | Face ID+Tela R$1.400 | Face ID+Traseira R$1.600 | Bateria+Tela R$1.500 | Bateria+Traseira R$1.800 | Tela+Traseira R$1.400
+iPhone 13 Pro Max: Sem defeito 128GB R$2.500, 256GB R$2.600, 512GB R$2.700, 1TB R$2.800 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2.300 | Tela trincada 128GB R$1.600, 256GB R$1.650, 512GB R$1.700, 1TB R$1.750 | Traseira trincada 128GB R$1.650 | Tudo junto 128GB R$1.000 | Face ID+Bateria R$1.900 | Face ID+Tela R$1.400 | Face ID+Traseira R$1.600 | Bateria+Tela R$1.500 | Bateria+Traseira R$1.800 | Tela+Traseira R$1.400
 iPhone 14: Sem defeito 128GB R$1.700, 256GB R$1.900, 512GB R$2.000 | Sem Face ID 128GB R$1.400 | Bat abaixo 80% 128GB R$1.600, 256GB R$1.800, 512GB R$2.000 | Tela trincada 128GB R$1.100, 256GB R$1.200, 512GB R$1.300 | Traseira trincada R$1.400 | Tudo junto R$800 | Face ID+Bateria R$1.200 | Face ID+Tela R$1.000 | Face ID+Traseira R$1.000 | Bateria+Tela R$1.000 | Bateria+Traseira R$1.400 | Tela+Traseira R$1.200
 iPhone 14 Plus: Sem defeito 128GB R$2.100, 256GB R$2.200, 512GB R$2.300 | Sem Face ID R$1.700 | Bat abaixo 80% 128GB R$1.900 | Tela trincada R$1.400 | Traseira trincada R$1.700 | Tudo junto R$700 | Face ID+Bateria R$1.500 | Face ID+Tela R$1.400 | Face ID+Traseira R$1.400 | Bateria+Tela R$1.200 | Bateria+Traseira R$1.400 | Tela+Traseira R$1.200
 iPhone 14 Pro: Sem defeito 128GB R$2.400, 256GB R$2.500, 512GB R$2.600, 1TB R$2.700 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2.300 | Tela trincada 128GB R$1.700, 256GB R$1.750, 512GB R$1.800, 1TB R$1.850 | Traseira trincada R$2.000 | Tudo junto 128GB R$1.200 | Face ID+Bateria R$1.700 | Face ID+Tela R$1.600 | Face ID+Traseira R$1.700 | Bateria+Tela R$1.600 | Bateria+Traseira R$1.800 | Tela+Traseira R$1.600
 iPhone 14 Pro Max: Sem defeito 128GB R$2.800, 256GB R$2.900, 512GB R$3.000, 1TB R$3.200 | Sem Face ID 128GB R$2.300 | Bat abaixo 80% 128GB R$2.800 | Tela trincada 128GB R$2.000, 256GB R$2.100, 512GB R$2.200, 1TB R$2.300 | Traseira trincada R$2.200 | Tudo junto 128GB R$1.500 | Face ID+Bateria R$2.100 | Face ID+Tela R$1.800 | Face ID+Traseira R$2.000 | Bateria+Tela R$1.800 | Bateria+Traseira R$2.000 | Tela+Traseira R$1.800
 iPhone 15: Sem defeito 128GB R$2.400, 256GB R$2.500, 512GB R$2.600 | Sem Face ID 128GB R$2.000 | Bat abaixo 80% 128GB R$2.300 | Tela trincada 128GB R$1.700, 256GB R$1.750, 512GB R$1.800 | Traseira trincada R$2.000 | Tudo junto R$1.000 | Face ID+Bateria R$1.900 | Face ID+Tela R$1.700 | Face ID+Traseira R$1.600 | Bateria+Tela R$1.600 | Bateria+Traseira R$2.000 | Tela+Traseira R$1.600
-iPhone 15 Plus: Sem defeito 128GB R$2.650, 256GB R$2.750, 512GB R$2900 | Sem Face ID 128GB R$2.200 | Bat abaixo 80% 128GB R$2.450 | Tela trincada 128GB R$2.000 | Traseira trincada R$2.200 | Tudo junto R$1.600 | Face ID+Bateria R$2.000 | Face ID+Tela R$1.800 | Face ID+Traseira R$1.600 | Bateria+Tela R$1.600 | Bateria+Traseira R$2.000 | Tela+Traseira R$1.600
+iPhone 15 Plus: Sem defeito 128GB R$2.800, 256GB R$2.900, 512GB R$3.000 | Sem Face ID 128GB R$2.400 | Bat abaixo 80% 128GB R$2.700 | Tela trincada 128GB R$2.000 | Traseira trincada R$2.200 | Tudo junto R$1.600 | Face ID+Bateria R$2.000 | Face ID+Tela R$1.800 | Face ID+Traseira R$1.600 | Bateria+Tela R$1.600 | Bateria+Traseira R$2.000 | Tela+Traseira R$1.600
 iPhone 15 Pro: Sem defeito 128GB R$3.000, 256GB R$3.200, 512GB R$3.500, 1TB R$3.600 | Sem Face ID 128GB R$2.800 | Bat abaixo 80% 128GB R$3.000 | Tela trincada 128GB R$2.200 | Traseira trincada R$2.500 | Tudo junto R$2.000 | Face ID+Bateria R$2.200 | Face ID+Tela R$2.000 | Face ID+Traseira R$2.200 | Bateria+Tela R$1.800 | Bateria+Traseira R$2.300 | Tela+Traseira R$1.800
 iPhone 15 Pro Max: Sem defeito 256GB R$3.600, 512GB R$3.800, 1TB R$4.000 | Sem Face ID 256GB R$3.200 | Bat abaixo 80% 256GB R$3.700 | Tela trincada 256GB R$2.200, 512GB R$2.200, 1TB R$2.200 | Traseira trincada R$3.000 | Tudo junto R$2.200 | Face ID+Bateria R$2.700 | Face ID+Tela R$2.000 | Face ID+Traseira R$2.300 | Bateria+Tela R$2.000 | Bateria+Traseira R$2.300 | Tela+Traseira R$2.000
 iPhone 16: Sem defeito 128GB R$3.200, 256GB R$3.400, 512GB R$3.600 | Sem Face ID 128GB R$2.600 | Bat abaixo 80% 128GB R$3.200 | Tela trincada 128GB R$2.200, 256GB R$2.300, 512GB R$2.600 | Traseira trincada 128GB R$2.700 | Tudo junto R$2.200 | Face ID+Bateria R$2.500 | Face ID+Tela R$2.000 | Face ID+Traseira R$2.400 | Bateria+Tela R$2.200 | Bateria+Traseira R$2.600 | Tela+Traseira R$2.000
@@ -2635,6 +2701,56 @@ app.post('/webhook', async (req, res) => {
     if (!metaConversas[phone]) metaConversas[phone] = {};
     metaConversas[phone].ultimaMensagemCliente = Date.now();
     metaConversas[phone].reativado = false;
+
+    // ==========================================
+    // CONVERSA JÁ ENCERRADA (boleto ou limite de DDD fora da região)
+    // ==========================================
+    // Uma vez encaminhado pro número de análise, o Cláudio não responde mais
+    // esse cliente — evita gastar crédito de API negociando com quem já foi
+    // direcionado pra outro atendimento.
+    if (phone !== NUMERO_ADMIN && conversasEncerradas[phone]) {
+      console.log(`🚫 Conversa com ${phone} já encerrada anteriormente — ignorando.`);
+      return;
+    }
+
+    if (phone !== NUMERO_ADMIN) {
+      // BOLETO: assim que o cliente menciona boleto, o Cláudio para de
+      // negociar e encaminha direto pro número de análise, sem mais idas e
+      // vindas.
+      if (message && mencionaBoleto(message)) {
+        const avisoBoleto = `Pra pagamento no boleto a gente encaminha pra nossa equipe de análise! Pode chamar direto nesse número que eles te atendem: ${NUMERO_ANALISE} 😊`;
+        conversas[phone].push({ role: 'user', content: message });
+        conversas[phone].push({ role: 'assistant', content: avisoBoleto });
+        if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+        salvarConversas();
+        conversasEncerradas[phone] = true;
+        salvarEncerradas();
+        await enviarMensagem(phone, avisoBoleto);
+        console.log(`📄 ${phone} mencionou boleto — encaminhado pra ${NUMERO_ANALISE} e conversa encerrada.`);
+        return;
+      }
+
+      // DDD FORA DA REGIÃO: limita quantas mensagens o Cláudio troca com
+      // números de fora da região (DDD diferente de 12) antes de encaminhar
+      // — evita gastar crédito de API com bate-papo longo que não costuma
+      // virar venda.
+      const ddd = extrairDDD(phone);
+      if (ddd && ddd !== DDD_REGIAO) {
+        contadoresForaRegiao[phone] = (contadoresForaRegiao[phone] || 0) + 1;
+        salvarContadoresForaRegiao();
+        if (contadoresForaRegiao[phone] >= LIMITE_MENSAGENS_FORA_REGIAO) {
+          const avisoLimite = `Pra continuar o atendimento, chama a gente direto nesse número: ${NUMERO_ANALISE} 😊`;
+          conversas[phone].push({ role: 'assistant', content: avisoLimite });
+          if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+          salvarConversas();
+          conversasEncerradas[phone] = true;
+          salvarEncerradas();
+          await enviarMensagem(phone, avisoLimite);
+          console.log(`🚦 ${phone} (DDD ${ddd}) atingiu o limite de ${LIMITE_MENSAGENS_FORA_REGIAO} mensagens — encaminhado pra ${NUMERO_ANALISE} e conversa encerrada.`);
+          return;
+        }
+      }
+    }
 
     if (isImage) {
       const imageUrl = body.image?.imageUrl || body.image?.url || body.imageUrl;
