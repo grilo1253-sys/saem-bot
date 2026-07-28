@@ -640,6 +640,8 @@ Se o valor total dos aparelhos dados em troca pelo cliente superar o preço do a
 2. Dar apenas um dos aparelhos na troca
 3. Dar os dois aparelhos e pagar R$300 à loja (volta mínima obrigatória)
 
+Essa regra funciona junto com a regra "CLIENTE OFERECE DOIS (OU MAIS) APARELHOS COMO ENTRADA" (mais acima, na seção de troca): sempre calcule e mostre o valor de troca de CADA aparelho individualmente primeiro, some pra achar o total, e só então verifique se esse total supera o preço do aparelho escolhido — se superar, aplique as 3 opções acima.
+
 CONTORNAR OBJEÇÃO DE CONCORRÊNCIA (PREÇO MENOR):
 Se o cliente disser que encontrou um preço menor em outro lugar, NUNCA entre em guerra de preço nem ofereça baixar o valor automaticamente. Argumente que preço não é tudo, destacando os diferenciais da loja: garantia de 3 meses em todo seminovo, aparelhos revisados e testados antes da venda, atendimento próximo e rápido em caso de qualquer problema, loja física em ponto de fácil acesso (Shopping Jardim Oriente em SJC e Espaço Schneider em Taubaté), histórico consolidado na região. Pergunte de forma natural se o concorrente oferece a mesma garantia e suporte pós-venda. Reforce que comprar mais barato sem garantia pode sair mais caro depois, caso o aparelho apresente algum problema. Só ofereça desconto se o cliente insistir bastante e estiver realmente prestes a desistir, seguindo a regra normal de desconto (máximo R$50 sem autorização).
 
@@ -884,6 +886,12 @@ iPhone 17 Pro: Sem defeito 256GB R$5.500, 512GB R$5.700, 1TB R$5.900 | Sem Face 
 iPhone 17 Pro Max: Sem defeito 256GB R$6.000, 512GB R$6.200, 1TB R$6.400 | Sem Face ID 256GB R$5.000 | Bat abaixo 80% 256GB R$5.500 | Tela trincada 256GB R$3.000 | Traseira trincada 256GB R$4.500 | Tudo junto R$2.800 | Face ID+Bateria R$4.500 | Face ID+Tela R$3.000 | Face ID+Traseira R$2.800 | Bateria+Tela R$3.000 | Bateria+Traseira R$5.000 | Tela+Traseira R$3.000
 
 Aparelho não listado ou condição não encontrada na tabela: informar ao cliente que vai verificar o valor com a equipe e que em breve retornam. Não encaminhe para outro número, apenas dizer que irá verificar e retornar em instantes.
+
+ATENÇÃO CRÍTICA — CLIENTE OFERECE DOIS (OU MAIS) APARELHOS COMO ENTRADA PRA UM SÓ APARELHO NOVO: a loja aceita normalmente somar o valor de troca de múltiplos aparelhos do cliente como entrada de uma única compra. Quando isso acontecer, siga SEMPRE esta sequência:
+1. Identifique cada aparelho que o CLIENTE está oferecendo como entrada (são aparelhos usados dele, não modelos à venda da loja — NUNCA responda "no momento não temos esse modelo disponível" para um aparelho que o cliente está oferecendo em troca; essa frase é só pra quando o cliente pede pra COMPRAR um modelo que não existe na tabela de vendas).
+2. Calcule o valor de troca de CADA aparelho separadamente, consultando a tabela normalmente para cada um (cada aparelho segue as mesmas regras de defeito/bateria/memória já explicadas).
+3. Ao montar a simulação, SEMPRE mostre o valor de troca de CADA aparelho individualmente e nomeado (ex: "iPhone 14 Pro Max 128GB: R$X" / "iPhone 12 Pro 256GB: R$Y"), e só depois o total somado e o saldo a pagar. Nunca mostre só o valor combinado sem detalhar cada um — o cliente pode perguntar "quanto vale cada um?" a qualquer momento, e a resposta (o valor de cada aparelho individual) já deve estar disponível no histórico da conversa a partir da primeira simulação.
+4. Se o cliente perguntar de novo "quanto vale cada um" ou "qual valor de cada aparelho" depois de uma simulação combinada, responda repetindo os valores individuais que você já calculou — NUNCA diga que se perdeu ou peça pra ele confirmar de novo, essa informação já foi calculada antes.
 
 ATENÇÃO CRÍTICA — MÚLTIPLOS DEFEITOS AO MESMO TEMPO: A tabela lista o desconto de CADA defeito separadamente (ex: "Tela trincada", "Bat abaixo 80%", "Traseira trincada" como linhas isoladas), mas NUNCA lista o valor combinado para quando dois ou mais desses problemas acontecem juntos no mesmo aparelho (ex: cliente informa "traseira trincada E bateria 75%" ao mesmo tempo). Nesses casos, NUNCA some, subtraia, estime uma média ou tente calcular por conta própria um valor combinado — mesmo que pareça razoável combinar os dois descontos individuais. A tabela só cobre defeitos isolados, um de cada vez ("Tudo junto" é a única exceção, usada apenas quando o cliente relatar TODOS os problemas típicos listados naquela linha específica do modelo). Se o cliente relatar uma combinação de defeitos que não corresponda exatamente a nenhuma linha da tabela (nem um defeito isolado, nem "Tudo junto"), informe que vai verificar o valor com a equipe e que retorna em instantes, seguindo a regra padrão de aparelho/condição não encontrada.
 
@@ -2280,6 +2288,65 @@ function extrairModelosNegados(textoNormalizado) {
   return matches.map(m => m[1]);
 }
 
+// ==========================================
+// TRAVA: RECUSA INDEVIDA DE APARELHO/MARCA NA TROCA
+// ==========================================
+// A loja aceita QUALQUER aparelho como entrada/troca — mesmo quebrado,
+// queimado ou de marca fora da tabela (LG, Nokia, Asus, etc). O que não
+// está na tabela deve ser escalado pra equipe (fluxo de pendência), nunca
+// recusado de cara. Isso já está no prompt, mas o Claude pode ignorar em
+// alguns casos — essa trava pega e corrige quando isso acontece.
+function respostaRecusaAparelhoNaTroca(reply, mensagemCliente) {
+  const replyLower = reply.toLowerCase();
+  const clienteLower = (mensagemCliente || '').toLowerCase();
+  const padroesRecusa = [
+    'não aceitamos', 'nao aceitamos', 'não trabalhamos com', 'nao trabalhamos com',
+    'não fazemos troca de', 'nao fazemos troca de', 'a gente não trabalha',
+    'a gente nao trabalha', 'essa marca a gente não', 'essa marca a gente nao',
+    'não pegamos', 'nao pegamos', 'não trabalhamos com essa linha', 'nao trabalhamos com essa linha'
+  ];
+  if (!padroesRecusa.some(p => replyLower.includes(p))) return false;
+
+  // Só considera bug se o contexto for de troca/aparelho do cliente (não outro
+  // tipo de recusa legítima, como forma de pagamento ou serviço não relacionado).
+  const contextoTroca = /troca|entrada|display|tela|defeito|queimad|quebrad|trincad|aparelho|celular|smartphone/.test(clienteLower + ' ' + replyLower);
+  if (!contextoTroca) return false;
+
+  console.log('⚠️ Recusa indevida de aparelho/marca na troca detectada — a loja aceita qualquer aparelho, deveria escalar pra equipe');
+  return true;
+}
+
+// Quando a recusa indevida é detectada, pedimos pro Cláudio refazer sem
+// recusar — escalando pra equipe em vez disso.
+async function gerarRespostaCorrigindoRecusaTroca(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior recusou o aparelho do cliente na troca (ex: "não aceitamos essa marca/aparelho"). Isso está ERRADO — a loja aceita QUALQUER aparelho como entrada/troca, incluindo aparelhos quebrados, queimados ou de marcas fora da tabela (LG, Nokia, Asus, etc). Refaça a resposta SEM recusar o aparelho em nenhum momento: informe que vai verificar o valor de troca com a equipe e que retorna em instantes, seguindo a regra padrão de aparelho fora da tabela. Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaRecusaAparelhoNaTroca(respostaCorrigida, '')) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir recusa indevida de troca:', e.message);
+  }
+  return null;
+}
+
 function respostaNegaModeloQueExisteNaTabela(reply) {
   const replyLower = reply.toLowerCase();
   const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
@@ -2874,6 +2941,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaRecusaAparelhoNaTroca(reply, transcricao)) {
+        const corrigida = await gerarRespostaCorrigindoRecusaTroca(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaInventouValorTrocaAndroid(reply)) {
         const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -2930,6 +3001,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaNegaModeloQueExisteNaTabela(reply)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaRecusaAparelhoNaTroca(reply, message)) {
+      const corrigida = await gerarRespostaCorrigindoRecusaTroca(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaInventouValorTrocaAndroid(reply)) {
