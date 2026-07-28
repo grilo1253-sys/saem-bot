@@ -110,9 +110,10 @@ function salvarEncerradas() {
   } catch (e) {}
 }
 
-// Conta quantas mensagens um número de DDD fora da região da loja (DDD 12)
-// já mandou, pra aplicar o limite de conversa antes de encaminhar.
-const ARQUIVO_CONTADORES_FORA = path.join(PASTA_DADOS, 'contadores_fora_regiao.json');
+// Conta quantas mensagens SEGUIDAS um cliente mandou fora do assunto da loja
+// (bate-papo pessoal, assunto aleatório) — usado pra encerrar conversa
+// improdutiva antes que ela continue consumindo crédito de API à toa.
+const ARQUIVO_CONTADORES_FORA = path.join(PASTA_DADOS, 'contadores_fora_assunto.json');
 function carregarContadoresForaRegiao() {
   try {
     if (fs.existsSync(ARQUIVO_CONTADORES_FORA)) {
@@ -135,12 +136,14 @@ const contadoresForaRegiao = carregarContadoresForaRegiao();
 
 // Número de análise pra onde encaminhamos: pedidos de pagamento no boleto e
 // clientes de DDD fora da região que estourarem o limite de mensagens.
-const NUMERO_ANALISE = '12983118100';
+const NUMERO_ANALISE = '12981880229';
 // DDD da região onde ficam as lojas (São José dos Campos / Taubaté).
 const DDD_REGIAO = '12';
-// Máximo de mensagens que um cliente de DDD fora da região pode trocar com o
-// Cláudio antes de ser encaminhado pro número de análise.
-const LIMITE_MENSAGENS_FORA_REGIAO = 10;
+// Máximo de mensagens SEGUIDAS fora do assunto da loja (não relacionadas a
+// aparelho/compra/troca/valor) antes de encerrar a conversa. Vale pra
+// QUALQUER DDD — inclusive DDD 12 — porque bate-papo pessoal consome
+// crédito de API independente de onde o cliente é.
+const LIMITE_MENSAGENS_FORA_DO_ASSUNTO = 4;
 
 // Extrai o DDD a partir do telefone no formato que o Z-API manda
 // (ex: "5512988887777" -> "12"). Remove o código do país (55) quando
@@ -157,6 +160,53 @@ function extrairDDD(phone) {
 function mencionaBoleto(texto) {
   if (!texto) return false;
   return /boleto/i.test(texto);
+}
+
+// Palavras que indicam que a conversa é sobre o negócio (aparelho, compra,
+// troca, valor, etc). Se a mensagem do cliente não tocar em nenhuma dessas E
+// não tiver número/valor, consideramos "fora do assunto" pra fins do
+// contador de conversa improdutiva.
+const PALAVRAS_ASSUNTO_LOJA = [
+  'iphone', 'ipad', 'samsung', 'galaxy', 'motorola', 'moto ', 'xiaomi', 'poco', 'redmi',
+  'celular', 'smartphone', 'aparelho', 'tablet',
+  'troca', 'trocar', 'tela', 'bateria', 'câmera', 'camera', 'valor', 'preço', 'preco',
+  'comprar', 'compra', 'venda', 'vender', 'reserva', 'reservar',
+  'parcela', 'parcelado', 'parcelamento', 'entrada', 'garantia', 'conserto', 'manutenção',
+  'manutencao', 'defeito', 'loja', 'endereço', 'endereco', 'horário', 'horario',
+  'estoque', 'modelo', 'gb', 'memória', 'memoria', 'nota fiscal', 'orçamento', 'orcamento',
+  'chip', 'seminovo', 'usado', 'novo'
+];
+function pareceAssuntoDaLoja(texto) {
+  if (!texto) return false;
+  const t = texto.toLowerCase();
+  if (PALAVRAS_ASSUNTO_LOJA.some(p => t.includes(p))) return true;
+  if (/r\$|\d{3,}/.test(t)) return true; // menção a valores em R$ ou números grandes (preço, modelo com número, etc)
+  return false;
+}
+
+// Saudações/curtas neutras que não devem contar nem a favor nem contra o
+// contador de "fora do assunto" (cumprimento normal não é bate-papo).
+const SAUDACOES_NEUTRAS = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'opa', 'eae', 'e ai', 'e aí', 'blz', 'beleza', 'obrigado', 'obrigada', 'valeu', 'ok', 'tá', 'ta bom', 'tá bom'];
+function ehSaudacaoNeutra(texto) {
+  if (!texto) return false;
+  const t = texto.toLowerCase().trim().replace(/[!.,]/g, '');
+  return SAUDACOES_NEUTRAS.some(s => t === s) && t.length <= 20;
+}
+
+// Termos que indicam conteúdo sexual/impróprio mandado pelo cliente. Nesses
+// casos o Cláudio corta a conversa na hora, sem negociar nem tentar
+// argumentar — e avisa o admin, pra ele decidir se quer bloquear o número.
+// Lista propositalmente enxuta (só termos inequívocos), pra evitar falso
+// positivo com palavras comuns do dia a dia.
+const TERMOS_CONTEUDO_SEXUAL = [
+  'nudes', 'pelada', 'pelado', 'buceta', 'pinto duro', 'pau duro', 'transar', 'transa comigo',
+  'sexo', 'tesão', 'tesao', 'boquete', 'siririca', 'gozar', 'chupar meu', 'foder', 'fuder',
+  'manda foto pelad', 'manda nude'
+];
+function mencionaConteudoSexual(texto) {
+  if (!texto) return false;
+  const t = texto.toLowerCase();
+  return TERMOS_CONTEUDO_SEXUAL.some(termo => t.includes(termo));
 }
 
 // Rastreia mensagens que o PRÓPRIO bot acabou de enviar, pra diferenciar do
@@ -2714,6 +2764,20 @@ app.post('/webhook', async (req, res) => {
     }
 
     if (phone !== NUMERO_ADMIN) {
+      // CONTEÚDO SEXUAL/IMPRÓPRIO: corta na hora, sem negociar, sem tentar
+      // argumentar — e avisa você, pra decidir se quer bloquear o número.
+      if (message && mencionaConteudoSexual(message)) {
+        conversasEncerradas[phone] = true;
+        salvarEncerradas();
+        console.log(`🚨 ${phone} mandou conteúdo impróprio/sexual — conversa encerrada, sem resposta ao cliente.`);
+        if (NUMERO_ADMIN) {
+          try {
+            await enviarMensagem(NUMERO_ADMIN, `🚨 O número ${phone} mandou uma mensagem com conteúdo sexual/impróprio pro Cláudio. A conversa foi encerrada automaticamente (o bot não vai responder mais esse número). Você pode bloquear/denunciar se quiser.`);
+          } catch (e) {}
+        }
+        return;
+      }
+
       // BOLETO: assim que o cliente menciona boleto, o Cláudio para de
       // negociar e encaminha direto pro número de análise, sem mais idas e
       // vindas.
@@ -2730,23 +2794,29 @@ app.post('/webhook', async (req, res) => {
         return;
       }
 
-      // DDD FORA DA REGIÃO: limita quantas mensagens o Cláudio troca com
-      // números de fora da região (DDD diferente de 12) antes de encaminhar
-      // — evita gastar crédito de API com bate-papo longo que não costuma
-      // virar venda.
-      const ddd = extrairDDD(phone);
-      if (ddd && ddd !== DDD_REGIAO) {
-        contadoresForaRegiao[phone] = (contadoresForaRegiao[phone] || 0) + 1;
+      // CONVERSA FORA DO ASSUNTO: vale pra QUALQUER DDD (inclusive DDD 12).
+      // Se o cliente mandar várias mensagens seguidas sem nenhuma relação
+      // com aparelho/compra/troca/valor (bate-papo pessoal, assunto
+      // aleatório), encerramos — mas SÓ nesse caso. Uma negociação real que
+      // está avançando (mesmo que longa, mesmo que DDD de fora da região)
+      // nunca é cortada por isso, porque cada mensagem relacionada à loja
+      // zera o contador de novo.
+      if (message && !ehSaudacaoNeutra(message)) {
+        if (pareceAssuntoDaLoja(message)) {
+          contadoresForaRegiao[phone] = 0;
+        } else {
+          contadoresForaRegiao[phone] = (contadoresForaRegiao[phone] || 0) + 1;
+        }
         salvarContadoresForaRegiao();
-        if (contadoresForaRegiao[phone] >= LIMITE_MENSAGENS_FORA_REGIAO) {
-          const avisoLimite = `Pra continuar o atendimento, chama a gente direto nesse número: ${NUMERO_ANALISE} 😊`;
-          conversas[phone].push({ role: 'assistant', content: avisoLimite });
+        if (contadoresForaRegiao[phone] >= LIMITE_MENSAGENS_FORA_DO_ASSUNTO) {
+          const avisoForaAssunto = `Aqui eu só consigo ajudar com assuntos da loja (aparelhos, troca, valores) 😊 Qualquer dúvida sobre isso, pode chamar!`;
+          conversas[phone].push({ role: 'assistant', content: avisoForaAssunto });
           if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
           salvarConversas();
           conversasEncerradas[phone] = true;
           salvarEncerradas();
-          await enviarMensagem(phone, avisoLimite);
-          console.log(`🚦 ${phone} (DDD ${ddd}) atingiu o limite de ${LIMITE_MENSAGENS_FORA_REGIAO} mensagens — encaminhado pra ${NUMERO_ANALISE} e conversa encerrada.`);
+          await enviarMensagem(phone, avisoForaAssunto);
+          console.log(`💬 ${phone} enviou ${LIMITE_MENSAGENS_FORA_DO_ASSUNTO} mensagens seguidas fora do assunto da loja — conversa encerrada.`);
           return;
         }
       }
