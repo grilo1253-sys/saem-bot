@@ -778,6 +778,13 @@ ENTREGAS
 Transferência entre lojas: R$70,00 via motoboy.
 Consultar disponibilidade: https://wa.me/5512981880229
 
+ENTREGA VIA MOTOBOY PRO CLIENTE (endereço do cliente, fora da loja):
+- A taxa de entrega NUNCA pode ser paga junto/embutida no valor do aparelho — são pagamentos separados.
+- A taxa de entrega deve ser paga ANTECIPADAMENTE, só via Pix (não aceita no cartão nem na entrega).
+- Toda entrega precisa ser combinada diretamente com a equipe pelo número https://wa.me/5512981880229 — é lá que confirmam disponibilidade, valor da taxa e fazem o pagamento antecipado do Pix.
+- Por segurança de ambas as partes, toda entrega exige: o cliente enviar seus documentos e fazer uma chamada de vídeo com o vendedor antes da entrega ser confirmada. Isso também é combinado direto pelo número acima.
+- Se o cliente perguntar sobre entrega, explique essas regras (pagamento antecipado via Pix, separado do aparelho, e o procedimento de documentos + chamada de vídeo) e encaminhe pro número https://wa.me/5512981880229 pra combinar os detalhes e horário.
+
 -----------------------------
 Regra sobre saúde da bateria
 
