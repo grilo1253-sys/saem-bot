@@ -2655,6 +2655,29 @@ app.post('/webhook', async (req, res) => {
         // ignora, sem duplicar.
         enviadosBot.splice(idx, 1);
       } else {
+        // COMANDO MANUAL DE ENCERRAMENTO: se o Saem digitar manualmente algo
+        // como "continuar atendimento 12983118100" (ou variações parecidas)
+        // direto no chat do cliente, isso é um sinal pra tirar esse número
+        // do atendimento automático — geralmente porque é um cliente
+        // enrolando/fake, ou porque o Saem já assumiu a negociação por
+        // outro canal. O bot para de responder esse número imediatamente,
+        // sem mandar mais nenhuma mensagem (a mensagem que o Saem mandou já
+        // foi entregue de verdade pelo WhatsApp, não precisa reenviar nada).
+        if (/continuar atendimento/i.test(textoEnviado)) {
+          conversasEncerradas[phoneDestino] = true;
+          salvarEncerradas();
+          if (!conversas[phoneDestino]) conversas[phoneDestino] = [];
+          conversas[phoneDestino].push({ role: 'user', content: `[RESPOSTA MANUAL DA EQUIPE]: ${textoEnviado}` });
+          if (conversas[phoneDestino].length > 20) conversas[phoneDestino] = conversas[phoneDestino].slice(-20);
+          if (pendentesEquipe[phoneDestino]) {
+            delete pendentesEquipe[phoneDestino];
+            salvarPendentes();
+          }
+          salvarConversas();
+          console.log(`🚫 Comando manual de encerramento detectado para ${phoneDestino} — bot vai parar de responder esse número.`);
+          return;
+        }
+
         // Qualquer mensagem que o Saem digitar manualmente direto na
         // conversa com o cliente (seja um valor, uma correção, um
         // comentário, o que for) agora é tratada como se ele estivesse
