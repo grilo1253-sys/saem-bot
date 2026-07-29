@@ -193,6 +193,70 @@ function ehSaudacaoNeutra(texto) {
   return SAUDACOES_NEUTRAS.some(s => t === s) && t.length <= 20;
 }
 
+// ==========================================
+// DETECÇÃO DE ASSUNTO REPETIDO (SINAL DE ENROLAÇÃO)
+// ==========================================
+// Cliente que fica perguntando sobre o MESMO assunto várias vezes na mesma
+// conversa (bateria, cor, entrega, garantia, parcelamento, desconto) —
+// mesmo trocando de modelo/memória no meio — é um sinal forte de enrolação
+// (as vezes de propósito, pra gastar crédito). Cada assunto já perguntado
+// uma vez fica marcado; se o cliente perguntar de novo sobre um assunto já
+// visto, conta como repetição. Ao acumular repetições demais, encerra a
+// conversa e encaminha pra equipe (mesmo mecanismo de conversasEncerradas).
+const ARQUIVO_TOPICOS_VISTOS = path.join(PASTA_DADOS, 'topicos_vistos.json');
+function carregarTopicosVistos() {
+  try {
+    if (fs.existsSync(ARQUIVO_TOPICOS_VISTOS)) {
+      return JSON.parse(fs.readFileSync(ARQUIVO_TOPICOS_VISTOS, 'utf8'));
+    }
+  } catch (e) {}
+  return {};
+}
+function salvarTopicosVistos() {
+  try {
+    fs.writeFileSync(ARQUIVO_TOPICOS_VISTOS, JSON.stringify(topicosVistosPorTelefone), 'utf8');
+  } catch (e) {}
+}
+const topicosVistosPorTelefone = carregarTopicosVistos(); // { [phone]: { topicos: [...vistos], repeticoes: N } }
+
+// Depois de quantas REPETIÇÕES de assunto (não a primeira vez perguntando,
+// mas repetições subsequentes) a conversa é encerrada e encaminhada.
+const LIMITE_REPETICOES_TOPICO = 3;
+
+const TOPICOS_REPETIVEIS = {
+  bateria: /bateria|sa[uú]de da bateria/,
+  cor: /\bcor\b|\bcores\b|prefer[eê]ncia de cor/,
+  entrega: /entrega|motoboy|\bretirar\b|\bbuscar\b/,
+  garantia: /garantia/,
+  parcelamento: /parcela|entrada|financiamento/,
+  desconto: /desconto|mais barato|abaixar o valor/,
+};
+
+// Verifica se a mensagem do cliente repete um assunto já perguntado antes
+// na mesma conversa. Retorna true quando o limite de repetições é atingido
+// (sinal pra encerrar a conversa).
+function verificarTopicoRepetido(phone, mensagemCliente) {
+  if (!mensagemCliente) return false;
+  const texto = mensagemCliente.toLowerCase();
+  if (!topicosVistosPorTelefone[phone]) topicosVistosPorTelefone[phone] = { topicos: [], repeticoes: 0 };
+  const registro = topicosVistosPorTelefone[phone];
+
+  for (const [nome, regex] of Object.entries(TOPICOS_REPETIVEIS)) {
+    if (regex.test(texto)) {
+      if (registro.topicos.includes(nome)) {
+        registro.repeticoes += 1;
+        salvarTopicosVistos();
+        console.log(`🔁 Tópico "${nome}" repetido por ${phone} (${registro.repeticoes}/${LIMITE_REPETICOES_TOPICO})`);
+        if (registro.repeticoes >= LIMITE_REPETICOES_TOPICO) return true;
+      } else {
+        registro.topicos.push(nome);
+        salvarTopicosVistos();
+      }
+    }
+  }
+  return false;
+}
+
 // Termos que indicam conteúdo sexual/impróprio mandado pelo cliente. Nesses
 // casos o Cláudio corta a conversa na hora, sem negociar nem tentar
 // argumentar — e avisa o admin, pra ele decidir se quer bloquear o número.
@@ -2916,6 +2980,23 @@ app.post('/webhook', async (req, res) => {
           console.log(`💬 ${phone} enviou ${LIMITE_MENSAGENS_FORA_DO_ASSUNTO} mensagens seguidas fora do assunto da loja — conversa encerrada.`);
           return;
         }
+      }
+
+      // ASSUNTO REPETIDO (enrolação): cliente perguntando o mesmo assunto
+      // (bateria, cor, entrega, garantia, parcelamento, desconto) várias
+      // vezes na mesma conversa, mesmo trocando de modelo no meio — sinal
+      // de enrolação, às vezes proposital, só pra gastar crédito.
+      if (message && verificarTopicoRepetido(phone, message)) {
+        const avisoRepeticao = `Pra fechar os detalhes certinho, chama a gente direto nesse número: ${NUMERO_ANALISE} 😊`;
+        conversas[phone].push({ role: 'user', content: message });
+        conversas[phone].push({ role: 'assistant', content: avisoRepeticao });
+        if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+        salvarConversas();
+        conversasEncerradas[phone] = true;
+        salvarEncerradas();
+        await enviarMensagem(phone, avisoRepeticao);
+        console.log(`🔁 ${phone} repetiu assunto ${LIMITE_REPETICOES_TOPICO}x — encaminhado pra ${NUMERO_ANALISE} e conversa encerrada.`);
+        return;
       }
     }
 
