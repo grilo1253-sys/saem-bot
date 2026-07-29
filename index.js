@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
@@ -2530,7 +2531,12 @@ async function gerarRespostaComAlternativa(mensagens, respostaOriginalBloqueada)
 // passar a saudação de novo naquele dia, não importa quantas mensagens
 // tenham passado.
 function removerApresentacaoRepetida(phone, reply) {
-  const regexSaudacaoInicial = /^(oi|ol[aá])[!,.]?\s*tudo bem\??\s*(sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio)[^\n]*\n*\s*/i;
+  // Cobre tanto a saudação completa com o nome ("Sou o Cláudio") quanto
+  // variações mais curtas que também funcionam como reapresentação (ex:
+  // "Oi! Tudo bem por aqui", "Oi! Tudo bem e você?") — essas variações
+  // escapavam da trava antiga por não conterem o nome, mas geram o mesmo
+  // efeito de o bot parecer que esqueceu a conversa e começou de novo.
+  const regexSaudacaoInicial = /^(oi|ol[aá])[!,.]?\s*tudo bem\??\s*(sou o cl[aá]udio|aqui\s*[eé]\s*o cl[aá]udio|por aqui|e voc[eê]|com voc[eê])?[^\n]*\n*\s*/i;
   const contemSaudacao = regexSaudacaoInicial.test(reply);
 
   if (!metaConversas[phone]) metaConversas[phone] = {};
