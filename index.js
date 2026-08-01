@@ -2281,6 +2281,124 @@ async function gerarRespostaCorrigindoValorRedmiNote(mensagens) {
 }
 
 // ==========================================
+// TRAVA DE SEGURANÇA — VALOR TROCADO ENTRE MODELOS DA LINHA MOTO G
+// ==========================================
+// Erro real que já aconteceu: cliente com "Moto G22 256GB sem defeitos"
+// recebeu valor de troca de R$500 — o valor correto da tabela é R$300 (o
+// R$500 pertence a outros modelos da linha, como G42/G51/G52 256GB). Assim
+// como na linha Redmi Note, a trava ANDROID_TROCA_MODELOS_VALIDOS não pega
+// esse erro porque "moto g22" existe na lista de modelos válidos — o
+// problema não é o modelo não existir, é o valor citado pertencer a OUTRO
+// modelo da mesma família. Esta trava roda em runtime comparando o valor
+// citado com o valor EXATO daquele modelo específico (e, quando aplicável,
+// daquela capacidade 128GB/256GB), independente do que o prompt diga.
+const VALORES_TROCA_MOTO_G = {
+  '1': 150, '2': 150, '3': 150,
+  '4': 200, '5': 200,
+  '6': 200, '7': 200, '8': 200,
+  '04': 300, '05': 300, '05s': 300,
+  '9': 250, '10': 250, '20': 250,
+  '9 play': 200, '9 plus': 250,
+  '22': 300, '24': 300, '30': 300, '35': 350,
+  '15': { 128: 400, 256: 500 },
+  '31': { 128: 300, 256: 400 },
+  '32': { 128: 300, 256: 400 },
+  '34': { 128: 300, 256: 400 },
+  '41': { 128: 350, 256: 400 },
+  '42': { 128: 400, 256: 500 },
+  '51': { 128: 400, 256: 500 },
+  '52': { 128: 400, 256: 500 },
+  '53': { 128: 450, 256: 550 },
+  '54': { 128: 500, 256: 600 },
+  '55': { 128: 500, 256: 600 },
+  '56': { 128: 600, 256: 700 },
+  '62': { 128: 500, 256: 550 },
+  '64': { 128: 450, 256: 550 },
+  '65': { 128: 450, 256: 550 },
+  '71': { 128: 400, 256: 500 },
+  '72': { 128: 500, 256: 550 },
+  '73': { 128: 400, 256: 450 },
+  '75': { 128: 500, 256: 550 },
+  '82': { 128: 500, 256: 550 },
+  '84': { 128: 600, 256: 700 },
+  '85': { 128: 650, 256: 700 },
+  '86': { 128: 1200, 256: 1300 },
+  '96': { 128: 1400, 256: 1500 },
+};
+
+function respostaTemValorTrocaMotoGErrado(reply) {
+  if (!/r\$/i.test(reply)) return false;
+  const replyLower = reply.toLowerCase();
+  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
+
+  const regexMencao = /moto\s*g\s*(\d{1,2}s?)\s*(play|plus|power)?/gi;
+
+  let match;
+  while ((match = regexMencao.exec(reply)) !== null) {
+    const numero = match[1].toLowerCase();
+    const sufixo = (match[2] || '').toLowerCase().trim();
+    const chaveComSufixo = sufixo ? `${numero} ${sufixo}` : null;
+    let valorEsperado = chaveComSufixo && VALORES_TROCA_MOTO_G[chaveComSufixo] !== undefined
+      ? VALORES_TROCA_MOTO_G[chaveComSufixo]
+      : VALORES_TROCA_MOTO_G[numero];
+    if (valorEsperado === undefined) continue; // combinação não mapeada, não valida
+
+    // Pega uma janela de caracteres ao redor da menção pra achar o valor R$
+    // citado perto dela (mesma técnica da trava do Redmi Note).
+    const inicioJanela = Math.max(0, match.index - 15);
+    const fimJanela = Math.min(reply.length, match.index + match[0].length + 80);
+    const janela = reply.slice(inicioJanela, fimJanela);
+
+    if (typeof valorEsperado === 'object') {
+      // Modelo com valor diferente por capacidade — só valida se a
+      // capacidade (128 ou 256) aparecer perto da menção; se não aparecer,
+      // não dá pra saber qual das duas comparar, então pula.
+      const capacidadeMatch = janela.match(/\b(128|256)\s*gb\b/i);
+      if (!capacidadeMatch) continue;
+      valorEsperado = valorEsperado[capacidadeMatch[1]];
+    }
+
+    const valorMatch = janela.match(/r\$[^\d]{0,3}([\d]{1,3}(?:\.\d{3})*(?:,\d{1,2})?)/i);
+    if (!valorMatch) continue;
+    const valorCitado = parseFloat(valorMatch[1].replace(/\./g, '').replace(',', '.'));
+    if (Math.abs(valorCitado - valorEsperado) > 0.01) {
+      console.log(`⚠️ Valor de troca trocado entre modelos Moto G bloqueado: "${match[0]}" deveria ser R$${valorEsperado}, mas citou R$${valorCitado}`);
+      return true;
+    }
+  }
+  return false;
+}
+
+async function gerarRespostaCorrigindoValorMotoG(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior citou um valor de troca da linha Moto G que pertence a OUTRO modelo (ou outra capacidade 128GB/256GB do MESMO modelo) da mesma família. Releia a seção "MOTOROLA - Linha Moto G" da tabela VALORES DE TROCA - ANDROID com muita atenção ao número EXATO do modelo e à capacidade (128GB e 256GB de um mesmo modelo podem ter valores DIFERENTES). Refaça a resposta usando o valor exato que corresponde ao modelo e capacidade que o cliente mencionou. Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    if (!respostaTemValorTrocaMotoGErrado(respostaCorrigida)) {
+      return respostaCorrigida;
+    }
+  } catch (e) {
+    console.error('Erro ao corrigir valor de troca Moto G:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — VALOR DE MANUTENÇÃO ANDROID INVENTADO
 // ==========================================
 // Erro real que já aconteceu: cliente perguntou quanto custa a troca de tela
@@ -3070,6 +3188,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoValorRedmiNote(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaTemValorTrocaMotoGErrado(reply)) {
+        const corrigida = await gerarRespostaCorrigindoValorMotoG(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
         const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -3130,6 +3252,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaTemValorTrocaRedmiNoteErrado(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorRedmiNote(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaTemValorTrocaMotoGErrado(reply)) {
+      const corrigida = await gerarRespostaCorrigindoValorMotoG(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
