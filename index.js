@@ -2399,6 +2399,83 @@ async function gerarRespostaCorrigindoValorMotoG(mensagens) {
 }
 
 // ==========================================
+// TRAVA DE SEGURANÇA — DOMINGO/TAUBATÉ SEM ENCAMINHAR PRO RODRIGO
+// ==========================================
+// Erro real que já aconteceu: em um domingo, a conversa já tinha estabelecido
+// que o cliente queria ir à loja de Taubaté (o próprio Cláudio já tinha
+// mandado o endereço de Taubaté), o cliente disse que estava lá na frente e
+// achou fechado, e o Cláudio respondeu com uma desculpa genérica ("pode ser
+// algum imprevisto") encaminhando pro número ERRADO — wa.me/5512981880229,
+// que é o número genérico de análise de crédito/equipe, não o do Rodrigo
+// (wa.me/5512991058245), o vendedor responsável pelo atendimento agendado de
+// Taubaté aos domingos. A regra de domingo já existe no prompt (ver
+// textoRegraDomingoTaubate), mas como é só uma instrução de texto, o modelo
+// pode deixar de aplicá-la — esta trava roda em runtime e força a correção
+// sempre que a conversa é sobre Taubaté num domingo e o cliente sinaliza que
+// a loja parece fechada, mas a resposta não encaminhou pro Rodrigo.
+function ehDomingoSaoPaulo() {
+  const diaSemana = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', weekday: 'long' });
+  return diaSemana === 'Sunday';
+}
+
+function conversaMencionaTaubate(mensagens, mensagemClienteAtual) {
+  const recentes = Array.isArray(mensagens) ? mensagens.slice(-8) : [];
+  for (const m of recentes) {
+    const texto = typeof m.content === 'string' ? m.content : '';
+    if (/taubat/i.test(texto)) return true;
+  }
+  return /taubat/i.test(mensagemClienteAtual || '');
+}
+
+function respostaDomingoTaubateSemRodrigo(mensagemCliente, reply, mensagens) {
+  if (!ehDomingoSaoPaulo()) return false;
+  if (!reply) return false;
+  if (!conversaMencionaTaubate(mensagens, mensagemCliente)) return false;
+
+  const clienteLower = (mensagemCliente || '').toLowerCase();
+  // Cliente sinalizando que a loja parece fechada, sem ninguém lá, ou que
+  // está no local esperando atendimento.
+  const clienteIndicaFechado = /fechad|n[aã]o\s+(est[aá]|t[aá])\s+abert|ningu[eé]m\s+(atende|abre|responde)|em\s+frente\s+(a|à|na|no)|chegue[ i]|cheguei/.test(clienteLower);
+  if (!clienteIndicaFechado) return false;
+
+  const replyLower = reply.toLowerCase();
+  const mencionaRodrigo = replyLower.includes('5512991058245') || replyLower.includes('rodrigo');
+  if (mencionaRodrigo) return false; // já está correto
+
+  console.log('⚠️ Domingo/Taubaté: resposta não encaminhou pro Rodrigo — bloqueada para correção');
+  return true;
+}
+
+async function gerarRespostaCorrigindoDomingoTaubate(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Hoje é domingo e a conversa é sobre a loja de Taubaté, que aos domingos funciona apenas com atendimento agendado pelo vendedor Rodrigo. Sua resposta anterior não encaminhou o cliente para o Rodrigo. Refaça a resposta explicando que aos domingos o atendimento em Taubaté é só com agendamento prévio, e encaminhe direto para o Rodrigo: https://wa.me/5512991058245 — NÃO use nenhum outro número (o número de análise de crédito/equipe geral não se aplica aqui). Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    const replyLower = respostaCorrigida.toLowerCase();
+    const aindaSemRodrigo = !(replyLower.includes('5512991058245') || replyLower.includes('rodrigo'));
+    if (!aindaSemRodrigo) return respostaCorrigida;
+  } catch (e) {
+    console.error('Erro ao corrigir domingo/Taubaté sem Rodrigo:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — VALOR DE MANUTENÇÃO ANDROID INVENTADO
 // ==========================================
 // Erro real que já aconteceu: cliente perguntou quanto custa a troca de tela
@@ -3192,6 +3269,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoValorMotoG(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaDomingoTaubateSemRodrigo(transcricao, reply, conversas[phone])) {
+        const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
         const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -3256,6 +3337,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaTemValorTrocaMotoGErrado(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorMotoG(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaDomingoTaubateSemRodrigo(message, reply, conversas[phone])) {
+      const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
