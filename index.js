@@ -633,6 +633,7 @@ Quando o cliente perguntar sobre acessórios (carregadores, capas, películas, e
 Se o cliente reclamar de propaganda enganosa, atendimento ruim ou qualquer crítica à loja, NUNCA concorde com a reclamação, NUNCA diga "você tem razão" sobre algo negativo da loja e NUNCA prometa repassar feedback para a equipe como se fosse um erro real. Defenda a loja de forma educada e firme. Explique a situação de forma positiva. Exemplo: se o cliente reclamar do anúncio de "36 vezes no boleto", explique que é uma modalidade real de financiamento aprovada, onde o cliente paga parcelas mensais via boleto após análise de crédito — não é propaganda enganosa, é uma forma de pagamento legítima oferecida pela loja.
 - REGRA DE OFERTAS EM IMAGENS:
 Se o cliente enviar uma imagem ou vídeo com uma oferta da Saem Celulares contendo um preço diferente da tabela, considere esse preço como válido para a negociação. Negocie com base no valor mostrado na imagem, sem questionar ou invalidar a oferta.
+Isso vale também para prints de preços praticados nas redes sociais da loja (Instagram, Facebook, etc) — se o cliente mandar um print mostrando um preço mais barato que o da tabela atual, aceite esse preço e continue a negociação normalmente com base no valor que ele mandou. Nesse caso específico (print de rede social), inclua na resposta, de forma natural, que o preço será conferido quando ele chegar na loja — algo como "esse valor a gente confere certinho quando você vier na loja, mas já vamos seguindo com base nele 😊". Não questione, não invalide e não recuse negociar por causa disso; é só um aviso pra deixar claro que a confirmação final acontece presencialmente.
 - REGRA DE VALOR CONFIRMADO PELA EQUIPE:
 Se no histórico da conversa aparecer uma mensagem do tipo "[EQUIPE]: O valor de troca do [aparelho] é R$X", use EXATAMENTE esse valor na negociação. Esse valor foi confirmado pela equipe e deve ser tratado como oficial.
 IMPORTANTE — NÃO PERCA O CONTEXTO DA COMPRA: essa mensagem confirma só o valor de TROCA do aparelho do cliente — ela NÃO apaga o resto da conversa. Antes de perguntar "qual modelo você quer levar?", releia as mensagens anteriores do cliente: se ele já disse em algum momento qual aparelho tem interesse em comprar (ex: "tenho interesse no iPhone 14"), use essa informação diretamente e já monte a simulação com esse modelo — não pergunte de novo algo que o cliente já respondeu antes.
@@ -1950,19 +1951,7 @@ function mensagemPareceTroca(mensagemCliente) {
     /dar\s+(de\s+)?(entrada|troca)/,
     /usar\s+(de\s+)?(entrada|troca)/,
     /troca(r)?\s+(o\s+)?meu\s+\w+/,
-    /entrada\s+(com\s+)?(o\s+)?meu\s+\w+/,
-    // ERRO REAL QUE JÁ ACONTECEU: cliente perguntou "vocês aceitam iPhone
-    // como forma de pagamento para complementar a compra de outro
-    // aparelho... vocês conseguem me passar um pré-valor estimado da
-    // avaliação?" — nenhum padrão acima batia, porque "aceita" não vinha
-    // seguido de "meu", e não havia as palavras "entrada"/"troca". Essa é
-    // uma forma comum e educada de pedir avaliação de troca sem usar
-    // nenhuma das palavras-chave originais.
-    /aceita(m)?\s+.{0,25}\s+como\s+(forma\s+de\s+)?pagamento/,
-    /pre.?valor|pré.?valor/,
-    /valor\s+(estimado\s+)?d[ae]\s+avalia[cç][aã]o/,
-    /passa(r)?\s+(um\s+)?(pre.?valor|pré.?valor|valor\s+estimado)/,
-    /complementar\s+(a\s+|na\s+)?compra/
+    /entrada\s+(com\s+)?(o\s+)?meu\s+\w+/
   ];
   return padroesTroca.some(p => p.test(texto));
 }
@@ -2483,77 +2472,6 @@ async function gerarRespostaCorrigindoDomingoTaubate(mensagens) {
     if (!aindaSemRodrigo) return respostaCorrigida;
   } catch (e) {
     console.error('Erro ao corrigir domingo/Taubaté sem Rodrigo:', e.message);
-  }
-  return null;
-}
-
-// ==========================================
-// TRAVA DE SEGURANÇA — MANUTENÇÃO (TROCA DE DISPLAY/TELA) TRATADA COMO VENDA
-// ==========================================
-// Erro real que já aconteceu: cliente perguntou "queria fazer um orçamento
-// de troca de display do iPhone 11 pro" — claramente uma pergunta de
-// MANUTENÇÃO (conserto de tela), não de compra do aparelho. O Cláudio
-// confundiu "troca de display" com "troca de aparelho" e respondeu como se
-// fosse pergunta de VENDA: "No momento não temos esse modelo específico
-// disponível... catálogo completo" — resposta sem sentido nenhum, porque o
-// cliente não queria comprar um iPhone 11 Pro, queria saber o preço de
-// consertar a tela do que ele já tem. A trava respostaTrocaTratadaComoVenda
-// já existente cobre o caso de TROCA/avaliação de aparelho confundida com
-// venda, mas não cobre esse caso de MANUTENÇÃO confundida com venda — esta
-// trava cobre especificamente isso.
-function mensagemPareceManutencao(mensagemCliente) {
-  const texto = normalizarTexto(mensagemCliente);
-  if (!texto) return false;
-  const padroesManutencao = [
-    /troca\s+de\s+(display|tela|modulo|módulo|bateria|conector|camera|câmera)/,
-    /trocar\s+(a\s+|o\s+)?(display|tela|modulo|módulo|bateria|conector)/,
-    /consert(o|ar)\s+(de\s+|do\s+|da\s+)?(display|tela|modulo|módulo|bateria|aparelho|celular)/,
-    /or[cç]amento\s+(de\s+|para\s+)?(troca|conserto|reparo)\s+(de\s+|do\s+|da\s+)?(display|tela|modulo|módulo|bateria)/,
-    /quanto\s+(custa|fica|[eé])\s+(a\s+|o\s+)?(troca|conserto|reparo)\s+(de\s+|do\s+|da\s+)?(display|tela|modulo|módulo|bateria)/,
-    /reparo\s+(de\s+|do\s+|da\s+)?(display|tela|modulo|módulo|bateria)/
-  ];
-  return padroesManutencao.some(p => p.test(texto));
-}
-
-function respostaManutencaoTratadaComoVenda(mensagemCliente, reply) {
-  if (!mensagemPareceManutencao(mensagemCliente)) return false;
-  if (!reply) return false;
-  const replyLower = reply.toLowerCase();
-  // Se já encaminha corretamente (pro Breno ou "verificar com a equipe"), não é o bug
-  if (replyLower.includes('breno')) return false;
-  if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
-  const mandaCatalogo = replyLower.includes('catalogo') || replyLower.includes('catálogo') || replyLower.includes('docs.google.com');
-  const pareceRecusaDeVenda = /nao temos esse modelo|não temos esse modelo|no momento nao temos|no momento não temos|nao temos esse|não temos esse/.test(replyLower);
-  if (!pareceRecusaDeVenda && !mandaCatalogo) return false;
-  console.log('⚠️ Manutenção (troca de display/tela) tratada como venda — resposta bloqueada para correção');
-  return true;
-}
-
-async function gerarRespostaCorrigindoManutencaoTratadaComoVenda(mensagens) {
-  try {
-    if (mensagens.length === 0) return null;
-
-    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior tratou a pergunta do cliente como se fosse sobre COMPRAR um aparelho (venda), dizendo que o modelo não estava disponível e mandando o catálogo. Isso está ERRADO: releia a mensagem do cliente — ele está pedindo um ORÇAMENTO DE MANUTENÇÃO/CONSERTO (troca de display, tela, módulo, bateria, etc) do aparelho que ele JÁ TEM, não perguntando se pode comprar um aparelho novo. Se o aparelho mencionado for iPhone, use a tabela de preços de manutenção (exclusiva para iPhones) e informe o valor exato do serviço perguntado. Se não encontrar o serviço exato na tabela, ou se o aparelho for Android, informe que o valor precisa ser verificado com a equipe técnica e encaminhe para o Breno: https://wa.me/5512991364221. NUNCA diga "não temos esse modelo disponível" nem mande para o catálogo de vendas, pois essa não é uma pergunta de venda. Seja breve (1 a 3 frases).';
-
-    const ultima = mensagens[mensagens.length - 1];
-    let ultimaComInstrucao;
-    if (typeof ultima.content === 'string') {
-      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
-    } else if (Array.isArray(ultima.content)) {
-      const conteudo = ultima.content.map(b => ({ ...b }));
-      conteudo.push({ type: 'text', text: instrucao });
-      ultimaComInstrucao = { ...ultima, content: conteudo };
-    } else {
-      ultimaComInstrucao = ultima;
-    }
-    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
-
-    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
-    const replyLower = respostaCorrigida.toLowerCase();
-    const aindaRecusaDeVenda = /nao temos esse modelo|não temos esse modelo|no momento nao temos|no momento não temos/.test(replyLower);
-    if (!aindaRecusaDeVenda) return respostaCorrigida;
-  } catch (e) {
-    console.error('Erro ao corrigir manutenção tratada como venda:', e.message);
   }
   return null;
 }
@@ -3356,10 +3274,6 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
-      if (respostaManutencaoTratadaComoVenda(transcricao, reply)) {
-        const corrigida = await gerarRespostaCorrigindoManutencaoTratadaComoVenda(conversas[phone]);
-        if (corrigida) reply = corrigida;
-      }
       if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
         const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
         if (corrigida) reply = corrigida;
@@ -3428,10 +3342,6 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaDomingoTaubateSemRodrigo(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
-      if (corrigida) reply = corrigida;
-    }
-    if (respostaManutencaoTratadaComoVenda(message, reply)) {
-      const corrigida = await gerarRespostaCorrigindoManutencaoTratadaComoVenda(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
