@@ -194,6 +194,30 @@ function ehSaudacaoNeutra(texto) {
   return SAUDACOES_NEUTRAS.some(s => t === s) && t.length <= 20;
 }
 
+// Erro real que já aconteceu várias vezes: cliente respondeu "Sim" (a uma
+// pergunta direta do próprio Cláudio: "Quer que eu monte uma simulação com
+// o valor da sua troca já abatido?"), "Pro maz", "16 pro", "Troca" —
+// respostas CURTAS e DIRETAS a uma pergunta que o próprio Cláudio tinha
+// acabado de fazer. Nenhuma dessas respostas batia com PALAVRAS_ASSUNTO_LOJA
+// nem com o regex de R$/números grandes, então contavam como "fora do
+// assunto" e a conversa era encerrada no meio de uma negociação real,
+// mandando a mensagem genérica "Aqui eu só consigo ajudar com assuntos da
+// loja" pro cliente que não tinha fugido do assunto nenhuma vez. Esta
+// função reconhece que uma mensagem curta do cliente, logo após o Cláudio
+// ter feito uma pergunta direta, é uma RESPOSTA àquela pergunta — mesmo sem
+// palavra-chave, mesmo com typo, mesmo que seja só um número ou "sim"/"não".
+function pareceRespostaCurtaContextual(texto, historico) {
+  if (!texto || !historico || historico.length === 0) return false;
+  const ultima = historico[historico.length - 1];
+  if (!ultima || ultima.role !== 'assistant') return false;
+  const conteudoUltima = typeof ultima.content === 'string' ? ultima.content : '';
+  if (!conteudoUltima.includes('?')) return false;
+  // "Curta" aqui = poucas palavras — resposta direta, não um assunto novo
+  // sendo puxado pelo cliente.
+  const palavras = texto.trim().split(/\s+/).filter(Boolean);
+  return palavras.length <= 6;
+}
+
 // ==========================================
 // DETECÇÃO DE ASSUNTO REPETIDO (SINAL DE ENROLAÇÃO)
 // ==========================================
@@ -2060,6 +2084,68 @@ async function gerarRespostaCorrigindoTrocaConfundidaComVenda(mensagens) {
 }
 
 // ==========================================
+// TRAVA DE SEGURANÇA — CLIENTE COBRA PENDÊNCIA ATIVA E O BOT IGNORA
+// ==========================================
+// Erro real que já aconteceu: o Cláudio tinha dito "vou verificar com a
+// equipe" sobre o valor de um aparelho (criando uma pendência em
+// pendentesEquipe[phone]), e depois o cliente voltou perguntando "o qual
+// você falou que ia verificar por qual valor pegaria ele" — uma cobrança
+// clara e direta daquela pendência. Em vez de reconhecer isso, o Cláudio
+// ignorou completamente e reiniciou a conversa com uma pergunta genérica
+// ("Qual modelo você teria interesse em levar?"), como se a pendência nunca
+// tivesse existido. Isso faz o cliente se sentir ignorado e perder a
+// confiança na loja. Esta trava detecta quando o cliente está cobrando algo
+// que ficou pendente e força uma resposta que reconhece a espera, em vez de
+// reiniciar o assunto do zero.
+function clienteCobrandoPendencia(mensagemCliente) {
+  if (!mensagemCliente) return false;
+  const t = mensagemCliente.toLowerCase();
+  const padroes = [
+    /falou que ia/, /disse que ia/, /ia verificar/, /vai verificar/,
+    /estou aguardando/, /tô aguardando/, /to aguardando/, /aguardando/,
+    /ficou de/, /prometeu/, /e (o|a) valor/, /qual (o|a) valor/,
+    /o valor (que|de)/, /ainda não (respond|retorn)/, /ainda nao (respond|retorn)/
+  ];
+  return padroes.some(p => p.test(t));
+}
+
+function respostaIgnorouPendenciaAtiva(mensagemCliente, reply, phone) {
+  if (!clienteCobrandoPendencia(mensagemCliente)) return false;
+  if (!pendentesEquipe[phone] || !pendentesEquipe[phone].aguardando) return false;
+  const replyLower = reply.toLowerCase();
+  // Se a resposta já reconhece a espera/pendência, está correta
+  if (replyLower.includes('aguardando') || replyLower.includes('ainda estou') || (replyLower.includes('equipe') && (replyLower.includes('retorno') || replyLower.includes('verificando')))) return false;
+  console.log('⚠️ Cliente cobrou pendência ativa e o Cláudio ignorou (reiniciou o assunto) — resposta bloqueada para correção');
+  return true;
+}
+
+async function gerarRespostaCorrigindoPendenciaIgnorada(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O cliente está cobrando um valor/resposta que você já disse que ia verificar com a equipe anteriormente nesta mesma conversa. Sua resposta anterior ignorou isso e reiniciou o assunto do zero, o que faz o cliente se sentir ignorado. Refaça a resposta reconhecendo que a equipe ainda está verificando esse valor e que você retorna assim que tiver a confirmação — não peça informações que o cliente já deu, não reinicie a negociação do zero. Seja breve, direto e empático (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    return await chamarClaude(mensagensComInstrucao);
+  } catch (e) {
+    console.error('Erro ao corrigir resposta que ignorou pendência ativa:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
 // TRAVA DE SEGURANÇA — VALOR DE TROCA ANDROID INVENTADO
 // ==========================================
 // Erro real que já aconteceu: um cliente com "Poco X7" recebeu um valor de
@@ -3248,7 +3334,7 @@ app.post('/webhook', async (req, res) => {
       // nunca é cortada por isso, porque cada mensagem relacionada à loja
       // zera o contador de novo.
       if (message && !ehSaudacaoNeutra(message)) {
-        if (pareceAssuntoDaLoja(message)) {
+        if (pareceAssuntoDaLoja(message) || pareceRespostaCurtaContextual(message, conversas[phone])) {
           contadoresForaRegiao[phone] = 0;
         } else {
           contadoresForaRegiao[phone] = (contadoresForaRegiao[phone] || 0) + 1;
@@ -3400,6 +3486,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaTrocaTratadaComoVenda(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaIgnorouPendenciaAtiva(message, reply, phone)) {
+      const corrigida = await gerarRespostaCorrigindoPendenciaIgnorada(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
