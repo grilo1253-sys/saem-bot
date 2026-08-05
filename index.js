@@ -412,18 +412,29 @@ function detectouPendencia(reply, mensagemCliente) {
   const sobreEntrega = textoCompleto.includes('entrega') || textoCompleto.includes('motoboy') || textoCompleto.includes('disponibilidade') || textoCompleto.includes('entregar na sua região');
   if (sobreEntrega) return false;
 
-  // Não disparar se já passou valor calculado
-  const jaTemValor = replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || (replyLower.includes('r$') && (replyLower.includes('parcela') || replyLower.includes('vista')));
+  // Não disparar se já passou valor calculado de verdade (precisa ter R$
+  // junto — "saldo"/"10x"/"12x" sozinhos, sem R$, não contam: podem
+  // aparecer em frases que não têm nada a ver com um valor já calculado,
+  // como "ajuda no saldo do 14 Pro" ao final de uma resposta que na
+  // verdade ESTÁ escalando pra equipe, não dando valor nenhum).
+  const jaTemValor = replyLower.includes('r$') && (replyLower.includes('saldo') || replyLower.includes('10x') || replyLower.includes('12x') || replyLower.includes('parcela') || replyLower.includes('vista'));
   if (jaTemValor) return false;
 
-  // Não disparar para reclamações, defeitos, sinal, internet, conexão, cartão ou falta de resposta —
+  // Não disparar para reclamações, sinal, internet, conexão, cartão ou falta de resposta —
   // checando TANTO a resposta do Cláudio QUANTO a mensagem do cliente, pois o cliente pode usar
   // palavras diferentes das que o Cláudio usou na resposta. Esses assuntos não são "valor de
   // aparelho faltando na tabela" e devem ser resolvidos pelo próprio Cláudio (seguindo a regra
   // de reclamação ou respondendo direto), não pela equipe.
+  // IMPORTANTE: "defeito" foi removido dessa lista — ele aparece o tempo todo
+  // em descrições normais de avaliação de troca ("tela quebrada", "defeito
+  // específico que foge do padrão"), e estava bloqueando justamente os casos
+  // reais que precisavam notificar o admin (ex: Samsung A70 com defeito fora
+  // da tabela). A combinação de temEquipe + temVerificar + sobreValor abaixo
+  // já é específica o suficiente pra não disparar em reclamações de garantia
+  // por engano.
   const palavrasNaoValor = [
     'sinal', 'internet', 'wi-fi', 'wifi', 'conexão', 'conexao',
-    'defeito', 'não obtive resposta', 'nao obtive resposta',
+    'não obtive resposta', 'nao obtive resposta',
     'demora', 'demorando', 'atraso', 'atrasado',
     'cartão', 'cartao', 'não funciona', 'nao funciona',
     'travando', 'travou', 'lento', 'lenta',
@@ -434,8 +445,18 @@ function detectouPendencia(reply, mensagemCliente) {
 
   // Dispara para qualquer assunto em que o Cláudio disse que vai verificar com a equipe
   // (valor de troca, saúde de bateria, peça trocada, manutenção fora da tabela, etc.)
+  // ERRO REAL QUE JÁ ACONTECEU: em casos de aparelho Android com defeito fora
+  // do padrão da tabela (ex: "Samsung A70 com tela trincada", "sem botão de
+  // ligar"), o Cláudio responde algo como "precisa ser avaliado
+  // presencialmente pela equipe" / "a equipe avalia na hora" — mas nenhuma
+  // dessas frases contém a palavra "verificar" nem "retorno em instantes",
+  // então a pendência nunca era registrada e NENHUMA notificação chegava
+  // pro admin, mesmo sendo um caso real de avaliação pendente. Por isso o
+  // check abaixo também cobre o radical "avali" (avaliar, avaliado, avalia,
+  // avaliação, avaliada, etc), que é a forma mais comum usada pra esses
+  // casos de defeito Android que exigem inspeção presencial.
   const temEquipe = replyLower.includes('equipe');
-  const temVerificar = replyLower.includes('verificar') || replyLower.includes('retorno em instantes') || replyLower.includes('retornar em instantes') || replyLower.includes('retorno em breve');
+  const temVerificar = replyLower.includes('verificar') || replyLower.includes('retorno em instantes') || replyLower.includes('retornar em instantes') || replyLower.includes('retorno em breve') || replyLower.includes('avali');
 
   // Só considera pendência real se a resposta também mencionar contexto de valor/preço/aparelho/troca —
   // evita disparar para assuntos genéricos que nada têm a ver com precificação.
@@ -635,6 +656,8 @@ REGRAS DE ATENDIMENTO
 PRINCÍPIO GERAL — RESPONDA SÓ O BÁSICO DO QUE FOI PERGUNTADO, APROFUNDE SÓ QUANDO PEDIREM: Esse princípio vale pra qualquer assunto da conversa (produto, entrega, garantia, pagamento, acessórios, loja, etc), não só pra listagem de variações. Quando o cliente faz uma pergunta, responda o essencial que resolve aquela pergunta específica — não antecipe informações extras que ele não pediu, mesmo que pareçam úteis. Se o cliente quiser mais detalhe sobre qualquer ponto, ele vai perguntar, e aí você aprofunda naquele ponto específico. Isso mantém a conversa mais leve, natural e barata de gerar, em vez de virar uma enxurrada de informação a cada resposta. Exemplo: se o cliente pergunta "tem entrega?", responda só sobre entrega — não aproveite pra já explicar garantia, parcelamento e todas as lojas juntas. Espere ele perguntar o próximo ponto.
 
 - Utilize o histórico da conversa para manter o contexto da negociação.
+- POSTURA DE VENDEDOR COMPROMETIDO: você não é um atendente passivo que só responde o que é perguntado — você é um vendedor de verdade, com o objetivo real de fechar a venda. Isso significa: mantenha o fio da negociação ativo, sempre sabendo em que ponto ela está (qual modelo, qual forma de pagamento, qual aparelho de troca, qual objeção ainda falta resolver). Nunca "reinicie" uma conversa do zero fazendo uma pergunta genérica quando já existe uma negociação em andamento — isso faz o cliente sentir que está falando com um robô que não presta atenção, e é um dos erros mais graves que você pode cometer. Se em algum momento você não tiver certeza de algo que já foi dito antes, releia o histórico da conversa com atenção antes de responder — não pergunte de novo algo que o cliente já respondeu, e não ignore um assunto que ainda está em aberto (valor pendente, pergunta não respondida, proposta que o cliente ainda não confirmou).
+- Sempre conduza a conversa ativamente rumo ao fechamento: depois de tirar uma dúvida, retome o fio da negociação (ex: "Voltando ao seu 14 Pro, fecha assim?"), em vez de deixar a conversa parada esperando o cliente puxar o próximo passo sozinho.
 - Nunca diga ao cliente que você não possui histórico, contexto, memória ou informações anteriores.
 - Nunca explique limitações do sistema, da inteligência artificial ou do atendimento.
 - Se alguma informação não estiver clara, faça perguntas para entender melhor a necessidade do cliente.
@@ -3025,14 +3048,38 @@ async function enviarMensagem(phone, message) {
   // de novo e gerando uma resposta duplicada pro cliente. Registrando ANTES
   // de mandar, garantimos que o registro já existe assim que o eco chegar.
   if (!mensagensEnviadasPeloBot[phone]) mensagensEnviadasPeloBot[phone] = [];
-  mensagensEnviadasPeloBot[phone].push({ texto: message, ts: Date.now() });
+  const registroEnvio = { texto: message, ts: Date.now(), messageId: null };
+  mensagensEnviadasPeloBot[phone].push(registroEnvio);
   if (mensagensEnviadasPeloBot[phone].length > 10) mensagensEnviadasPeloBot[phone].shift();
 
-  await axios.post(
+  const resposta = await axios.post(
     `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`,
     { phone, message },
     { headers: { 'Client-Token': ZAPI_CLIENT_TOKEN } }
   );
+  // Guarda o messageId retornado pela Z-API nesse mesmo registro, pra dar
+  // pra resolver depois quando o cliente CITAR (responder em cima de) essa
+  // mensagem específica — ver função resolverMensagemCitada mais abaixo.
+  const idRetornado = resposta?.data?.messageId || resposta?.data?.zaapId || resposta?.data?.id;
+  if (idRetornado) registroEnvio.messageId = idRetornado;
+}
+
+// ERRO REAL QUE JÁ ACONTECEU: quando o cliente responde citando/marcando uma
+// mensagem antiga do Cláudio (o recurso de "responder" do WhatsApp, que cita
+// o texto original acima da resposta), o Cláudio não sabia a qual mensagem
+// específica aquilo se referia — via só o texto novo, sem nenhuma pista de
+// qual pergunta antiga estava sendo respondida, e por vezes perdia o fio da
+// negociação. A Z-API manda o ID da mensagem citada no campo
+// "referenceMessageId" (ou, pra alguns tipos de mensagem, dentro de
+// "referencedMessage.messageId"). Esta função tenta resolver esse ID pro
+// texto real da mensagem do bot que foi citada, usando o histórico recente
+// que já guardamos em mensagensEnviadasPeloBot.
+function resolverMensagemCitada(phone, body) {
+  const idCitado = body?.referenceMessageId || body?.text?.referencedMessage?.messageId || body?.referencedMessage?.messageId;
+  if (!idCitado) return null;
+  const historico = mensagensEnviadasPeloBot[phone] || [];
+  const encontrada = historico.find(m => m.messageId === idCitado);
+  return encontrada ? encontrada.texto : null;
 }
 
 // ==========================================
@@ -3471,7 +3518,17 @@ app.post('/webhook', async (req, res) => {
 
     if (!message) return;
     console.log(`📱 ${phone}: ${message}`);
-    conversas[phone].push({ role: 'user', content: message });
+    // Se o cliente respondeu CITANDO (recurso de "responder" do WhatsApp)
+    // uma mensagem antiga do Cláudio, anexa o texto daquela mensagem citada
+    // como contexto pro Claude entender exatamente a qual pergunta/proposta
+    // o cliente está se referindo — sem alterar a variável "message" (que
+    // continua sendo o texto puro do cliente, usada nos checks de
+    // palavra-chave/contagem de palavras em outras travas).
+    const mensagemCitada = resolverMensagemCitada(phone, body);
+    const conteudoParaClaude = mensagemCitada
+      ? `[O cliente respondeu citando esta mensagem sua anterior: "${mensagemCitada}"]\n\n${message}`
+      : message;
+    conversas[phone].push({ role: 'user', content: conteudoParaClaude });
     if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
     const tamanhoAntes = conversas[phone].length;
     let reply = await chamarClaude(conversas[phone]);
