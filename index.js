@@ -136,10 +136,14 @@ const conversasEncerradas = carregarEncerradas();
 const contadoresForaRegiao = carregarContadoresForaRegiao();
 
 // Número de análise pra onde encaminhamos: pedidos de pagamento no boleto e
-// clientes de DDD fora da região que estourarem o limite de mensagens.
+// clientes de DDD fora da região atendida.
 const NUMERO_ANALISE = '12981880229';
-// DDD da região onde ficam as lojas (São José dos Campos / Taubaté).
-const DDD_REGIAO = '12';
+// DDDs da região atendida pela loja (São José dos Campos / Taubaté = DDD 12)
+// e também DDD 11 (São Paulo capital/região metropolitana), liberado por
+// decisão do Saem — o Instagram Ads está trazendo contatos de fora dessas
+// regiões, que consomem tempo e crédito de API sem fechar venda. Cliente de
+// qualquer outro DDD é encaminhado direto, sem negociar.
+const DDDS_PERMITIDOS = ['11', '12'];
 // Máximo de mensagens SEGUIDAS fora do assunto da loja (não relacionadas a
 // aparelho/compra/troca/valor) antes de encerrar a conversa. Vale pra
 // QUALQUER DDD — inclusive DDD 12 — porque bate-papo pessoal consome
@@ -3343,6 +3347,28 @@ app.post('/webhook', async (req, res) => {
     }
 
     if (phone !== NUMERO_ADMIN) {
+      // DDD FORA DA REGIÃO ATENDIDA: o Instagram Ads está trazendo contatos
+      // de fora de SP capital/região (DDD 11) e SJC/Taubaté (DDD 12), que
+      // consomem tempo e crédito de API sem fechar venda (decisão do Saem).
+      // Corta ANTES de chamar a IA — nem processa a mensagem com o Claude,
+      // só manda o redirecionamento e encerra. Roda uma vez só por número
+      // (a partir daí a conversa fica marcada como encerrada e mensagens
+      // seguintes desse número são ignoradas, igual boleto/conteúdo
+      // impróprio).
+      const dddCliente = extrairDDD(phone);
+      if (dddCliente && !DDDS_PERMITIDOS.includes(dddCliente)) {
+        const avisoForaDaRegiao = `Oi! Pra te atender certinho, nosso setor específico pra esse atendimento é por aqui: https://wa.me/5512983118100 — é só chamar que eles seguem com você! 😊`;
+        conversas[phone].push({ role: 'user', content: message || '[mensagem sem texto]' });
+        conversas[phone].push({ role: 'assistant', content: avisoForaDaRegiao });
+        if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+        salvarConversas();
+        conversasEncerradas[phone] = true;
+        salvarEncerradas();
+        await enviarMensagem(phone, avisoForaDaRegiao);
+        console.log(`📍 ${phone} (DDD ${dddCliente}, fora de ${DDDS_PERMITIDOS.join('/')}) — redirecionado sem negociar, conversa encerrada.`);
+        return;
+      }
+
       // CONTEÚDO SEXUAL/IMPRÓPRIO: corta na hora, sem negociar, sem tentar
       // argumentar — e avisa você, pra decidir se quer bloquear o número.
       if (message && mencionaConteudoSexual(message)) {
