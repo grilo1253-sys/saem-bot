@@ -720,13 +720,15 @@ todo aparelho/iphone / android / smartphone acompanha apenas o cabo não falar n
 Regra sobre reserva
 -------------------------
 
-Para reservar um aparelho, ANTES de qualquer coisa, informe imediatamente ao cliente que a reserva só vale para o dia atual — não é possível reservar para outro dia. Se o cliente confirmar que quer reservar para hoje, então informe: o sinal é R$100,00 via Pix, chave Pix: saemthiago@gmail.com. Informe também que caso haja algum problema de estoque por parte da loja, o valor é estornado integralmente. Antes de enviar o Pix, o cliente deve escrever "Eu concordo" confirmando que está ciente de que, se desistir da compra por conta própria, o sinal não é devolvido em dinheiro, mas pode ser usado como R$100,00 em crédito para comprar acessórios na loja. Após enviar o pagamento, o cliente deve enviar o comprovante e escrever "Estou de acordo". Depois disso, informe ao cliente que a equipe irá conferir o pagamento e, assim que o valor for confirmado, a reserva será efetivada. A reserva só pode ser feita para o mesmo dia da conversa. Se o cliente pedir para reservar para outro dia, informe que as reservas valem apenas para o dia atual e que ele deve entrar em contato novamente no dia que pretende vir.
+Para reservar um aparelho, ANTES de qualquer coisa, informe imediatamente ao cliente que a reserva só vale para o dia atual — não é possível reservar para outro dia. Se o cliente confirmar que quer reservar para hoje, então informe: o sinal é R$100,00 via Pix, chave Pix: saemthiago@gmail.com. Informe também que caso haja algum problema de estoque por parte da loja, o valor é estornado integralmente. Antes de enviar o Pix, o cliente deve escrever "Eu concordo" confirmando que está ciente de que, se desistir da compra por conta própria, o sinal não é devolvido em dinheiro, mas pode ser usado como R$100,00 em crédito para comprar acessórios na loja. Após enviar o pagamento, o cliente deve enviar o comprovante e escrever "Estou de acordo". Ao receber o comprovante, confirme apenas o RECEBIMENTO (ex: "Recebido! 😊") — quem confirma que o valor realmente caiu é o setor financeiro, não você. Informe que a equipe financeira vai conferir o pagamento e, assim que confirmado, a reserva é efetivada; se o cliente quiser confirmação mais rápida, pode chamar direto no financeiro: https://wa.me/5512983118100. A reserva só pode ser feita para o mesmo dia da conversa. Se o cliente pedir para reservar para outro dia, informe que as reservas valem apenas para o dia atual e que ele deve entrar em contato novamente no dia que pretende vir.
 
 ━━━━━━━━━━━━━━━━━━━
 FORMAS DE PAGAMENTO
 ━━━━━━━━━━━━━━━━━━━
 
 Trabalhamos com: Pix, Dinheiro, Cartão de crédito, Boleto parcelado via financiamento (análise de crédito).
+
+REGRA GERAL — COMPROVANTE DE PIX (vale pra qualquer situação: sinal de reserva, taxa de entrega, taxa de transferência entre lojas, pagamento do aparelho, etc): a chave Pix padrão da loja é saemthiago@gmail.com, salvo quando outra instrução específica indicar um número/contato diferente pra combinar o pagamento. Sempre que o cliente mandar um comprovante de pagamento via Pix (foto, print ou PDF), confirme o RECEBIMENTO do comprovante (ex: "Recebido! 😊"). NUNCA confirme que o valor efetivamente caiu na conta — isso quem confirma é o setor financeiro, não você. Deixe claro que a equipe financeira ainda vai conferir se o valor caiu, e que o cliente também pode chamar direto no número do financeiro se quiser: https://wa.me/5512983118100.
 
 ESCLARECIMENTO SOBRE BOLETO — CRÍTICO:
 A loja NÃO trabalha com boleto à vista. A única modalidade de boleto é o financiamento parcelado — o cliente paga parcelas mensais via boleto após aprovação em análise de crédito, podendo chegar até 36x. Esta modalidade é divulgada nos anúncios da loja e é totalmente legítima. Quando o cliente mencionar boleto, SEMPRE explique que funciona como financiamento e encaminhe para análise: https://wa.me/5512981880229. NUNCA diga que boleto não existe ou que é só à vista.
@@ -891,12 +893,12 @@ https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/
 ENTREGAS
 ━━━━━━━━━━━━━━━━━━━
 
-Transferência entre lojas: R$70,00 via motoboy.
+Transferência entre lojas: R$70,00 via Pix (chave: saemthiago@gmail.com).
 Consultar disponibilidade: https://wa.me/5512981880229
 
 ENTREGA VIA MOTOBOY PRO CLIENTE (endereço do cliente, fora da loja):
 - A taxa de entrega NUNCA pode ser paga junto/embutida no valor do aparelho — são pagamentos separados.
-- A taxa de entrega deve ser paga ANTECIPADAMENTE, só via Pix (não aceita no cartão nem na entrega).
+- A taxa de entrega deve ser paga ANTECIPADAMENTE, só via Pix (chave: saemthiago@gmail.com — não aceita no cartão nem na entrega).
 - Toda entrega precisa ser combinada diretamente com a equipe pelo número https://wa.me/5512981880229 — é lá que confirmam disponibilidade, valor da taxa e fazem o pagamento antecipado do Pix.
 - Por segurança de ambas as partes, toda entrega exige: o cliente enviar seus documentos e fazer uma chamada de vídeo com o vendedor antes da entrega ser confirmada. Isso também é combinado direto pelo número acima.
 - Se o cliente perguntar sobre entrega, explique essas regras (pagamento antecipado via Pix, separado do aparelho, e o procedimento de documentos + chamada de vídeo) e encaminhe pro número https://wa.me/5512981880229 pra combinar os detalhes e horário.
@@ -2168,6 +2170,67 @@ async function gerarRespostaCorrigindoPendenciaIgnorada(mensagens) {
     return await chamarClaude(mensagensComInstrucao);
   } catch (e) {
     console.error('Erro ao corrigir resposta que ignorou pendência ativa:', e.message);
+  }
+  return null;
+}
+
+// ==========================================
+// TRAVA DE SEGURANÇA — TAXA DE TRANSFERÊNCIA ENTRE LOJAS ESQUECIDA
+// ==========================================
+// Erro real que já aconteceu: cliente pediu um aparelho que só tem
+// disponível em Taubaté, mas disse "seria mais fácil aq em sjc pra mim" —
+// ou seja, pediu pra trazerem o aparelho de uma loja pra outra. A regra já
+// existe no prompt (Transferência entre lojas: R$70,00 via motoboy), mas
+// como é só uma linha solta no meio da seção de entregas, o Cláudio
+// respondeu "vou verificar com a equipe a disponibilidade... e já te
+// retorno" sem mencionar a taxa de R$70 em nenhum momento — o cliente só
+// saberia da taxa depois, o que pode gerar climão na hora de fechar. Esta
+// trava detecta quando o cliente pede claramente pra trazer o aparelho de
+// uma loja pra outra (cidade diferente de onde o produto está disponível) e
+// garante que a resposta mencione a taxa de R$70 via Pix.
+function clientePedeTransferenciaEntreLojas(mensagemCliente) {
+  if (!mensagemCliente) return false;
+  const t = mensagemCliente.toLowerCase();
+  const padroes = [
+    /mais f[aá]cil (aq|aqui|pra mim|em)/, /pode trazer/, /consegue trazer/,
+    /d[aá] pra trazer/, /tem como trazer/, /tem como vir/, /traz(er)? pra c[aá]/,
+    /vem pra (sjc|taubat|s[aã]o jos[eé])/, /trazer (pra|para) (sjc|taubat|s[aã]o jos[eé])/
+  ];
+  return padroes.some(p => p.test(t));
+}
+
+function respostaTransferenciaSemTaxa(mensagemCliente, reply) {
+  if (!clientePedeTransferenciaEntreLojas(mensagemCliente)) return false;
+  if (!reply) return false;
+  const replyLower = reply.toLowerCase();
+  // Se já menciona a taxa de alguma forma, está correto
+  if (replyLower.includes('70') || replyLower.includes('motoboy') || replyLower.includes('transferência') || replyLower.includes('transferencia')) return false;
+  console.log('⚠️ Cliente pediu transferência entre lojas e a resposta não mencionou a taxa de R$70 — bloqueada para correção');
+  return true;
+}
+
+async function gerarRespostaCorrigindoTransferenciaSemTaxa(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: O cliente pediu pra trazerem o aparelho de uma loja pra outra (transferência entre SJC e Taubaté). Sua resposta anterior não mencionou a taxa de transferência entre lojas, que é de R$70,00 via Pix (pago via motoboy). Refaça a resposta confirmando que dá pra trazer, mas deixando claro essa taxa de R$70,00 via Pix logo de cara, sem esconder isso pra depois. Seja breve (1 a 3 frases).';
+
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+
+    return await chamarClaude(mensagensComInstrucao);
+  } catch (e) {
+    console.error('Erro ao corrigir resposta de transferência sem taxa:', e.message);
   }
   return null;
 }
@@ -3573,6 +3636,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaIgnorouPendenciaAtiva(message, reply, phone)) {
       const corrigida = await gerarRespostaCorrigindoPendenciaIgnorada(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaTransferenciaSemTaxa(message, reply)) {
+      const corrigida = await gerarRespostaCorrigindoTransferenciaSemTaxa(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
