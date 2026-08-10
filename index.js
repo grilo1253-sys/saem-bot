@@ -475,7 +475,12 @@ function extrairAparelhoPendente(mensagens) {
   const padroes = [
     /poco\s+\w+/i, /redmi\s+\w+/i, /galaxy\s+\w+/i, /moto\s+\w+/i,
     /iphone\s+\d+[a-z]*(?:\s+(?:pro\s*max|pro|plus|mini))?/i, /macbook\s+\w+/i, /ipad\s+\w*/i,
-    /notebook\s+\w*/i, /ps[34]/i, /xbox\s+\w*/i, /apple\s+watch/i
+    /notebook\s+\w*/i, /ps[34]/i, /xbox\s+\w*/i, /apple\s+watch/i,
+    // Padrões adicionados: marcas/termos genéricos que também aparecem sem
+    // um modelo específico logo depois (ex: só "iphone", só "xiaomi"), pra
+    // reduzir os casos que caem em "aparelho não identificado" sem necessidade.
+    /iphone/i, /xiaomi/i, /samsung/i, /motorola/i, /asus/i, /realme/i,
+    /oneplus/i, /huawei/i, /lg\s+\w+/i, /nokia/i, /tablet/i, /notebook/i,
   ];
   // Erro real que já aconteceu: quando o cliente menciona DOIS aparelhos na
   // mesma frase — o que ele quer COMPRAR e o que ele quer DAR de entrada
@@ -3697,21 +3702,30 @@ app.post('/webhook', async (req, res) => {
 
     if (detectouPendencia(reply, message) && NUMERO_ADMIN && !pendentesEquipe[phone]) {
       const aparelho = extrairAparelhoPendente(conversas[phone]);
-      pendentesEquipe[phone] = { aparelho, aguardando: true };
-      salvarPendentes();
-      // Usamos a RESPOSTA do Cláudio como contexto, não a mensagem crua do
-      // cliente. Motivo: o cliente pode estar no meio de uma pergunta sobre
-      // outro assunto (ex: perguntando por um modelo diferente pra comprar)
-      // no exato momento em que a pendência de troca é detectada — nesse
-      // caso, a mensagem dele não explica o problema real. A resposta do
-      // próprio Cláudio, por outro lado, já contém a explicação certa do
-      // motivo da escalação (ex: "tem dois defeitos combinados, preciso
-      // verificar com a equipe"), então é uma contexto muito mais útil e
-      // relevante pra quem vai avaliar.
-      // Extraímos só o MOTIVO real (defeito ou modelo fora da tabela) da
-      // resposta do Cláudio, em vez de mandar a resposta inteira ou a
-      // mensagem crua do cliente — assim você vê direto qual é o problema.
-      await notificarAdmin(phone, aparelho, extrairMotivoPendencia(reply));
+      // Se não conseguimos identificar o aparelho, NÃO notifica o admin —
+      // uma solicitação sem identificação de aparelho não dá pra agir em
+      // cima, só polui o WhatsApp de notificações. Melhor deixar o Cláudio
+      // seguir a conversa naturalmente (ele já tende a perguntar o modelo)
+      // até o aparelho ficar claro, e só então escalar.
+      if (aparelho !== 'aparelho não identificado') {
+        pendentesEquipe[phone] = { aparelho, aguardando: true };
+        salvarPendentes();
+        // Usamos a RESPOSTA do Cláudio como contexto, não a mensagem crua do
+        // cliente. Motivo: o cliente pode estar no meio de uma pergunta sobre
+        // outro assunto (ex: perguntando por um modelo diferente pra comprar)
+        // no exato momento em que a pendência de troca é detectada — nesse
+        // caso, a mensagem dele não explica o problema real. A resposta do
+        // próprio Cláudio, por outro lado, já contém a explicação certa do
+        // motivo da escalação (ex: "tem dois defeitos combinados, preciso
+        // verificar com a equipe"), então é uma contexto muito mais útil e
+        // relevante pra quem vai avaliar.
+        // Extraímos só o MOTIVO real (defeito ou modelo fora da tabela) da
+        // resposta do Cláudio, em vez de mandar a resposta inteira ou a
+        // mensagem crua do cliente — assim você vê direto qual é o problema.
+        await notificarAdmin(phone, aparelho, extrairMotivoPendencia(reply));
+      } else {
+        console.log(`⚠️ Pendência detectada mas aparelho não identificado — notificação de admin suprimida para ${phone}`);
+      }
     }
 
     await enviarMensagem(phone, reply);
