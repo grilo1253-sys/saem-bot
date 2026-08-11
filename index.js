@@ -153,10 +153,26 @@ const LIMITE_MENSAGENS_FORA_DO_ASSUNTO = 4;
 // Extrai o DDD a partir do telefone no formato que o Z-API manda
 // (ex: "5512988887777" -> "12"). Remove o código do país (55) quando
 // presente antes de pegar os dois primeiros dígitos.
+//
+// PROTEÇÃO CONTRA @lid: por causa das atualizações de privacidade do
+// WhatsApp, o campo "phone" que o Z-API recebe às vezes NÃO é o número de
+// telefone real do cliente — é um "@lid", um identificador interno enorme
+// e sem relação nenhuma com o DDD verdadeiro (ex:
+// "184729384756273@lid"). Isso já aconteceu de derrubar clientes de DDD 12
+// (região permitida) só porque o ID aleatório começava com outros dois
+// dígitos. Pra evitar isso: se o campo contiver "lid", ou se o número (já
+// sem o código do país) não tiver o tamanho de um telefone brasileiro
+// válido (10 ou 11 dígitos: DDD + número fixo/celular), retornamos null —
+// ou seja, "não dá pra confirmar o DDD com segurança". Nesses casos o
+// cliente NÃO é cortado (é melhor conversar com alguém que talvez seja de
+// fora da região do que bloquear por engano um cliente legítimo de SP/SJC/
+// Taubaté).
 function extrairDDD(phone) {
   if (!phone) return null;
+  if (/lid/i.test(phone)) return null;
   const numeros = phone.replace(/\D/g, '');
   const semPais = (numeros.startsWith('55') && numeros.length > 10) ? numeros.slice(2) : numeros;
+  if (semPais.length < 10 || semPais.length > 11) return null;
   return semPais.slice(0, 2) || null;
 }
 
@@ -2113,7 +2129,13 @@ async function gerarRespostaCorrigindoTrocaConfundidaComVenda(mensagens) {
 
     const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
     const replyLower = respostaCorrigida.toLowerCase();
-    const aindaRecusaDeVenda = /nao temos esse modelo|não temos esse modelo|no momento nao temos|no momento não temos/.test(replyLower);
+    // Verifica não só a frase de recusa, mas também se a resposta corrigida
+    // ainda manda o link do catálogo de vendas — já aconteceu de a correção
+    // tirar a frase "não temos esse modelo" mas manter o link do catálogo
+    // (ex: "vou verificar com a equipe, mas dá uma olhada no catálogo: ..."),
+    // o que continua sendo a resposta errada (é troca/manutenção, não venda).
+    const aindaMandaCatalogo = replyLower.includes('catalogo') || replyLower.includes('catálogo') || replyLower.includes('docs.google.com');
+    const aindaRecusaDeVenda = /nao temos esse modelo|não temos esse modelo|no momento nao temos|no momento não temos/.test(replyLower) || aindaMandaCatalogo;
     if (!aindaRecusaDeVenda) return respostaCorrigida;
   } catch (e) {
     console.error('Erro ao corrigir troca confundida com venda:', e.message);
@@ -2735,7 +2757,13 @@ async function gerarRespostaCorrigindoManutencaoTratadaComoVenda(mensagens) {
 
     const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
     const replyLower = respostaCorrigida.toLowerCase();
-    const aindaRecusaDeVenda = /nao temos esse modelo|não temos esse modelo|no momento nao temos|no momento não temos/.test(replyLower);
+    // Verifica não só a frase de recusa, mas também se a resposta corrigida
+    // ainda manda o link do catálogo de vendas — já aconteceu de a correção
+    // tirar a frase "não temos esse modelo" mas manter o link do catálogo
+    // (ex: "vou verificar com a equipe, mas dá uma olhada no catálogo: ..."),
+    // o que continua sendo a resposta errada (é troca/manutenção, não venda).
+    const aindaMandaCatalogo = replyLower.includes('catalogo') || replyLower.includes('catálogo') || replyLower.includes('docs.google.com');
+    const aindaRecusaDeVenda = /nao temos esse modelo|não temos esse modelo|no momento nao temos|no momento não temos/.test(replyLower) || aindaMandaCatalogo;
     if (!aindaRecusaDeVenda) return respostaCorrigida;
   } catch (e) {
     console.error('Erro ao corrigir manutenção tratada como venda:', e.message);
