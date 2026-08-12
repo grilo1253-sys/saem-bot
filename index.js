@@ -183,6 +183,21 @@ function mencionaBoleto(texto) {
   return /boleto/i.test(texto);
 }
 
+// Detecta quando o cliente está explicitamente pedindo pra falar com um
+// atendente humano/representante, em vez de continuar com o Cláudio (bot).
+// Ex: "passa pra um representante", "quero falar com um atendente",
+// "tem como falar com alguém de verdade?", "quero falar com uma pessoa".
+function clientePedeAtendenteHumano(texto) {
+  if (!texto) return false;
+  const t = texto
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return /\b(representante|atendente|gerente)\b/.test(t)
+    || /pessoa\s+(de\s+verdade|real)/.test(t)
+    || /(falar|passa|passar|chamar|transferir)\s+(com\s+|pra\s+|para\s+)?(um|uma)?\s*(humano|alguem\s+de\s+verdade|atendente|representante)/.test(t)
+    || /atendimento\s+humano/.test(t);
+}
+
 // Palavras que indicam que a conversa é sobre o negócio (aparelho, compra,
 // troca, valor, etc). Se a mensagem do cliente não tocar em nenhuma dessas E
 // não tiver número/valor, consideramos "fora do assunto" pra fins do
@@ -598,23 +613,15 @@ function extrairValorDeMensagemLivre(texto) {
 }
 
 // ==========================================
-// REGRA ESPECIAL DE DOMINGO — LOJA TAUBATÉ
+// REGRA ESPECIAL DE DOMINGO — LOJA TAUBATÉ (REMOVIDA)
 // ==========================================
-// Verifica se hoje (no fuso de São Paulo) é domingo. Se for, retorna um bloco
-// de texto extra que é acrescentado ao final do system prompt, instruindo o
-// Cláudio a encaminhar clientes que queiram visitar/agendar em Taubaté no
-// domingo diretamente para o vendedor Rodrigo. Nos demais dias da semana,
-// retorna string vazia e não afeta em nada o comportamento normal do bot.
+// Antes, aos domingos a loja de Taubaté funcionava só com atendimento
+// agendado pelo Rodrigo, então o Cláudio encaminhava esses clientes direto
+// pra ele. Isso não é mais necessário: agora a loja de Taubaté abre
+// normalmente aos domingos e feriados, das 13h às 20h (ver horário no
+// cabeçalho do prompt), então não há mais regra especial nenhuma pra esse
+// dia — funciona igual a qualquer outro dia da semana.
 function textoRegraDomingoTaubate() {
-  const diaSemana = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', weekday: 'long' });
-  if (diaSemana === 'Sunday') {
-    return `
-
-━━━━━━━━━━━━━━━━━━━
-REGRA ESPECIAL DE DOMINGO — LOJA TAUBATÉ
-━━━━━━━━━━━━━━━━━━━
-Hoje é domingo. Aos domingos, a loja de Taubaté funciona apenas com atendimento agendado, feito pelo vendedor Rodrigo. Se o cliente disser que quer ir até a loja de Taubaté hoje, quer agendar uma visita, quer ver o aparelho pessoalmente ou fechar a compra presencialmente em Taubaté, informe que aos domingos o atendimento em Taubaté é só com agendamento e encaminhe direto para o Rodrigo: https://wa.me/5512991058245. Essa regra vale APENAS para a loja de Taubaté aos domingos — não se aplica a São José dos Campos nem a outros dias da semana.`;
-  }
   return '';
 }
 
@@ -728,7 +735,7 @@ São José dos Campos: Shopping Jardim Oriente – Praça de Alimentação
 Horário: Segunda a sexta 10h às 22h | Domingos e feriados 13h às 20h
 
 Taubaté: Espaço Schneider - Avenida Charles Schneider, 781 – Sala 406C
-Horário: Segunda a sábado 13h às 21h | Domingos e feriados sob consulta
+Horário: Segunda a sábado 10h às 22h | Domingos e feriados 13h às 20h
 
 Símbolos ✅ ☑️ ⚫ = Loja São José dos Campos
 Símbolos ⤴️ 🟣 = Loja Taubaté
@@ -2081,12 +2088,34 @@ function assistentePerguntouSobreAparelhoDeTroca(mensagens) {
   // formato real de pergunta de avaliação.
   const regexPerguntaSobreAparelhoTroca = /dar\s+(ele\s+)?(como\s+)?(de\s+)?entrada|entrada\s+na\s+(troca|compra)|qual\s+aparelho\s+voce\s+tem\s+para\s+dar\s+de\s+entrada|tem\s+algum\s+aparelho\s+para\s+troca|modelo,?\s+memoria\s+e\s+estado|saude\s+da\s+bateria|quantos\s+gb\s+e\s+o\s+seu|conta\s+(um\s+pouco\s+)?sobre\s+o\s+seu\s+\w+|(memoria|bateria|tela|traseira)\s+do\s+seu\s+\w+|tela\s*,?\s*traseira\s*,?\s*bateria/;
 
+  // ERRO REAL QUE JÁ ACONTECEU (outra variação): o Cláudio perguntou "Só me
+  // confirma: tem algum outro defeito além da tela? Bateria abaixo de 80%?
+  // Traseira trincada? Face ID funcionando?" — uma pergunta clara de
+  // avaliação do aparelho do cliente pra troca, mas com palavras numa ordem/
+  // combinação que não batia com NENHUM padrão fixo acima (não tem "tela,
+  // traseira, bateria" em sequência, não tem "do seu"). Toda vez que o
+  // Cláudio tenta variar a frase naturalmente, um novo padrão fixo fica
+  // faltando. Em vez de continuar caçando frase por frase, adicionamos uma
+  // segunda checagem por CONTAGEM de palavras-chave de avaliação de
+  // aparelho: se a mensagem do assistente tiver pelo menos 2 dessas
+  // palavras (bateria, defeito, trincad, funcionando, face id, traseira,
+  // estado, tela troc), é muito provável que seja uma pergunta sobre o
+  // estado do aparelho do cliente pra troca, não uma pergunta de venda.
+  function pareceEvalDeAparelhoPorPalavrasChave(texto) {
+    const palavrasChave = ['bateria', 'defeito', 'trincad', 'funcionando', 'face id', 'traseira', 'estado de cada', 'tela troc', 'sem defeito', 'saude da bateria'];
+    let contagem = 0;
+    for (const p of palavrasChave) {
+      if (texto.includes(p)) contagem++;
+    }
+    return contagem >= 2;
+  }
+
   const ultimasMensagens = mensagens.slice(-9, -1); // últimas ~8, excluindo a mensagem atual do cliente
   for (let i = ultimasMensagens.length - 1; i >= 0; i--) {
     const m = ultimasMensagens[i];
     if (m.role !== 'assistant') continue;
     const texto = normalizarTexto(typeof m.content === 'string' ? m.content : '');
-    if (regexPerguntaSobreAparelhoTroca.test(texto)) return true;
+    if (regexPerguntaSobreAparelhoTroca.test(texto) || pareceEvalDeAparelhoPorPalavrasChave(texto)) return true;
   }
   return false;
 }
@@ -2647,22 +2676,12 @@ function conversaMencionaTaubate(mensagens, mensagemClienteAtual) {
 }
 
 function respostaDomingoTaubateSemRodrigo(mensagemCliente, reply, mensagens) {
-  if (!ehDomingoSaoPaulo()) return false;
-  if (!reply) return false;
-  if (!conversaMencionaTaubate(mensagens, mensagemCliente)) return false;
-
-  const clienteLower = (mensagemCliente || '').toLowerCase();
-  // Cliente sinalizando que a loja parece fechada, sem ninguém lá, ou que
-  // está no local esperando atendimento.
-  const clienteIndicaFechado = /fechad|n[aã]o\s+(est[aá]|t[aá])\s+abert|ningu[eé]m\s+(atende|abre|responde)|em\s+frente\s+(a|à|na|no)|chegue[ i]|cheguei/.test(clienteLower);
-  if (!clienteIndicaFechado) return false;
-
-  const replyLower = reply.toLowerCase();
-  const mencionaRodrigo = replyLower.includes('5512991058245') || replyLower.includes('rodrigo');
-  if (mencionaRodrigo) return false; // já está correto
-
-  console.log('⚠️ Domingo/Taubaté: resposta não encaminhou pro Rodrigo — bloqueada para correção');
-  return true;
+  // Regra desativada: a loja de Taubaté agora abre normalmente aos domingos
+  // (13h às 20h, ver horário no cabeçalho do prompt), não é mais só com
+  // agendamento pelo Rodrigo — então essa trava não tem mais motivo pra
+  // existir. Mantida como função (retornando sempre false) só pra não
+  // precisar mexer nos pontos onde ela é chamada.
+  return false;
 }
 
 async function gerarRespostaCorrigindoDomingoTaubate(mensagens) {
@@ -3456,7 +3475,12 @@ app.post('/webhook', async (req, res) => {
       // seguintes desse número são ignoradas, igual boleto/conteúdo
       // impróprio).
       const dddCliente = extrairDDD(phone);
-      if (dddCliente && !DDDS_PERMITIDOS.includes(dddCliente)) {
+      // Se a mensagem for só uma saudação neutra (oi, olá, bom dia...), NÃO
+      // corta ainda — deixa o Cláudio responder normalmente e conversar. O
+      // corte só faz sentido quando o cliente já demonstrou algum interesse
+      // real (perguntou preço, modelo, etc); cortar em cima de um simples
+      // "oi" passa a impressão de que o bot nem quis conversar.
+      if (dddCliente && !DDDS_PERMITIDOS.includes(dddCliente) && !ehSaudacaoNeutra(message)) {
         const avisoForaDaRegiao = `Oi! Pra te atender certinho, nosso setor específico pra esse atendimento é por aqui: https://wa.me/5512983118100 — é só chamar que eles seguem com você! 😊`;
         conversas[phone].push({ role: 'user', content: message || '[mensagem sem texto]' });
         conversas[phone].push({ role: 'assistant', content: avisoForaDaRegiao });
@@ -3466,6 +3490,32 @@ app.post('/webhook', async (req, res) => {
         salvarEncerradas();
         await enviarMensagem(phone, avisoForaDaRegiao);
         console.log(`📍 ${phone} (DDD ${dddCliente}, fora de ${DDDS_PERMITIDOS.join('/')}) — redirecionado sem negociar, conversa encerrada.`);
+        return;
+      }
+
+      // CLIENTE PEDE PRA FALAR COM UM ATENDENTE HUMANO/REPRESENTANTE: já
+      // aconteceu de o cliente pedir isso claramente ("Passa para um
+      // representante prfv", "Tem como eu falar um um representante?") e o
+      // Cláudio simplesmente não reconhecer o pedido, respondendo com o
+      // fallback genérico de "me perdi aqui" ou até com o catálogo de
+      // vendas — o que é bem ruim pra quem só queria falar com uma pessoa.
+      // Detecta isso ANTES de chamar o Claude (mais confiável que esperar a
+      // IA perceber sozinha) e já avisa você pra assumir a conversa.
+      if (message && clientePedeAtendenteHumano(message)) {
+        const avisoHumano = `Claro! Já vou chamar alguém da nossa equipe pra continuar seu atendimento por aqui mesmo, só um instante 😊`;
+        conversas[phone].push({ role: 'user', content: message });
+        conversas[phone].push({ role: 'assistant', content: avisoHumano });
+        if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+        salvarConversas();
+        conversasEncerradas[phone] = true;
+        salvarEncerradas();
+        await enviarMensagem(phone, avisoHumano);
+        console.log(`🙋 ${phone} pediu atendimento humano — bot pausado pra esse número, aguardando atendente assumir.`);
+        if (NUMERO_ADMIN) {
+          try {
+            await enviarMensagem(NUMERO_ADMIN, `🙋 *Cliente pediu atendente humano*\n\nCliente: ${phone}\n\nO Cláudio pausou as respostas automáticas pra esse número — pode assumir a conversa direto por lá.`);
+          } catch (e) {}
+        }
         return;
       }
 
