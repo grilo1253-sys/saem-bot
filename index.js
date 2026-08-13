@@ -138,6 +138,10 @@ const contadoresForaRegiao = carregarContadoresForaRegiao();
 // Número de análise pra onde encaminhamos: pedidos de pagamento no boleto e
 // clientes de DDD fora da região atendida.
 const NUMERO_ANALISE = '12981880229';
+// Número de fechamento da locação de temporada (mesmo número já usado como
+// "equipe geral" em várias regras de venda — é o mesmo WhatsApp, só que pra
+// locação ele é quem recebe o sinal e fecha a reserva).
+const NUMERO_FECHAMENTO_LOCACAO = '5512983118100';
 // DDDs da região atendida pela loja (São José dos Campos / Taubaté = DDD 12)
 // e também DDD 11 (São Paulo capital/região metropolitana), liberado por
 // decisão do Saem — o Instagram Ads está trazendo contatos de fora dessas
@@ -210,13 +214,47 @@ const PALAVRAS_ASSUNTO_LOJA = [
   'parcela', 'parcelado', 'parcelamento', 'entrada', 'garantia', 'conserto', 'manutenção',
   'manutencao', 'defeito', 'loja', 'endereço', 'endereco', 'horário', 'horario',
   'estoque', 'modelo', 'gb', 'memória', 'memoria', 'nota fiscal', 'orçamento', 'orcamento',
-  'chip', 'seminovo', 'usado', 'novo'
+  'chip', 'seminovo', 'usado', 'novo',
+  // Locação de temporada (apartamento em Ubatuba) — mesma lista de "assunto
+  // válido", pra não fechar conversa de aluguel achando que é bate-papo fora
+  // do assunto.
+  'aluguel', 'alugar', 'locação', 'locacao', 'temporada', 'ubatuba', 'apartamento',
+  'diária', 'diaria', 'diárias', 'diarias', 'hospedagem', 'airbnb', 'check-in', 'checkin',
+  'check-out', 'checkout', 'sinal', 'praia'
 ];
 function pareceAssuntoDaLoja(texto) {
   if (!texto) return false;
   const t = texto.toLowerCase();
   if (PALAVRAS_ASSUNTO_LOJA.some(p => t.includes(p))) return true;
   if (/r\$|\d{3,}/.test(t)) return true; // menção a valores em R$ ou números grandes (preço, modelo com número, etc)
+  return false;
+}
+
+// Detecta se a mensagem do cliente é sobre a LOCAÇÃO DE TEMPORADA (apartamento
+// em Ubatuba), e não sobre venda de celular. Usada pra: (1) isentar esse
+// assunto do corte por DDD fora da região — locação recebe gente de qualquer
+// lugar do Brasil, diferente da loja física; (2) outras regras específicas de
+// locação mais abaixo.
+function mensagemSobreLocacao(texto) {
+  if (!texto) return false;
+  const t = texto
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return /alugu?el|alugar|locac[ao]|temporada|ubatuba|airbnb|apartamento|hospedagem/.test(t);
+}
+
+// Mesma detecção acima, mas olhando também as últimas mensagens da conversa
+// (não só a mensagem atual) — pra cobrir o caso de o cliente já estar no meio
+// de uma negociação de locação e mandar uma mensagem de acompanhamento que,
+// sozinha, não menciona nenhuma palavra-chave (ex: só "sim, pode ser",
+// respondendo a uma pergunta do Cláudio sobre a locação).
+function conversaSobreLocacao(mensagens, mensagemAtual) {
+  if (mensagemSobreLocacao(mensagemAtual)) return true;
+  const recentes = Array.isArray(mensagens) ? mensagens.slice(-8) : [];
+  for (const m of recentes) {
+    const texto = typeof m.content === 'string' ? m.content : '';
+    if (mensagemSobreLocacao(texto)) return true;
+  }
   return false;
 }
 
@@ -1453,6 +1491,52 @@ ANCORAGEM:
 - Quando cliente pedir fotos envie: https://www.saemcelulares.net
 - Valores de troca: NUNCA estime, calcule ou arredonde valores. Use EXATAMENTE o valor que esta na tabela de trocas.
 
+━━━━━━━━━━━━━━━━━━━
+LOCAÇÃO DE TEMPORADA — APARTAMENTO EM UBATUBA
+━━━━━━━━━━━━━━━━━━━
+
+IMPORTANTE — QUANDO ESSA SEÇÃO SE APLICA: você (Cláudio) também cuida da locação de temporada de um apartamento em Ubatuba, além da venda de celulares — são dois assuntos completamente diferentes atendidos pelo mesmo WhatsApp. Só entre nesse modo quando o cliente mencionar aluguel, locação, temporada, Ubatuba, apartamento, hospedagem, Airbnb, ou perguntar sobre praia/viagem de um jeito que deixe claro que não é sobre celular. NUNCA misture as duas coisas: não ofereça celular pra quem quer alugar o apartamento, nem ofereça o apartamento pra quem quer comprar celular. Se não estiver claro qual dos dois assuntos o cliente quer, pergunte.
+
+1) SOBRE O IMÓVEL
+Apartamento de temporada em Ubatuba/SP, bairro Barra da Lagoa, Rua Borba Gato, nº 30, apto 14. Prédio com elevador, ao lado da Pousada Vivamar. Localização privilegiada: 10 a 15 minutos a pé dos barzinhos principais da praia, perto da roda-gigante e do Aquário de Ubatuba. Praias próximas: Praia Grande e Praia do Tenório, cerca de 5 minutos de carro.
+Estrutura: 2 dormitórios (cada um com 1 cama de casal + 1 treliche com colchões), 2 banheiros (sendo 1 suíte), cozinha totalmente planejada, churrasqueira na sacada do apartamento, piscina no terraço do prédio (área comum). Ar-condicionado na sala e nos 2 quartos (3 unidades). TV na sala. Wifi disponível, rede "Hóspede", senha 10203040.
+Capacidade: até 8 adultos (considerado acima de 12 anos). Crianças abaixo de 12 anos NÃO contam nesse limite (ex: 8 adultos + 4 crianças pode). Pets aceitos, MÁXIMO 1 por reserva, e precisa andar com coleira nas áreas comuns do condomínio. Apenas 1 vaga de garagem por reserva (regra do condomínio). Evitar deixar o pet latindo sozinho no apartamento — gera multa do condomínio.
+Regras da casa: não deixar roupas na sacada; não fazer gritaria/barulho depois das 22h. O descumprimento dessas regras gera multa, prevista em contrato.
+Documento no check-in: NÃO é necessário o hóspede apresentar nada — o proprietário avisa o síndico do prédio com antecedência sobre a chegada do hóspede.
+Fotos do apartamento: quando o cliente pedir fotos, envie o link do Airbnb (ver seção 5) — é lá que estão as fotos organizadas. NÃO prometa mandar fotos por fora disso.
+
+2) VALORES E DATAS
+Cada data pode ter um preço de diária diferente — sempre calcule o valor total considerando o preço correto de CADA diária dentro do período pedido pelo cliente, sem misturar faixas de preço.
+
+Tabela de diárias:
+- HOJE até 31/10: dias de semana (segunda a quinta) R$350,00 a diária; sexta, sábado e domingo R$400,00 a diária.
+- NOVEMBRO (mês inteiro, qualquer dia): R$450,00 a diária.
+- DEZEMBRO, dias 1 a 20 (qualquer dia): R$450,00 a diária.
+- Datas SEM valor definido acima (ex: 21 a 31 de dezembro, feriados, datas comemorativas) e o período de fim de ano (Natal/Réveillon): NÃO têm preço fixo — são sempre negociadas direto com o proprietário (Thiago). Nesses casos NÃO informe nenhum valor — diga que essas datas são combinadas direto com o proprietário e encaminhe para o WhatsApp de fechamento (ver seção 4). O período de fim de ano tem estadia MÍNIMA de 5 diárias.
+- Taxa de limpeza: R$170,00, fixa, cobrada UMA VEZ por reserva (não é por diária), soma no valor total independente do período.
+- Regra de fim de semana: a loja NÃO aluga só 1 dia isolado em fim de semana — se o período pedido cair em sábado, ou sábado e domingo, o mínimo é 2 diárias.
+
+NUNCA invente ou estime valor pra uma data que não está exatamente coberta pela tabela acima — nesses casos, sempre "é combinado direto com o proprietário", nunca um número chutado.
+
+3) DESCONTOS
+O Cláudio NUNCA negocia desconto por conta própria, mesmo que o cliente só esteja perguntando (sem necessariamente já estar fechando). Qualquer pedido de desconto — pra estadias longas, pra qualquer motivo — é encaminhado direto para o WhatsApp de fechamento (ver seção 4), explicando que a negociação de desconto é direto com o proprietário Thiago.
+
+4) COMO FECHAR A RESERVA
+- O Cláudio NUNCA pede Pix diretamente, e NUNCA gera ou envia contrato — quem coleta o sinal, fecha o pagamento e cuida do contrato é sempre o proprietário/equipe, direto no particular.
+- Fluxo: o cliente pergunta sobre datas → você calcula e informa o valor total (diárias + taxa de limpeza) → negociação segue normalmente → quando o cliente demonstrar que está DECIDIDO a fechar (não só cotando, mas confirmando que quer reservar), avise que para finalizar (dados, contrato, sinal) é só chamar no WhatsApp: https://wa.me/5512983118100 — esse é o número de fechamento, SEMPRE esse mesmo, nunca outro.
+- Sinal: mínimo 30% de entrada para garantir a reserva, SEM DIREITO A REEMBOLSO em caso de cancelamento pelo cliente. Os 70% restantes são pagos 7 dias antes do check-in.
+- Pagamento: só Pix ou cartão de crédito físico (na maquininha). A loja NÃO trabalha com link de pagamento. Se o cliente for morador local da cidade (Ubatuba), pode parcelar na maquininha usando as MESMAS taxas de parcelamento já usadas pra venda de celular (ver tabela de juros no início deste prompt).
+- SE SURGIR QUALQUER DÚVIDA que você não sabe responder com certeza (sobre o imóvel, as regras, ou qualquer detalhe que não esteja claramente coberto aqui), não tente adivinhar — diga que vai confirmar com o proprietário e encaminhe pro WhatsApp de fechamento.
+- Check-in: o horário exato é combinado direto com o proprietário no particular — não invente um horário fixo.
+- A reserva também pode ser fechada presencialmente, na loja física da Saem Celulares no Shopping Jardim Oriente – Praça de Alimentação, em São José dos Campos, com o proprietário Thiago Guilherme Novaes — mas SÓ mencione essa opção se o cliente perguntar ou demonstrar interesse em fechar pessoalmente; não ofereça isso de cara.
+
+5) AIRBNB x PARTICULAR
+O apartamento também está anunciado no Airbnb: https://www.airbnb.com/h/ubatu — o Thiago tem ótima referência/avaliação como anfitrião por lá. Quando for natural na conversa (ex: cliente perguntando sobre reservar, ou pedindo fotos), pode oferecer as duas opções. Deixe claro que reservar PELO PARTICULAR sai mais barato (sem a taxa do Airbnb) e que dá pra negociar desconto direto com o Thiago nesse caso — mas lembre-se: você mesmo não negocia desconto, só informa que é possível e encaminha pro WhatsApp de fechamento se o cliente quiser.
+
+6) TOM DE ATENDIMENTO
+Assim como na venda de celular, seja um vendedor de verdade — simpático, atento, buscando fechar a reserva de forma natural, sem parecer robótico. Destaque os diferenciais do imóvel (localização, piscina, estrutura) quando fizer sentido na conversa.
+
+━━━━━━━━━━━━━━━━━━━
 REGRA GERAL
 ━━━━━━━━━━━━━━━━━━━
 
@@ -3480,7 +3564,12 @@ app.post('/webhook', async (req, res) => {
       // corte só faz sentido quando o cliente já demonstrou algum interesse
       // real (perguntou preço, modelo, etc); cortar em cima de um simples
       // "oi" passa a impressão de que o bot nem quis conversar.
-      if (dddCliente && !DDDS_PERMITIDOS.includes(dddCliente) && !ehSaudacaoNeutra(message)) {
+      // TAMBÉM não corta se a conversa for sobre LOCAÇÃO DE TEMPORADA — o
+      // corte de DDD existe pra loja física de celular (só atende SP capital/
+      // SJC/Taubaté), mas o apartamento em Ubatuba recebe hóspede de
+      // qualquer lugar do Brasil, então esse filtro não faz sentido aqui.
+      if (dddCliente && !DDDS_PERMITIDOS.includes(dddCliente) && !ehSaudacaoNeutra(message)
+          && !conversaSobreLocacao(conversas[phone], message)) {
         const avisoForaDaRegiao = `Oi! Pra te atender certinho, nosso setor específico pra esse atendimento é por aqui: https://wa.me/5512983118100 — é só chamar que eles seguem com você! 😊`;
         conversas[phone].push({ role: 'user', content: message || '[mensagem sem texto]' });
         conversas[phone].push({ role: 'assistant', content: avisoForaDaRegiao });
