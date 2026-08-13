@@ -326,7 +326,15 @@ const TOPICOS_REPETIVEIS = {
   cor: /\bcor\b|\bcores\b|prefer[eê]ncia de cor/,
   entrega: /entrega|motoboy|\bretirar\b|\bbuscar\b/,
   garantia: /garantia/,
-  parcelamento: /parcela|entrada|financiamento/,
+  // ERRO REAL QUE JÁ ACONTECEU: a palavra "entrada" estava nessa lista, mas
+  // ela é vocabulário absolutamente normal em QUALQUER negociação (trade-in,
+  // "dar de entrada", confirmar o valor de entrada) — inclusive é comum
+  // aparecer várias vezes bem na hora que o cliente está fechando a compra.
+  // Contar isso como "repetição suspeita" e cortar a conversa bem no
+  // momento de fechamento é o pior timing possível. Mantido só "parcela" e
+  // "financiamento", que são específicos o bastante pra não pegar conversa
+  // normal de negociação.
+  parcelamento: /parcela|financiamento/,
   desconto: /desconto|mais barato|abaixar o valor/,
 };
 
@@ -3014,7 +3022,7 @@ async function gerarRespostaCorrigindoRecusaTroca(mensagens) {
   return null;
 }
 
-function respostaNegaModeloQueExisteNaTabela(reply) {
+function respostaNegaModeloQueExisteNaTabela(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
   const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
   if (!regexNegacao.test(replyLower)) return false;
@@ -3023,7 +3031,26 @@ function respostaNegaModeloQueExisteNaTabela(reply) {
   const tabelaNormalizada = normalizarTexto(tabelaCrua);
   if (!tabelaNormalizada) return false;
 
-  const modelosNegados = [...new Set(extrairModelosNegados(normalizarTexto(reply)))];
+  let modelosNegados = [...new Set(extrairModelosNegados(normalizarTexto(reply)))];
+
+  // ERRO REAL QUE JÁ ACONTECEU (e MUITO comum): a frase de recusa genérica
+  // "não temos esse modelo específico disponível" — usada como resposta
+  // padrão sempre que o Cláudio não acha o modelo — NUNCA repete o nome do
+  // modelo dentro da própria frase (diz "esse modelo", não "iPhone 17 Pro
+  // Max 256GB"). Como extrairModelosNegados só pega o nome do modelo
+  // quando ele aparece LOGO APÓS a negação no texto, essa frase genérica
+  // sempre resultava em lista vazia — e a trava nunca disparava, mesmo
+  // quando o modelo pedido pelo cliente estava certinho na tabela. Pra
+  // cobrir esse caso: se a negação for genérica (sem nomear nenhum
+  // modelo), usamos o modelo que o CLIENTE mencionou na própria pergunta
+  // como referência a conferir na tabela.
+  if (modelosNegados.length === 0) {
+    const negacaoGenerica = /esse\s+modelo|este\s+modelo|o\s+modelo\s+especifico|o\s+modelo\s+específico/.test(replyLower);
+    if (negacaoGenerica && mensagemCliente) {
+      modelosNegados = [...new Set(extrairModelosMencionados(normalizarTexto(mensagemCliente)))];
+    }
+  }
+
   if (modelosNegados.length === 0) return false;
 
   for (const modelo of modelosNegados) {
@@ -3031,7 +3058,7 @@ function respostaNegaModeloQueExisteNaTabela(reply) {
     // "iphone 15" com "iphone 15 pro" (substring parcial enganosa).
     const regexBusca = new RegExp(`\\b${modelo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|gb|$)`);
     if (regexBusca.test(tabelaNormalizada)) {
-      console.log(`⚠️ Negação incorreta bloqueada: Cláudio disse "não temos ${modelo}" mas o modelo existe na tabela`);
+      console.log(`⚠️ Negação incorreta bloqueada: Cláudio disse "não temos ${modelo}" (ou recusa genérica) mas o modelo existe na tabela`);
       return true;
     }
   }
@@ -3731,7 +3758,7 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
-      if (respostaNegaModeloQueExisteNaTabela(reply)) {
+      if (respostaNegaModeloQueExisteNaTabela(reply, transcricao)) {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
@@ -3823,7 +3850,7 @@ app.post('/webhook', async (req, res) => {
       const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
-    if (respostaNegaModeloQueExisteNaTabela(reply)) {
+    if (respostaNegaModeloQueExisteNaTabela(reply, message)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
