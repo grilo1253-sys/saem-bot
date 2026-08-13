@@ -326,7 +326,7 @@ const TOPICOS_REPETIVEIS = {
   cor: /\bcor\b|\bcores\b|prefer[eê]ncia de cor/,
   entrega: /entrega|motoboy|\bretirar\b|\bbuscar\b/,
   garantia: /garantia/,
-  parcelamento: /parcela|entrada|financiamento/,
+  parcelamento: /parcela|financiamento/,
   desconto: /desconto|mais barato|abaixar o valor/,
 };
 
@@ -2204,7 +2204,15 @@ function mensagemPareceTroca(mensagemCliente) {
     /pre.?valor|pré.?valor/,
     /valor\s+(estimado\s+)?d[ae]\s+avalia[cç][aã]o/,
     /passa(r)?\s+(um\s+)?(pre.?valor|pré.?valor|valor\s+estimado)/,
-    /complementar\s+(a\s+|na\s+)?compra/
+    /complementar\s+(a\s+|na\s+)?compra/,
+    // ERRO REAL QUE JÁ ACONTECEU: cliente perguntou "iPhone 16 pro 128gb 90%
+    // pega por quantos pelo 17 pro?" — ordem invertida de "quanto pega"
+    // (aqui é "pega ... por quantos"), que nenhum padrão acima cobria.
+    // Essa é uma forma muito comum de perguntar o valor de troca.
+    /pega(m)?\s+por\s+quant[oa]s?/,
+    /paga(m)?\s+por\s+quant[oa]s?/,
+    /vale\s+quant[oa]s?/,
+    /fica\s+quant[oa]s?\s+(pelo|pela|no|na)\s+\w+/
   ];
   return padroesTroca.some(p => p.test(texto));
 }
