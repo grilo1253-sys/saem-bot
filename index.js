@@ -1919,18 +1919,6 @@ async function gerarRespostaCorrigindoCorModelo(mensagens) {
   return null;
 }
 
-// ==========================================
-// TRAVA DE SEGURANÇA — PREÇO DESALINHADO DO MODELO (MODELO CERTO, PREÇO DE OUTRA LINHA)
-// ==========================================
-// Erro real que já aconteceu: cliente perguntou o valor do "iPhone 17 Pro
-// Max 256GB" e o Cláudio respondeu "iPhone 17 Pro Max 256GB — R$6.299,00" —
-// só que na tabela o iPhone 17 Pro Max 256GB (Novo) custa R$7.399,00; o
-// R$6.299,00 é do iPhone 17 PRO (sem "Max") 256GB Seminovo, uma linha
-// diferente. A trava "modelo fora da tabela" não pega esse caso porque ela
-// só confere se o texto "modelo+gb" existe EM ALGUM LUGAR da tabela — e
-// "iPhone 17 Pro Max 256GB" de fato existe (só que com outro preço). Esta
-// trava confere, além do modelo existir, se o PREÇO citado junto realmente
-// pertence a essa linha específica do modelo.
 function construirMapaModeloPreco(tabelaCrua) {
   const mapa = {};
   const blocos = tabelaCrua.split(/\n\s*\n/);
@@ -1939,17 +1927,12 @@ function construirMapaModeloPreco(tabelaCrua) {
     const modeloMatch = blocoNormalizado.match(/iphone\s+\d+[a-z]*(?:\s+(?:pro\s+max|pro|plus|mini))?\s+\d{2,4}\s*gb/);
     if (!modeloMatch) continue;
     const modelo = modeloMatch[0];
-
     const linhaPreco = bloco.split('\n').find(l => l.includes('💰'));
     if (!linhaPreco) continue;
     const precoMatch = linhaPreco.match(/R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/i);
     if (!precoMatch) continue;
     const precoNum = parseFloat(precoMatch[1].replace(/\./g, '').replace(',', '.'));
     if (isNaN(precoNum)) continue;
-
-    // O mesmo modelo+gb pode aparecer em mais de um bloco (cores/lojas
-    // diferentes, às vezes preços levemente diferentes por loja) — guarda
-    // todos os preços válidos encontrados pra esse modelo.
     if (!mapa[modelo]) mapa[modelo] = new Set();
     mapa[modelo].add(precoNum);
   }
@@ -1960,31 +1943,23 @@ function respostaTemPrecoDesalinhadoDoModelo(reply) {
   if (!/r\$/i.test(reply)) return false;
   const replyLower = reply.toLowerCase();
   if (replyLower.includes('equipe') && (replyLower.includes('verificar') || replyLower.includes('retorno'))) return false;
-
   const tabelaCrua = process.env.PRICE_TABLE || '';
   if (!tabelaCrua) return false;
-
   const mapaModeloPreco = construirMapaModeloPreco(tabelaCrua);
-
-  // Percorre a resposta linha por linha, pareando cada valor em R$ com o
-  // modelo+gb mencionado mais recentemente (mesma linha ou linha(s) acima) —
-  // reflete o jeito que o Cláudio normalmente lista as opções.
   const linhas = reply.split('\n');
   let ultimoModelo = null;
   for (const linha of linhas) {
     const modelosNaLinha = extrairModelosMencionados(normalizarTexto(linha)).filter(m => /\d{2,4}gb/.test(m));
     if (modelosNaLinha.length > 0) ultimoModelo = modelosNaLinha[modelosNaLinha.length - 1];
-    if (!ultimoModelo || !mapaModeloPreco[ultimoModelo]) continue; // modelo sem gb ou fora da tabela — outra trava cobre isso
-
+    if (!ultimoModelo || !mapaModeloPreco[ultimoModelo]) continue;
     const precoMatch = linha.match(/R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/i);
     if (!precoMatch) continue;
     const precoResposta = parseFloat(precoMatch[1].replace(/\./g, '').replace(',', '.'));
     if (isNaN(precoResposta)) continue;
-
     const precosValidos = mapaModeloPreco[ultimoModelo];
     const bateComAlgum = [...precosValidos].some(p => Math.abs(p - precoResposta) < 0.01);
     if (!bateComAlgum) {
-      console.log(`⚠️ Preço desalinhado bloqueado: "${ultimoModelo}" com R$${precoResposta} não bate com o(s) preço(s) real(is) da tabela pra esse modelo (${[...precosValidos].join(', ')})`);
+      console.log(`⚠️ Preço desalinhado bloqueado: modelo com preço que não bate com a tabela`);
       return true;
     }
   }
@@ -1994,9 +1969,7 @@ function respostaTemPrecoDesalinhadoDoModelo(reply) {
 async function gerarRespostaCorrigindoPrecoDesalinhado(mensagens) {
   try {
     if (mensagens.length === 0) return null;
-
-    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE, NÃO RESPONDA A ELA DIRETAMENTE, APENAS SIGA A ORIENTAÇÃO]: Sua resposta anterior citou um modelo+memória junto com um PREÇO que não pertence à linha exata dele na tabela (o preço foi emprestado de outra linha — outro modelo, memória ou condição parecida, ex: confundir "iPhone 17 Pro" com "iPhone 17 Pro Max", ou "Novo" com "Seminovo"). Releia a tabela de preços com muita atenção, linha por linha, e confira exatamente qual preço está escrito JUNTO do modelo+memória que o cliente pediu — preste atenção especial em não confundir "Pro" com "Pro Max", nem memórias/condições parecidas. Refaça a resposta com o preço EXATO e correto dessa linha específica (nunca invente nem aproxime). Se esse modelo+memória+condição exata não existir na tabela, diga isso claramente e ofereça a opção real mais parecida que exista, com preço correto. Seja breve (1 a 4 frases).';
-
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA]: Sua resposta anterior citou um modelo+memória junto com um PREÇO que não pertence à linha exata dele na tabela. Releia a tabela com atenção e refaça com o preço EXATO correto dessa linha específica. Seja breve.';
     const ultima = mensagens[mensagens.length - 1];
     let ultimaComInstrucao;
     if (typeof ultima.content === 'string') {
@@ -2009,13 +1982,12 @@ async function gerarRespostaCorrigindoPrecoDesalinhado(mensagens) {
       ultimaComInstrucao = ultima;
     }
     const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
-
     const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
     if (!respostaTemPrecoDesalinhadoDoModelo(respostaCorrigida)) {
       return respostaCorrigida;
     }
   } catch (e) {
-    console.error('Erro ao corrigir preço desalinhado do modelo:', e.message);
+    console.error('Erro ao corrigir preço desalinhado:', e.message);
   }
   return null;
 }
@@ -2926,8 +2898,31 @@ function mensagemPareceManutencao(mensagemCliente) {
   return padroesManutencao.some(p => p.test(texto));
 }
 
-function respostaManutencaoTratadaComoVenda(mensagemCliente, reply) {
-  if (!mensagemPareceManutencao(mensagemCliente)) return false;
+// ERRO REAL QUE JÁ ACONTECEU (outra variação): depois de o Cláudio perguntar
+// "E o que precisa consertar nele? Tela, bateria, alguma outra coisa?", o
+// cliente respondeu só "Tela" — uma palavra só, sem repetir nenhum contexto
+// de manutenção. mensagemPareceManutencao("Tela") sozinha não bate com
+// nenhum padrão, então a trava não disparava mesmo a conversa sendo
+// claramente sobre manutenção. Esta função olha também se o CLÁUDIO já
+// tinha acabado de perguntar sobre conserto/manutenção — se sim, qualquer
+// resposta curta do cliente (tela, bateria, câmera etc.) ainda conta como
+// contexto de manutenção.
+function assistentePerguntouSobreManutencao(mensagens) {
+  if (!Array.isArray(mensagens)) return false;
+  const ultimasMensagens = mensagens.slice(-9, -1); // últimas ~8, excluindo a mensagem atual do cliente
+  const padraoPerguntaManutencao = /consert|conserto|reparo|orcamento|orçamento|display|manutencao|manutenção/;
+  for (let i = ultimasMensagens.length - 1; i >= 0; i--) {
+    const m = ultimasMensagens[i];
+    if (m.role !== 'assistant') continue;
+    const texto = normalizarTexto(typeof m.content === 'string' ? m.content : '');
+    if (padraoPerguntaManutencao.test(texto)) return true;
+  }
+  return false;
+}
+
+function respostaManutencaoTratadaComoVenda(mensagemCliente, reply, mensagens) {
+  const pareceManutencao = mensagemPareceManutencao(mensagemCliente) || assistentePerguntouSobreManutencao(mensagens);
+  if (!pareceManutencao) return false;
   if (!reply) return false;
   const replyLower = reply.toLowerCase();
   // Se já encaminha corretamente (pro número de manutenção ou "verificar com a equipe"), não é o bug
@@ -3115,7 +3110,7 @@ async function gerarRespostaCorrigindoRecusaTroca(mensagens) {
   return null;
 }
 
-function respostaNegaModeloQueExisteNaTabela(reply) {
+function respostaNegaModeloQueExisteNaTabela(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
   const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
   if (!regexNegacao.test(replyLower)) return false;
@@ -3124,7 +3119,26 @@ function respostaNegaModeloQueExisteNaTabela(reply) {
   const tabelaNormalizada = normalizarTexto(tabelaCrua);
   if (!tabelaNormalizada) return false;
 
-  const modelosNegados = [...new Set(extrairModelosNegados(normalizarTexto(reply)))];
+  let modelosNegados = [...new Set(extrairModelosNegados(normalizarTexto(reply)))];
+
+  // ERRO REAL QUE JÁ ACONTECEU (e MUITO comum): a frase de recusa genérica
+  // "não temos esse modelo específico disponível" — usada como resposta
+  // padrão sempre que o Cláudio não acha o modelo — NUNCA repete o nome do
+  // modelo dentro da própria frase (diz "esse modelo", não "iPhone 17 Pro
+  // Max 256GB"). Como extrairModelosNegados só pega o nome do modelo
+  // quando ele aparece LOGO APÓS a negação no texto, essa frase genérica
+  // sempre resultava em lista vazia — e a trava nunca disparava, mesmo
+  // quando o modelo pedido pelo cliente estava certinho na tabela. Pra
+  // cobrir esse caso: se a negação for genérica (sem nomear nenhum
+  // modelo), usamos o modelo que o CLIENTE mencionou na própria pergunta
+  // como referência a conferir na tabela.
+  if (modelosNegados.length === 0) {
+    const negacaoGenerica = /esse\s+modelo|este\s+modelo|o\s+modelo\s+especifico|o\s+modelo\s+específico/.test(replyLower);
+    if (negacaoGenerica && mensagemCliente) {
+      modelosNegados = [...new Set(extrairModelosMencionados(normalizarTexto(mensagemCliente)))];
+    }
+  }
+
   if (modelosNegados.length === 0) return false;
 
   for (const modelo of modelosNegados) {
@@ -3132,7 +3146,7 @@ function respostaNegaModeloQueExisteNaTabela(reply) {
     // "iphone 15" com "iphone 15 pro" (substring parcial enganosa).
     const regexBusca = new RegExp(`\\b${modelo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|gb|$)`);
     if (regexBusca.test(tabelaNormalizada)) {
-      console.log(`⚠️ Negação incorreta bloqueada: Cláudio disse "não temos ${modelo}" mas o modelo existe na tabela`);
+      console.log(`⚠️ Negação incorreta bloqueada: Cláudio disse "não temos ${modelo}" (ou recusa genérica) mas o modelo existe na tabela`);
       return true;
     }
   }
@@ -3836,7 +3850,7 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoPrecoDesalinhado(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
-      if (respostaNegaModeloQueExisteNaTabela(reply)) {
+      if (respostaNegaModeloQueExisteNaTabela(reply, transcricao)) {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
@@ -3860,7 +3874,7 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
-      if (respostaManutencaoTratadaComoVenda(transcricao, reply)) {
+      if (respostaManutencaoTratadaComoVenda(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoManutencaoTratadaComoVenda(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
@@ -3932,7 +3946,7 @@ app.post('/webhook', async (req, res) => {
       const corrigida = await gerarRespostaCorrigindoPrecoDesalinhado(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
-    if (respostaNegaModeloQueExisteNaTabela(reply)) {
+    if (respostaNegaModeloQueExisteNaTabela(reply, message)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
@@ -3956,7 +3970,7 @@ app.post('/webhook', async (req, res) => {
       const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
-    if (respostaManutencaoTratadaComoVenda(message, reply)) {
+    if (respostaManutencaoTratadaComoVenda(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoManutencaoTratadaComoVenda(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
