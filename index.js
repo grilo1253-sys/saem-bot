@@ -2212,7 +2212,18 @@ function mensagemPareceTroca(mensagemCliente) {
     /pega(m)?\s+por\s+quant[oa]s?/,
     /paga(m)?\s+por\s+quant[oa]s?/,
     /vale\s+quant[oa]s?/,
-    /fica\s+quant[oa]s?\s+(pelo|pela|no|na)\s+\w+/
+    /fica\s+quant[oa]s?\s+(pelo|pela|no|na)\s+\w+/,
+    // ERRO REAL QUE JÁ ACONTECEU (mais duas variações): "Vc paga quanto
+    // nele?" e "Quanto paga no meu iphone 16..." — nenhuma das duas batia
+    // com os padrões acima, porque cada uma tenta prever uma ordem
+    // específica de palavras (pronome antes ou depois, "pega" mas não
+    // "paga" em certas posições, etc.), e a linguagem natural varia demais
+    // pra enumerar frase por frase. Em vez de continuar caçando frase por
+    // frase, estes dois padrões finais cobrem "quanto" e "pega"/"paga" em
+    // QUALQUER ordem, com até ~20 caracteres de distância entre eles —
+    // cobre a esmagadora maioria das formas de perguntar valor de troca.
+    /\bquant[oa]s?\b.{0,20}?\b(pega|paga)\b/,
+    /\b(pega|paga)(m)?\b.{0,20}?\bquant[oa]s?\b/
   ];
   return padroesTroca.some(p => p.test(texto));
 }
