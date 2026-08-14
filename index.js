@@ -779,6 +779,9 @@ Símbolos ✅ ☑️ ⚫ = Loja São José dos Campos
 Símbolos ⤴️ 🟣 = Loja Taubaté
 ⚠️ Só informar a loja quando o cliente perguntar.
 
+- REGRA DE PRECISÃO AO INFORMAR A LOJA — NUNCA CHUTAR:
+Quando o cliente perguntar em qual loja um aparelho está, PARE e confira com atenção redobrada antes de responder — é comum a tabela ter mais de uma linha com o MESMO nome de modelo (ex: dois "iPhone 14 Pro Max 256GB"), só que em condições, preços e símbolos (lojas) diferentes. Nunca informe a loja de cabeça ou por semelhança de nome — releia a linha EXATA que está sendo discutida na conversa (o preço e a condição específica que você já mencionou antes, ou que o cliente confirmou) e use o símbolo dela pra dizer a loja certa. Se o cliente perguntar sobre um modelo sem deixar claro qual das opções (quando existir mais de uma linha igual na tabela), não escolha uma aleatoriamente — pergunte qual delas (pelo preço ou pela condição) antes de afirmar a loja, ou liste as opções com a loja de cada uma. NUNCA informe uma loja em uma mensagem e outra loja diferente para o mesmo aparelho mais adiante na mesma conversa — isso já causou problema real de cliente sendo direcionado pra loja errada.
+
 - REGRA DE XIAOMI COM SÍMBOLO PRETO (⚫) — EXCLUSIVO SJC, POR ENCOMENDA E SOMENTE À VISTA (SEM TROCA):
 Xiaomis marcados com o símbolo preto (⚫) na tabela de preços são EXCLUSIVOS da loja de São José dos Campos e funcionam POR ENCOMENDA — ou seja, não são pronta entrega, precisam ser encomendados antes. Se o cliente demonstrar interesse em algum Xiaomi marcado com ⚫, informe que esse modelo/cor é exclusivo de São José dos Campos e que a compra é por encomenda, e encaminhe para o WhatsApp da equipe para confirmar prazo e fechar o pedido: https://wa.me/5512981880229. NÃO trate esse Xiaomi como pronta entrega, NÃO ofereça em Taubaté e NÃO estime prazo de encomenda por conta própria — quem confirma prazo e disponibilidade é a equipe por esse número.
 ATENÇÃO — SOMENTE VENDA À VISTA, NÃO ACEITA TROCA: esses Xiaomis de encomenda (símbolo ⚫) são vendidos SOMENTE à vista — a loja NÃO aceita nenhum aparelho do cliente como troca/entrada nessa compra, mesmo que o cliente ofereça um iPhone ou Android. Se o cliente perguntar sobre troca ou tentar dar outro aparelho como entrada para um Xiaomi ⚫, informe que esse modelo específico é só venda à vista, sem troca, e encaminhe para o WhatsApp acima para fechar o pedido. NÃO calcule nem estime valor de troca nessa situação. Essa restrição vale APENAS para os Xiaomis de encomenda marcados com ⚫ — todos os demais produtos e símbolos (iPhones, outros Android, seminovos, etc.) continuam aceitando troca normalmente, sem nenhuma mudança.
@@ -3129,6 +3132,61 @@ async function gerarRespostaCorrigindoRecusaTroca(mensagens) {
   return null;
 }
 
+// ==========================================
+// TRAVA DE SEGURANÇA GERAL — PERDA DE CONTEXTO EM RESPOSTA CURTA
+// ==========================================
+// Erro real que já aconteceu VÁRIAS vezes, de formas diferentes: o cliente
+// responde algo CURTO a uma pergunta que o Cláudio TINHA ACABADO de fazer
+// (ex: "128", "256gb", "64gb, bateria 73%, tela boa", "Tela", "preto") —
+// uma resposta que só faz sentido junto com o que já tinha sido perguntado
+// antes. Cada vez que isso vira uma variação de frase nova, era preciso
+// caçar padrão por padrão nas travas de troca/manutenção específicas — mas
+// o problema de fundo é sempre o mesmo: mensagem curta + "não temos esse
+// modelo" = quase sempre o Cláudio perdeu o fio do que já estava sendo
+// discutido, não é o cliente pedindo um modelo novo do zero.
+// Esta trava geral cobre isso pra QUALQUER assunto (venda, troca,
+// manutenção), sem precisar prever a frase exata.
+function respostaPerdeuContextoDeRespostaCurta(mensagemCliente, reply) {
+  if (!reply) return false;
+  const replyLower = reply.toLowerCase();
+  if (!/nao temos esse modelo|não temos esse modelo|nao encontrei esse modelo|não encontrei esse modelo/.test(replyLower)) return false;
+
+  const texto = (mensagemCliente || '').trim();
+  if (!texto) return false;
+  // Se a mensagem já menciona uma marca/modelo por extenso, não é uma
+  // resposta curta ambígua — é um pedido novo de verdade, deixa a trava
+  // específica de "modelo fora da tabela" cuidar disso.
+  if (/iphone|galaxy|xiaomi|redmi|poco|moto\s|watch|ipad/i.test(texto)) return false;
+  // Mensagens curtas (até ~50 caracteres) sem nome de aparelho — número
+  // solto, GB, cor, "sim", descrição de estado — são o padrão clássico de
+  // resposta a uma pergunta anterior.
+  return texto.length <= 50;
+}
+
+async function gerarRespostaCorrigindoPerdaDeContexto(mensagens) {
+  try {
+    if (mensagens.length === 0) return null;
+    const instrucao = '\n\n[INSTRUÇÃO INTERNA DO SISTEMA — NÃO É MENSAGEM DO CLIENTE]: Sua resposta anterior disse que não tem esse modelo disponível, mas a mensagem do cliente foi curta (um número, GB, cor, "sim", ou descrição de estado) — muito provavelmente é uma resposta direta a uma pergunta que VOCÊ MESMO fez antes (sobre memória, cor, estado do aparelho, ou modelo que já estava sendo discutido). Releia toda a conversa com atenção, identifique qual aparelho/modelo estava sendo discutido antes dessa resposta curta, e responda considerando esse contexto. NUNCA trate uma resposta curta isolada como se fosse um pedido de um modelo novo e desconhecido. Se depois de reler o contexto o modelo realmente não existir na tabela, aí sim explique isso claramente. Seja breve.';
+    const ultima = mensagens[mensagens.length - 1];
+    let ultimaComInstrucao;
+    if (typeof ultima.content === 'string') {
+      ultimaComInstrucao = { ...ultima, content: ultima.content + instrucao };
+    } else if (Array.isArray(ultima.content)) {
+      const conteudo = ultima.content.map(b => ({ ...b }));
+      conteudo.push({ type: 'text', text: instrucao });
+      ultimaComInstrucao = { ...ultima, content: conteudo };
+    } else {
+      ultimaComInstrucao = ultima;
+    }
+    const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
+    const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
+    return respostaCorrigida;
+  } catch (e) {
+    console.error('Erro ao corrigir perda de contexto em resposta curta:', e.message);
+  }
+  return null;
+}
+
 function respostaNegaModeloQueExisteNaTabela(reply, mensagemCliente) {
   const replyLower = reply.toLowerCase();
   const regexNegacao = /nao tem|não tem|indisponivel|indisponível|sem estoque|esgotado|nao temos|não temos/;
@@ -3860,6 +3918,10 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
         if (corrigida) reply = corrigida;
       }
+      if (respostaPerdeuContextoDeRespostaCurta(transcricao, reply)) {
+        const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
+        if (corrigida) reply = corrigida;
+      }
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       if (respostaTemCorErradaParaModelo(reply)) {
         const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
@@ -3954,6 +4016,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaTransferenciaSemTaxa(message, reply)) {
       const corrigida = await gerarRespostaCorrigindoTransferenciaSemTaxa(conversas[phone]);
+      if (corrigida) reply = corrigida;
+    }
+    if (respostaPerdeuContextoDeRespostaCurta(message, reply)) {
+      const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
       if (corrigida) reply = corrigida;
     }
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
