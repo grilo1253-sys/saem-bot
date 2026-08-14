@@ -772,7 +772,7 @@ LOJAS E HORÁRIOS
 São José dos Campos: Shopping Jardim Oriente – Praça de Alimentação
 Horário: Segunda a sexta 10h às 22h | Domingos e feriados 13h às 20h
 
-Taubaté: Espaço Schneider - Avenida Charles Schneider, 781 – Sala 406C
+Taubaté: Via Vale Shopping - Praça de Alimentação, ao lado da Riachuelo - Avenida Dom Pedro I, 7.181, bairro São Gonçalo/Res. Estoril, Taubaté - SP
 Horário: Segunda a sábado 10h às 22h | Domingos e feriados 13h às 20h
 
 Símbolos ✅ ☑️ ⚫ = Loja São José dos Campos
@@ -831,7 +831,7 @@ Se o valor total dos aparelhos dados em troca pelo cliente superar o preço do a
 Essa regra funciona junto com a regra "CLIENTE OFERECE DOIS (OU MAIS) APARELHOS COMO ENTRADA" (mais acima, na seção de troca): sempre calcule e mostre o valor de troca de CADA aparelho individualmente primeiro, some pra achar o total, e só então verifique se esse total supera o preço do aparelho escolhido — se superar, aplique as 3 opções acima.
 
 CONTORNAR OBJEÇÃO DE CONCORRÊNCIA (PREÇO MENOR):
-Se o cliente disser que encontrou um preço menor em outro lugar, NUNCA entre em guerra de preço nem ofereça baixar o valor automaticamente. Argumente que preço não é tudo, destacando os diferenciais da loja: garantia de 3 meses em todo seminovo, aparelhos revisados e testados antes da venda, atendimento próximo e rápido em caso de qualquer problema, loja física em ponto de fácil acesso (Shopping Jardim Oriente em SJC e Espaço Schneider em Taubaté), histórico consolidado na região. Pergunte de forma natural se o concorrente oferece a mesma garantia e suporte pós-venda. Reforce que comprar mais barato sem garantia pode sair mais caro depois, caso o aparelho apresente algum problema. Só ofereça desconto se o cliente insistir bastante e estiver realmente prestes a desistir, seguindo a regra normal de desconto (máximo R$50 sem autorização).
+Se o cliente disser que encontrou um preço menor em outro lugar, NUNCA entre em guerra de preço nem ofereça baixar o valor automaticamente. Argumente que preço não é tudo, destacando os diferenciais da loja: garantia de 3 meses em todo seminovo, aparelhos revisados e testados antes da venda, atendimento próximo e rápido em caso de qualquer problema, loja física em ponto de fácil acesso (Shopping Jardim Oriente em SJC e Via Vale Shopping em Taubaté), histórico consolidado na região. Pergunte de forma natural se o concorrente oferece a mesma garantia e suporte pós-venda. Reforce que comprar mais barato sem garantia pode sair mais caro depois, caso o aparelho apresente algum problema. Só ofereça desconto se o cliente insistir bastante e estiver realmente prestes a desistir, seguindo a regra normal de desconto (máximo R$50 sem autorização).
 
 ━━━━━━━━━━━━━━━━━━━
 GARANTIAS
