@@ -1,4 +1,5 @@
 
+
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
@@ -1967,6 +1968,19 @@ function respostaTemModeloForaDaTabela(reply) {
 
 const RESPOSTA_SEGURA_FALLBACK = 'No momento não temos esse modelo específico disponível. Consigo te mostrar nosso catálogo completo com tudo que temos: https://docs.google.com/document/d/10-sOETWnw8hazOiKq9eCZ3MG1L7kn3m8A71eFMOlZq0/edit?usp=drivesdk — tem algum outro modelo em mente? 😊';
 
+// ERRO REAL QUE JÁ ACONTECEU (e explica boa parte dos bugs recorrentes):
+// quando uma trava detecta que a resposta do Cláudio está errada (ex: troca
+// tratada como venda), o sistema pede pro Claude se corrigir — mas às vezes
+// a correção TAMBÉM sai errada (o Claude repete o mesmo erro na segunda
+// tentativa). Nesse caso, a função corretora retorna null, e o código
+// antigo fazia "if (corrigida) reply = corrigida" — ou seja, se a correção
+// falhasse, a resposta ERRADA ORIGINAL era mandada pro cliente do mesmo
+// jeito! A trava detectava o erro certinho, mas isso não impedia o erro de
+// chegar até o cliente. Esta resposta segura substitui a original sempre
+// que a correção falha — nunca afirma nada de errado, só avisa que vai
+// confirmar antes de responder.
+const RESPOSTA_SEGURA_AGUARDAR_EQUIPE = 'Deixa eu confirmar esse detalhe certinho antes de te passar a informação — só um instante que já te retorno! 😊';
+
 // ==========================================
 // TRAVA DE SEGURANÇA — LOOP DE RESPOSTA REPETIDA
 // ==========================================
@@ -3820,60 +3834,60 @@ app.post('/webhook', async (req, res) => {
       if (conversas[phone].length > tamanhoAntesAudio) conversas[phone] = conversas[phone].slice(0, tamanhoAntesAudio);
       if (respostaRepetidaEmLoop(reply, conversas[phone])) {
         const corrigida = await gerarRespostaQuebrandoLoop(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaPedeConfirmacaoJaConfirmada(reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoConfirmacaoRegressao(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaTrocaTratadaComoVenda(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaPerdeuContextoDeRespostaCurta(transcricao, reply)) {
         const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       if (respostaTemCorErradaParaModelo(reply)) {
         const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaTemPrecoDesalinhadoDoModelo(reply)) {
         const corrigida = await gerarRespostaCorrigindoPrecoDesalinhado(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaNegaModeloQueExisteNaTabela(reply, transcricao)) {
         const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaRecusaAparelhoNaTroca(reply, transcricao)) {
         const corrigida = await gerarRespostaCorrigindoRecusaTroca(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaInventouValorTrocaAndroid(reply)) {
         const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaTemValorTrocaRedmiNoteErrado(reply)) {
         const corrigida = await gerarRespostaCorrigindoValorRedmiNote(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaTemValorTrocaMotoGErrado(reply)) {
         const corrigida = await gerarRespostaCorrigindoValorMotoG(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaDomingoTaubateSemRodrigo(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaManutencaoTratadaComoVenda(transcricao, reply, conversas[phone])) {
         const corrigida = await gerarRespostaCorrigindoManutencaoTratadaComoVenda(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
         const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
-        if (corrigida) reply = corrigida;
+        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
       // Checagem final de loop: as travas acima (ex: modelo fora da tabela)
       // podem, na correção, cair de volta no MESMO texto genérico de
@@ -3912,68 +3926,68 @@ app.post('/webhook', async (req, res) => {
     if (conversas[phone].length > tamanhoAntes) conversas[phone] = conversas[phone].slice(0, tamanhoAntes);
     if (respostaRepetidaEmLoop(reply, conversas[phone])) {
       const corrigida = await gerarRespostaQuebrandoLoop(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaPedeConfirmacaoJaConfirmada(reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoConfirmacaoRegressao(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTrocaTratadaComoVenda(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoTrocaConfundidaComVenda(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaIgnorouPendenciaAtiva(message, reply, phone)) {
       const corrigida = await gerarRespostaCorrigindoPendenciaIgnorada(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTransferenciaSemTaxa(message, reply)) {
       const corrigida = await gerarRespostaCorrigindoTransferenciaSemTaxa(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaPerdeuContextoDeRespostaCurta(message, reply)) {
       const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
     if (respostaTemCorErradaParaModelo(reply)) {
       const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTemPrecoDesalinhadoDoModelo(reply)) {
       const corrigida = await gerarRespostaCorrigindoPrecoDesalinhado(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaNegaModeloQueExisteNaTabela(reply, message)) {
       const corrigida = await gerarRespostaCorrigindoNegacao(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaRecusaAparelhoNaTroca(reply, message)) {
       const corrigida = await gerarRespostaCorrigindoRecusaTroca(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaInventouValorTrocaAndroid(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorAndroid(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTemValorTrocaRedmiNoteErrado(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorRedmiNote(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTemValorTrocaMotoGErrado(reply)) {
       const corrigida = await gerarRespostaCorrigindoValorMotoG(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaDomingoTaubateSemRodrigo(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoDomingoTaubate(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaManutencaoTratadaComoVenda(message, reply, conversas[phone])) {
       const corrigida = await gerarRespostaCorrigindoManutencaoTratadaComoVenda(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     if (respostaTemPrecoManutencaoAndroidInventado(reply)) {
       const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
-      if (corrigida) reply = corrigida;
+      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     // Checagem final de loop (mesma explicação do fluxo de áudio acima).
     if (respostaRepetidaEmLoop(reply, conversas[phone])) {
