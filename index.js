@@ -390,6 +390,31 @@ function jaProcessouMensagem(messageId) {
   return false;
 }
 
+// CAMADA EXTRA DE DEDUPLICAÇÃO — por conteúdo, não só por messageId:
+// Erro real que já aconteceu: o cliente mandou "ok" UMA vez, mas recebeu DUAS
+// respostas do Cláudio seguidas (uma correta, e logo depois um "me perdi
+// aqui" do nada) — sem nenhuma mensagem nova do cliente entre as duas. A
+// checagem por messageId acima não pegou porque, nesse caso, o Z-API deve
+// ter mandado o mesmo evento com IDs diferentes (não é um reenvio idêntico
+// de webhook, é uma duplicação com ID novo a cada disparo — algo que já é
+// documentado como comportamento instável de algumas integrações de
+// WhatsApp). Esta segunda camada guarda o ÚLTIMO texto recebido de cada
+// telefone com o horário — se o MESMO texto (normalizado) chegar de novo do
+// MESMO número em menos de 6 segundos, é praticamente certo que seja o
+// mesmo evento duplicado (nenhum cliente real digita e reenvia a mesma
+// frase, do zero, em menos de 6 segundos), então ignoramos o processamento
+// da segunda vez — sem gerar nem mandar uma segunda resposta.
+const ultimaMensagemRecebidaPorTelefone = {};
+function ehMensagemDuplicadaPorConteudo(phone, texto) {
+  if (!phone || !texto) return false;
+  const anterior = ultimaMensagemRecebidaPorTelefone[phone];
+  const textoNormalizado = normalizarParaComparacao(texto);
+  const agora = Date.now();
+  const duplicada = !!anterior && anterior.texto === textoNormalizado && (agora - anterior.ts) < 6000;
+  ultimaMensagemRecebidaPorTelefone[phone] = { texto: textoNormalizado, ts: agora };
+  return duplicada;
+}
+
 // ==========================================
 // FILA DE PROCESSAMENTO POR TELEFONE (evita condição de corrida)
 // ==========================================
@@ -3716,6 +3741,17 @@ app.post('/webhook', async (req, res) => {
 
   if (!phone) return res.sendStatus(200);
   res.sendStatus(200);
+
+  // Segunda camada de deduplicação (por conteúdo) — ver explicação completa
+  // na função ehMensagemDuplicadaPorConteudo, lá em cima. Só se aplica a
+  // mensagens de texto de clientes de verdade (não admin, não vazias) — é
+  // exatamente o tipo de mensagem que gerou a resposta duplicada real que já
+  // aconteceu. Se for duplicada, ignora completamente: não processa, não
+  // chama o Claude, não manda nenhuma resposta extra.
+  if (message && phone !== NUMERO_ADMIN && ehMensagemDuplicadaPorConteudo(phone, message)) {
+    console.log(`⚠️ Mensagem duplicada por conteúdo ignorada (${phone}): "${message}"`);
+    return;
+  }
 
   // Determina qual telefone é o "dono" desse processamento — normalmente é
   // quem mandou a mensagem, mas no caso de resposta do admin no formato
