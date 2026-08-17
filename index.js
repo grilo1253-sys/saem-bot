@@ -1491,6 +1491,22 @@ REGRA GERAL
 Nunca inventar preços, estoque, valores de troca, garantias ou parcelamentos.
 Em caso de dúvida, informar que será necessário verificar com a equipe.`;
 
+// Recorte, dentro do SYSTEM_PROMPT, só da seção real "VALORES DE TROCA
+// (PRINCIPAIS MODELOS)" (tabela de troca de iPhone) — usado pela trava
+// anti-alucinação de modelo pra também aceitar modelos que só existem na
+// tabela de troca (ex: iPhone 8 Plus, que a loja não vende mas aceita como
+// entrada). Extraímos só esse trecho específico, e não o SYSTEM_PROMPT
+// inteiro, porque o restante do prompt tem parágrafos de instrução com
+// EXEMPLOS de conversa que citam modelo+memória apenas ilustrativamente —
+// usar o texto todo arriscaria validar por engano um modelo que só
+// apareceu num exemplo, não numa tabela de verdade.
+const TABELA_TROCA_IPHONE_NORMALIZADA = (() => {
+  const inicio = SYSTEM_PROMPT.indexOf('VALORES DE TROCA (PRINCIPAIS MODELOS)');
+  const fim = SYSTEM_PROMPT.indexOf('VALORES DE TROCA - APPLE WATCH');
+  if (inicio === -1 || fim === -1 || fim <= inicio) return '';
+  return normalizarTexto(SYSTEM_PROMPT.slice(inicio, fim));
+})();
+
 // ==========================================
 // FILTRO DE REATIVAÇÃO
 // ==========================================
@@ -1965,18 +1981,42 @@ function respostaTemModeloForaDaTabela(reply) {
 
   if (modelosMencionados.length === 0) return false;
 
-  // Verificação 1: o modelo+memória existe em ALGUM lugar da tabela
+  // Importante: nas tabelas de troca, a memória (GB) NÃO fica sempre colada
+  // no nome do modelo como na tabela de venda — é comum um formato do tipo
+  // "iPhone 8 Plus: ... 64GB R$300, 128GB R$350, 256GB R$400", onde "256GB"
+  // aparece bem depois de "Plus", não logo em seguida. Se a resposta citar
+  // "iPhone 8 Plus 256GB" (modelo+memória colados), essa string exata nunca
+  // vai bater com esse formato de tabela de troca, mesmo o modelo existindo
+  // normalmente ali. Por isso, além de checar o modelo+memória exatos,
+  // também checamos o modelo SEM a memória (ex: "iphone 8 plus") — se esse
+  // nome base já existe em alguma tabela (venda ou troca), consideramos
+  // válido. Isso mantém a proteção real (nome de modelo inventado, tipo
+  // "iPhone 25", nunca vai bater de nenhuma forma) sem bloquear respostas
+  // corretas de troca só por causa do formato da tabela.
+  // Usamos especificamente a TABELA_TROCA_IPHONE_NORMALIZADA (só a seção
+  // real de valores de troca de iPhone) em vez do SYSTEM_PROMPT inteiro —
+  // o prompt também contém parágrafos de instrução com EXEMPLOS de
+  // conversa que citam modelos+memória apenas ilustrativamente, e usar o
+  // texto inteiro correria o risco de validar por engano um modelo que só
+  // apareceu num exemplo, não numa tabela de verdade.
+  const tabelaCombinadaNormalizada = tabelaNormalizada + ' ' + TABELA_TROCA_IPHONE_NORMALIZADA;
   for (const modelo of modelosMencionados) {
-    if (!tabelaNormalizada.includes(modelo)) {
-      console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado na tabela de preços`);
+    const modeloSemMemoria = modelo.replace(/\s+\d{2,4}\s*gb$/, '').trim();
+    const existeComMemoria = tabelaCombinadaNormalizada.includes(modelo);
+    const existeSemMemoria = modeloSemMemoria !== modelo && tabelaCombinadaNormalizada.includes(modeloSemMemoria);
+    if (!existeComMemoria && !existeSemMemoria) {
+      console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado em nenhuma tabela (venda ou troca)`);
       return true;
     }
   }
 
-  // Verificação 2: se a resposta menciona explicitamente "Novo" ou "Seminovo",
-  // confirma que o modelo existe sob ESSA condição específica — evita pegar o
-  // preço de uma condição e rotular como se fosse a outra (ex: usar o preço do
-  // Novo e chamar de Seminovo, ou vice-versa).
+  // Verificação 2: se a resposta menciona explicitamente "Novo" ou "Seminovo"
+  // (linguagem exclusiva de VENDA — troca nunca usa esses termos), confirma
+  // que o modelo existe sob ESSA condição específica NA TABELA DE VENDA —
+  // aqui sim faz sentido restringir só à tabela de venda, porque só ela tem
+  // o conceito de Novo/Seminovo. Evita pegar o preço de uma condição e
+  // rotular como se fosse a outra (ex: usar o preço do Novo e chamar de
+  // Seminovo, ou vice-versa).
   const mencionaSeminovo = /\bseminovo\b/.test(replyLower);
   const mencionaNovo = /\bnovo\b/.test(replyLower) && !mencionaSeminovo;
   if (mencionaSeminovo || mencionaNovo) {
@@ -2040,14 +2080,22 @@ function respostaRepetidaEmLoop(reply, mensagens) {
 }
 
 // Detecta se a resposta final é um dos dois textos genéricos de fallback
-// (o "aguarde que já te retorno" ou o "me perdi aqui, pode repetir?").
-// Usado junto com o contador acima pra decidir quando escalar pra humano
-// em vez de insistir com mais uma resposta vaga.
+// Detecta se a resposta final é um dos textos genéricos de fallback: o
+// "aguarde que já te retorno" (RESPOSTA_SEGURA_AGUARDAR_EQUIPE), o "me
+// perdi aqui, pode repetir?" (TEXTO_APOLOGIA_PERDIDO), ou o "não temos esse
+// modelo... catálogo" (RESPOSTA_SEGURA_FALLBACK, usado quando a trava de
+// "modelo fora da tabela" não consegue gerar uma alternativa real). Os três
+// são igualmente "respostas vazias" do ponto de vista do cliente — nenhuma
+// resolve a dúvida dele — por isso os três contam pro mesmo contador de
+// escalonamento. Usado junto com o contador acima pra decidir quando
+// escalar pra humano em vez de insistir com mais uma resposta vaga.
 const TEXTO_APOLOGIA_PERDIDO = 'Peço desculpas, acho que me perdi aqui! Pode me confirmar de novo, com suas palavras, qual é exatamente a sua dúvida ou o que você precisa? Assim já te ajudo certinho 😊';
 function respostaEhFallbackGenerico(reply) {
   const n = normalizarParaComparacao(reply);
   if (!n) return false;
-  return n === normalizarParaComparacao(RESPOSTA_SEGURA_AGUARDAR_EQUIPE) || n === normalizarParaComparacao(TEXTO_APOLOGIA_PERDIDO);
+  return n === normalizarParaComparacao(RESPOSTA_SEGURA_AGUARDAR_EQUIPE)
+    || n === normalizarParaComparacao(TEXTO_APOLOGIA_PERDIDO)
+    || n === normalizarParaComparacao(RESPOSTA_SEGURA_FALLBACK);
 }
 
 // Escala a conversa pra atendimento humano — mesmo padrão já usado quando o
