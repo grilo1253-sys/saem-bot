@@ -136,6 +136,27 @@ const pendentesEquipe = carregarPendentes();
 const conversasEncerradas = carregarEncerradas();
 const contadoresForaRegiao = carregarContadoresForaRegiao();
 
+// ==========================================
+// CONTADOR DE RESPOSTAS "PERDIDAS" (fallback genérico / loop)
+// ==========================================
+// Problema real identificado em vários prints de conversa: quando uma das
+// travas de correção não consegue gerar uma resposta melhor, o Cláudio cai
+// no texto genérico RESPOSTA_SEGURA_AGUARDAR_EQUIPE ("Deixa eu confirmar
+// esse detalhe certinho... já te retorno!") — só que NADA de fato "retorna"
+// depois, porque não existe um passo seguinte que resolva a dúvida. Se isso
+// se repete na mensagem seguinte, o detector de loop troca essa resposta
+// por outra ainda mais genérica ("Peço desculpas, acho que me perdi
+// aqui..."), e como as duas mensagens genéricas ficam salvas no histórico,
+// o Cláudio tende a continuar preso nesse padrão pelas próximas mensagens
+// também — gerando várias chamadas extras e pagas à API do Claude (as
+// travas de correção) SEM nunca resolver a dúvida do cliente, e frustrando
+// quem está do outro lado. Este contador (em memória, por telefone) conta
+// quantas vezes SEGUIDAS isso aconteceu; na 2ª vez seguida, em vez de
+// insistir com mais uma resposta genérica, o bot já escala direto pra
+// atendimento humano (mesmo mecanismo usado quando o cliente pede um
+// atendente), evitando o loop e o gasto desnecessário de API.
+const contadorRespostaPerdida = {};
+
 // Número de análise pra onde encaminhamos: pedidos de pagamento no boleto e
 // clientes de DDD fora da região atendida.
 const NUMERO_ANALISE = '12981880229';
@@ -2016,6 +2037,44 @@ function respostaRepetidaEmLoop(reply, mensagens) {
     .slice(-2);
 
   return ultimasAssistente.some(m => normalizarParaComparacao(m.content) === replyNormalizada);
+}
+
+// Detecta se a resposta final é um dos dois textos genéricos de fallback
+// (o "aguarde que já te retorno" ou o "me perdi aqui, pode repetir?").
+// Usado junto com o contador acima pra decidir quando escalar pra humano
+// em vez de insistir com mais uma resposta vaga.
+const TEXTO_APOLOGIA_PERDIDO = 'Peço desculpas, acho que me perdi aqui! Pode me confirmar de novo, com suas palavras, qual é exatamente a sua dúvida ou o que você precisa? Assim já te ajudo certinho 😊';
+function respostaEhFallbackGenerico(reply) {
+  const n = normalizarParaComparacao(reply);
+  if (!n) return false;
+  return n === normalizarParaComparacao(RESPOSTA_SEGURA_AGUARDAR_EQUIPE) || n === normalizarParaComparacao(TEXTO_APOLOGIA_PERDIDO);
+}
+
+// Escala a conversa pra atendimento humano — mesmo padrão já usado quando o
+// cliente pede um atendente explicitamente. Chamado quando o bot cai 2x
+// seguidas numa resposta genérica/loop pro mesmo número: em vez de mandar
+// uma 3ª mensagem vaga, avisa o cliente com transparência, pausa o bot
+// nesse número e notifica o Saem/equipe pra assumir.
+async function escalarAtendimentoHumano(phone, motivoLog) {
+  try {
+    const aviso = 'Peço desculpas pela demora! Vou chamar um atendente da nossa equipe pra continuar te ajudando por aqui mesmo, só um instante 😊';
+    if (!conversas[phone]) conversas[phone] = [];
+    conversas[phone].push({ role: 'assistant', content: aviso });
+    if (conversas[phone].length > 20) conversas[phone] = conversas[phone].slice(-20);
+    salvarConversas();
+    conversasEncerradas[phone] = true;
+    salvarEncerradas();
+    contadorRespostaPerdida[phone] = 0;
+    await enviarMensagem(phone, aviso);
+    console.log(`🆘 ${phone} escalado pra atendimento humano — motivo: ${motivoLog}. Bot pausado pra esse número.`);
+    if (NUMERO_ADMIN) {
+      try {
+        await enviarMensagem(NUMERO_ADMIN, `🆘 *Cláudio se perdeu na conversa e escalou pra humano*\n\nCliente: ${phone}\nMotivo: ${motivoLog}\n\nO bot pausou as respostas automáticas pra esse número — pode assumir a conversa direto por lá.`);
+      } catch (e) {}
+    }
+  } catch (e) {
+    console.error('Erro ao escalar atendimento humano:', e.message);
+  }
 }
 
 // Quando a trava acima detecta o loop, pedimos pro Cláudio parar de repetir e
@@ -3901,9 +3960,20 @@ app.post('/webhook', async (req, res) => {
       // substituição acontece DEPOIS da checagem de loop lá em cima, ela
       // passava despercebida. Confere de novo aqui, bem no final, antes de
       // mandar pro cliente.
-      if (respostaRepetidaEmLoop(reply, conversas[phone])) {
-        console.log('⚠️ Loop final detectado (fallback repetido) — usando resposta de recuperação');
-        reply = 'Peço desculpas, acho que me perdi aqui! Pode me confirmar de novo, com suas palavras, qual é exatamente a sua dúvida ou o que você precisa? Assim já te ajudo certinho 😊';
+      {
+        const emLoop = respostaRepetidaEmLoop(reply, conversas[phone]);
+        const ehFallback = respostaEhFallbackGenerico(reply);
+        if (emLoop || ehFallback) {
+          contadorRespostaPerdida[phone] = (contadorRespostaPerdida[phone] || 0) + 1;
+          console.log(`⚠️ Resposta genérica/loop detectada (áudio) para ${phone} — ocorrência ${contadorRespostaPerdida[phone]}`);
+          if (contadorRespostaPerdida[phone] >= 2) {
+            await escalarAtendimentoHumano(phone, emLoop ? 'loop de resposta repetida (áudio)' : 'trava de correção sem resultado (áudio)');
+            return;
+          }
+          if (emLoop) reply = TEXTO_APOLOGIA_PERDIDO;
+        } else {
+          contadorRespostaPerdida[phone] = 0;
+        }
       }
       reply = removerApresentacaoRepetida(phone, reply);
       reply = removerBateriaNaoSolicitada(transcricao, reply);
@@ -3996,9 +4066,20 @@ app.post('/webhook', async (req, res) => {
       reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
     // Checagem final de loop (mesma explicação do fluxo de áudio acima).
-    if (respostaRepetidaEmLoop(reply, conversas[phone])) {
-      console.log('⚠️ Loop final detectado (fallback repetido) — usando resposta de recuperação');
-      reply = 'Peço desculpas, acho que me perdi aqui! Pode me confirmar de novo, com suas palavras, qual é exatamente a sua dúvida ou o que você precisa? Assim já te ajudo certinho 😊';
+    {
+      const emLoop = respostaRepetidaEmLoop(reply, conversas[phone]);
+      const ehFallback = respostaEhFallbackGenerico(reply);
+      if (emLoop || ehFallback) {
+        contadorRespostaPerdida[phone] = (contadorRespostaPerdida[phone] || 0) + 1;
+        console.log(`⚠️ Resposta genérica/loop detectada para ${phone} — ocorrência ${contadorRespostaPerdida[phone]}`);
+        if (contadorRespostaPerdida[phone] >= 2) {
+          await escalarAtendimentoHumano(phone, emLoop ? 'loop de resposta repetida' : 'trava de correção sem resultado');
+          return;
+        }
+        if (emLoop) reply = TEXTO_APOLOGIA_PERDIDO;
+      } else {
+        contadorRespostaPerdida[phone] = 0;
+      }
     }
     reply = removerApresentacaoRepetida(phone, reply);
     reply = removerBateriaNaoSolicitada(message, reply);
