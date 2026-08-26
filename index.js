@@ -3726,13 +3726,15 @@ app.post('/webhook', async (req, res) => {
 
   console.log('BODY:', JSON.stringify(body).substring(0, 300));
 
+  // Cláudio NUNCA deve responder em grupo, ponto final — nenhuma exceção por
+  // palavra-chave. Erro real que já aconteceu: a trava antiga deixava passar
+  // mensagens de grupo que continham palavras como "preço"/"aparelho"/
+  // "venda", e isso incluía a própria tabela de preços que chega automática
+  // no grupo "Tabela lojas" (lista de aparelhos com "R$", nomes de modelo,
+  // etc) — o Cláudio respondia "Oi, sou o Cláudio da Saem..." dentro do
+  // grupo, o que nunca deveria acontecer.
   const isGroup = body.isGroup || body.phone?.includes('-group');
-  if (isGroup) {
-    const msgGrupo = body.text?.message || body.text || '';
-    if (body.image || body.mimetype?.includes('image') || !msgGrupo) return res.sendStatus(200);
-    const assuntosPermitidos = ['troca', 'valor', 'preco', 'manutencao', 'conserto', 'cliente', 'venda', 'negoc', 'quanto', 'aparelho'];
-    if (!assuntosPermitidos.some(a => msgGrupo.toLowerCase().includes(a))) return res.sendStatus(200);
-  }
+  if (isGroup) return res.sendStatus(200);
 
   const phone = body.phone;
   const message = body.text?.message || body.text || '';
