@@ -1239,14 +1239,14 @@ Galaxy S23+: R$900
 Galaxy S23 Ultra: R$1.600
 Galaxy S23 FE: R$1.000
 
-Galaxy S24: R$1.450
-Galaxy S24+: R$1.700
-Galaxy S24 Ultra: R$2.900
+Galaxy S24: R$1.40
+Galaxy S24+: R$1.400
+Galaxy S24 Ultra: R$2.800
 Galaxy S24 FE: R$1.400
 
-Galaxy S25: R$2.200
+Galaxy S25: R$2.000
 Galaxy S25 fe : R$2.000
-Galaxy S25+: R$2.400
+Galaxy S25+: R$2.200
 Galaxy S25 Ultra: R$4.000
 
 SAMSUNG — LINHA GALAXY A
