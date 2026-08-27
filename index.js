@@ -1981,7 +1981,32 @@ async function gerarRespostaCorrigindoPrecoDesalinhado(mensagens) {
   return null;
 }
 
-function respostaTemModeloForaDaTabela(reply) {
+// Verifica se um modelo (já normalizado) foi mencionado junto com um preço
+// em R$ em alguma mensagem ANTERIOR do próprio Cláudio nesta conversa — ou
+// seja, se esse modelo já foi validado/estabelecido antes (o caso mais comum
+// é a REGRA DE OFERTAS EM IMAGENS: cliente manda print de uma promoção com
+// preço fora da tabela normal, Cláudio aceita certinho aquele valor pra
+// negociação — mas esse preço nunca vai estar na tabela do Admin nem na de
+// troca). Sem essa checagem, a trava de alucinação não tinha como saber que
+// aquele modelo+preço já foram combinados antes, e barrava (ou pior,
+// revertia) uma negociação que já estava certa, fazendo o Cláudio se
+// contradizer poucas mensagens depois ("não temos esse modelo" depois de já
+// ter cotado ele certinho).
+function modeloJaEstabelecidoNoHistorico(modelo, mensagens) {
+  if (!Array.isArray(mensagens) || !modelo) return false;
+  for (const m of mensagens) {
+    if (m.role !== 'assistant' || typeof m.content !== 'string') continue;
+    if (!/r\$/i.test(m.content)) continue;
+    const modeloSemMemoria = modelo.replace(/\s+\d{2,4}\s*gb$/, '').trim();
+    const textoNormalizado = normalizarTexto(m.content);
+    if (textoNormalizado.includes(modelo) || (modeloSemMemoria !== modelo && textoNormalizado.includes(modeloSemMemoria))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function respostaTemModeloForaDaTabela(reply, mensagens) {
   // Só verifica respostas que parecem oferecer um produto à venda (têm preço em R$)
   if (!/r\$/i.test(reply)) return false;
   // Não verifica quando o Cláudio já está encaminhando pra equipe (resposta já é segura)
@@ -2030,6 +2055,10 @@ function respostaTemModeloForaDaTabela(reply) {
     const existeComMemoria = tabelaCombinadaNormalizada.includes(modelo);
     const existeSemMemoria = modeloSemMemoria !== modelo && tabelaCombinadaNormalizada.includes(modeloSemMemoria);
     if (!existeComMemoria && !existeSemMemoria) {
+      if (modeloJaEstabelecidoNoHistorico(modelo, mensagens)) {
+        console.log(`ℹ️ "${modelo}" não está na tabela, mas já foi validado antes nesta conversa (provável oferta por imagem) — não bloqueando`);
+        continue;
+      }
       console.log(`⚠️ Possível alucinação bloqueada: "${modelo}" não encontrado em nenhuma tabela (venda ou troca)`);
       return true;
     }
@@ -3215,10 +3244,28 @@ async function gerarRespostaCorrigindoRecusaTroca(mensagens) {
 // discutido, não é o cliente pedindo um modelo novo do zero.
 // Esta trava geral cobre isso pra QUALQUER assunto (venda, troca,
 // manutenção), sem precisar prever a frase exata.
+// ERRO REAL QUE JÁ ACONTECEU (motivou a ampliação abaixo): cliente respondeu
+// "15 128 mesmo" — uma resposta curta e direta à pergunta que o PRÓPRIO
+// Cláudio tinha acabado de fazer ("prefere o 15 ou o 16? qual memória?").
+// Só que a resposta gerada pelo Claude para essa mensagem foi barrada por
+// OUTRA trava de segurança (ex: modelo+preço não bateu certinho com a
+// tabela) e virou o texto genérico RESPOSTA_SEGURA_AGUARDAR_EQUIPE antes de
+// chegar até aqui. Como esta trava só verificava se o texto continha
+// literalmente "não temos esse modelo", ela nunca disparava nesse caso — o
+// Cláudio ficava preso no genérico, sem nunca tentar reler o contexto e dar
+// uma resposta de verdade, até estourar o contador de "resposta perdida" e
+// escalar pra atendimento humano. Por isso agora esta trava também dispara
+// quando a resposta já é um dos textos genéricos de fallback (usa
+// respostaEhFallbackGenerico, que cobre RESPOSTA_SEGURA_AGUARDAR_EQUIPE,
+// TEXTO_APOLOGIA_PERDIDO e RESPOSTA_SEGURA_FALLBACK) — não só quando diz
+// "não temos esse modelo" — sempre que a mensagem do cliente for curta e
+// vier logo após uma pergunta do próprio Cláudio.
 function respostaPerdeuContextoDeRespostaCurta(mensagemCliente, reply) {
   if (!reply) return false;
   const replyLower = reply.toLowerCase();
-  if (!/nao temos esse modelo|não temos esse modelo|nao encontrei esse modelo|não encontrei esse modelo/.test(replyLower)) return false;
+  const pareceNaoTemModelo = /nao temos esse modelo|não temos esse modelo|nao encontrei esse modelo|não encontrei esse modelo/.test(replyLower);
+  const pareceFallbackGenerico = respostaEhFallbackGenerico(reply);
+  if (!pareceNaoTemModelo && !pareceFallbackGenerico) return false;
 
   const texto = (mensagemCliente || '').trim();
   if (!texto) return false;
@@ -3324,7 +3371,7 @@ async function gerarRespostaCorrigindoNegacao(mensagens) {
     const respostaCorrigida = await chamarClaude(mensagensComInstrucao);
     // Só aceita a correção se ela não cair em nenhuma das duas travas (nem
     // inventar modelo fora da tabela, nem negar de novo um modelo que existe)
-    if (!respostaTemModeloForaDaTabela(respostaCorrigida) && !respostaNegaModeloQueExisteNaTabela(respostaCorrigida)) {
+    if (!respostaTemModeloForaDaTabela(respostaCorrigida, mensagens) && !respostaNegaModeloQueExisteNaTabela(respostaCorrigida)) {
       return respostaCorrigida;
     }
   } catch (e) {
@@ -3369,7 +3416,7 @@ async function gerarRespostaComAlternativa(mensagens, respostaOriginalBloqueada)
     const mensagensComInstrucao = [...mensagens.slice(0, -1), ultimaComInstrucao];
 
     const respostaAlternativa = await chamarClaude(mensagensComInstrucao);
-    if (!respostaTemModeloForaDaTabela(respostaAlternativa)) {
+    if (!respostaTemModeloForaDaTabela(respostaAlternativa, mensagens)) {
       return respostaAlternativa;
     }
   } catch (e) {
@@ -3999,7 +4046,7 @@ app.post('/webhook', async (req, res) => {
         const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
         reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
       }
-      if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
+      if (respostaTemModeloForaDaTabela(reply, conversas[phone])) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       if (respostaTemCorErradaParaModelo(reply)) {
         const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
         reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
@@ -4110,7 +4157,7 @@ app.post('/webhook', async (req, res) => {
       const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
       reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
-    if (respostaTemModeloForaDaTabela(reply)) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
+    if (respostaTemModeloForaDaTabela(reply, conversas[phone])) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
     if (respostaTemCorErradaParaModelo(reply)) {
       const corrigida = await gerarRespostaCorrigindoCorModelo(conversas[phone]);
       reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
