@@ -1239,14 +1239,14 @@ Galaxy S23+: R$900
 Galaxy S23 Ultra: R$1.600
 Galaxy S23 FE: R$1.000
 
-Galaxy S24: R$1.40
-Galaxy S24+: R$1.400
-Galaxy S24 Ultra: R$2.800
+Galaxy S24: R$1.450
+Galaxy S24+: R$1.700
+Galaxy S24 Ultra: R$2.900
 Galaxy S24 FE: R$1.400
 
-Galaxy S25: R$2.000
+Galaxy S25: R$2.200
 Galaxy S25 fe : R$2.000
-Galaxy S25+: R$2.200
+Galaxy S25+: R$2.400
 Galaxy S25 Ultra: R$4.000
 
 SAMSUNG — LINHA GALAXY A
@@ -2150,6 +2150,26 @@ function respostaEhFallbackGenerico(reply) {
   return n === normalizarParaComparacao(RESPOSTA_SEGURA_AGUARDAR_EQUIPE)
     || n === normalizarParaComparacao(TEXTO_APOLOGIA_PERDIDO)
     || n === normalizarParaComparacao(RESPOSTA_SEGURA_FALLBACK);
+}
+
+// Erro real que já aconteceu: cliente perguntou "12 pro" (resposta curta a
+// uma pergunta do próprio Cláudio) e a correção tentada falhou (o modelo
+// pedido provavelmente nem está mais na tabela de preços atual, por ser
+// muito antigo) — o Cláudio mandou "Deixa eu confirmar esse detalhe
+// certinho... já te retorno!", só que NINGUÉM de fato retornava depois.
+// Essa mensagem só virava alerta pro Saem quando acontecia DUAS vezes
+// seguidas com o mesmo número (ver escalarAtendimentoHumano acima) — na
+// primeira vez, o cliente ficava esperando uma resposta que nunca chegava,
+// e o Saem não tinha como saber, porque nenhuma notificação era mandada.
+// Esta função avisa o Saem já na PRIMEIRA ocorrência (sem pausar o bot nem
+// encerrar a conversa — o Cláudio continua tentando normalmente nas
+// próximas mensagens), pra ele poder acompanhar ou responder manualmente se
+// quiser, em vez de descobrir só quando já eram duas falhas seguidas.
+async function avisarAdminRespostaGenericaPrimeiraVez(phone, motivoLog) {
+  if (!NUMERO_ADMIN) return;
+  try {
+    await enviarMensagem(NUMERO_ADMIN, `⚠️ *Cláudio não conseguiu responder direito*\n\nCliente: ${phone}\nMotivo: ${motivoLog}\n\nEle já mandou uma resposta genérica ("aguarda que já retorno") pro cliente, mas o bot continua tentando normalmente. Se quiser, dá uma olhada nessa conversa.`);
+  } catch (e) {}
 }
 
 // Escala a conversa pra atendimento humano — mesmo padrão já usado quando o
@@ -4044,7 +4064,16 @@ app.post('/webhook', async (req, res) => {
       }
       if (respostaPerdeuContextoDeRespostaCurta(transcricao, reply)) {
         const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
-        reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
+        // ERRO REAL QUE JÁ ACONTECEU: quando essa correção falhava (ex: o
+        // modelo que o cliente confirmou por número curto — "12 pro" — nem
+        // está mais na tabela de preços atual, por ser antigo), o Cláudio
+        // caía no texto genérico RESPOSTA_SEGURA_AGUARDAR_EQUIPE ("já te
+        // retorno") — só que ninguém de fato retornava depois, deixando o
+        // cliente esperando pra sempre. Em vez disso, quando a correção
+        // falha aqui, chamamos direto a mesma função usada pra "modelo fora
+        // da tabela" — ela já sabe oferecer 1-2 alternativas REAIS da
+        // tabela em vez de deixar a conversa em suspenso.
+        reply = corrigida || await gerarRespostaComAlternativa(conversas[phone], reply);
       }
       if (respostaTemModeloForaDaTabela(reply, conversas[phone])) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       if (respostaTemCorErradaParaModelo(reply)) {
@@ -4093,17 +4122,18 @@ app.post('/webhook', async (req, res) => {
       // substituição acontece DEPOIS da checagem de loop lá em cima, ela
       // passava despercebida. Confere de novo aqui, bem no final, antes de
       // mandar pro cliente.
+      // DECISÃO DO SAEM: nunca escalar pra atendimento humano só por causa
+      // de resposta genérica/loop — o Cláudio tem que continuar tentando
+      // resolver sozinho. Se o modelo pedido realmente não existir, ele
+      // oferece uma alternativa real da tabela (a mesma lógica de "modelo
+      // fora da tabela") em vez de travar a venda ou passar pra um humano.
       {
         const emLoop = respostaRepetidaEmLoop(reply, conversas[phone]);
         const ehFallback = respostaEhFallbackGenerico(reply);
         if (emLoop || ehFallback) {
           contadorRespostaPerdida[phone] = (contadorRespostaPerdida[phone] || 0) + 1;
-          console.log(`⚠️ Resposta genérica/loop detectada (áudio) para ${phone} — ocorrência ${contadorRespostaPerdida[phone]}`);
-          if (contadorRespostaPerdida[phone] >= 2) {
-            await escalarAtendimentoHumano(phone, emLoop ? 'loop de resposta repetida (áudio)' : 'trava de correção sem resultado (áudio)');
-            return;
-          }
-          if (emLoop) reply = TEXTO_APOLOGIA_PERDIDO;
+          console.log(`⚠️ Resposta genérica/loop detectada (áudio) para ${phone} — ocorrência ${contadorRespostaPerdida[phone]} — oferecendo alternativa em vez de travar`);
+          reply = await gerarRespostaComAlternativa(conversas[phone], reply);
         } else {
           contadorRespostaPerdida[phone] = 0;
         }
@@ -4155,7 +4185,10 @@ app.post('/webhook', async (req, res) => {
     }
     if (respostaPerdeuContextoDeRespostaCurta(message, reply)) {
       const corrigida = await gerarRespostaCorrigindoPerdaDeContexto(conversas[phone]);
-      reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
+      // Mesma correção do fluxo de áudio (ver comentário lá em cima): em vez
+      // de deixar o cliente esperando um "já te retorno" que nunca vem,
+      // oferece uma alternativa real da tabela quando a correção falha.
+      reply = corrigida || await gerarRespostaComAlternativa(conversas[phone], reply);
     }
     if (respostaTemModeloForaDaTabela(reply, conversas[phone])) reply = await gerarRespostaComAlternativa(conversas[phone], reply);
     if (respostaTemCorErradaParaModelo(reply)) {
@@ -4198,18 +4231,16 @@ app.post('/webhook', async (req, res) => {
       const corrigida = await gerarRespostaCorrigindoManutencaoAndroid(conversas[phone]);
       reply = corrigida || RESPOSTA_SEGURA_AGUARDAR_EQUIPE;
     }
-    // Checagem final de loop (mesma explicação do fluxo de áudio acima).
+    // Checagem final de loop (mesma explicação e mesma decisão do Saem do
+    // fluxo de áudio acima: nunca escalar pra humano, sempre tentar
+    // resolver ou oferecer alternativa real).
     {
       const emLoop = respostaRepetidaEmLoop(reply, conversas[phone]);
       const ehFallback = respostaEhFallbackGenerico(reply);
       if (emLoop || ehFallback) {
         contadorRespostaPerdida[phone] = (contadorRespostaPerdida[phone] || 0) + 1;
-        console.log(`⚠️ Resposta genérica/loop detectada para ${phone} — ocorrência ${contadorRespostaPerdida[phone]}`);
-        if (contadorRespostaPerdida[phone] >= 2) {
-          await escalarAtendimentoHumano(phone, emLoop ? 'loop de resposta repetida' : 'trava de correção sem resultado');
-          return;
-        }
-        if (emLoop) reply = TEXTO_APOLOGIA_PERDIDO;
+        console.log(`⚠️ Resposta genérica/loop detectada para ${phone} — ocorrência ${contadorRespostaPerdida[phone]} — oferecendo alternativa em vez de travar`);
+        reply = await gerarRespostaComAlternativa(conversas[phone], reply);
       } else {
         contadorRespostaPerdida[phone] = 0;
       }
