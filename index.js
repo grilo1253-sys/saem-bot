@@ -275,6 +275,32 @@ function pareceRespostaCurtaContextual(texto, historico) {
   return palavras.length <= 6;
 }
 
+// ERRO REAL QUE JÁ ACONTECEU: cliente mandou várias mensagens seguidas
+// cobrando resposta ("????", "???", "??????", "Consegui confirmar por
+// favor") depois de o bot ter ficado sem responder por um tempo — ou seja,
+// sem NENHUMA mensagem do assistente entre elas. pareceRespostaCurtaContextual
+// não pega esse caso porque ela exige que a ÚLTIMA mensagem do histórico
+// seja do assistente e contenha "?" — aqui a última mensagem era do próprio
+// cliente (a cobrança anterior), então a função retornava false. Sem
+// nenhuma palavra-chave de loja nessas mensagens, o contador de "fora do
+// assunto" foi subindo a cada uma delas até fechar a conversa sozinho,
+// mandando a mensagem genérica pra uma cliente que só estava cobrando uma
+// resposta no meio de uma negociação real. Esta função reconhece esse
+// padrão de cobrança/frustração (só pontuação, ou frases curtas de
+// cobrança) pra ele NUNCA contar como "fora do assunto".
+function pareceMensagemDeCobranca(texto) {
+  if (!texto) return false;
+  const t = texto.trim();
+  if (/^[?!.\s]+$/.test(t)) return true; // só pontuação: "?", "???", "??????"
+  const palavras = t.toLowerCase();
+  const padroesCobranca = [
+    /confirma(r|do|ção|çao)?/, /respond(e|eu|er)/, /consegui/, /oi\s*\?/,
+    /algu[ée]m/, /por favor/, /pfv/, /alo/, /ol[aá]\s*\?/
+  ];
+  const poucasPalavras = t.split(/\s+/).filter(Boolean).length <= 5;
+  return poucasPalavras && padroesCobranca.some(p => p.test(palavras));
+}
+
 // ==========================================
 // DETECÇÃO DE ASSUNTO REPETIDO (SINAL DE ENROLAÇÃO)
 // ==========================================
@@ -3985,7 +4011,7 @@ app.post('/webhook', async (req, res) => {
       // nunca é cortada por isso, porque cada mensagem relacionada à loja
       // zera o contador de novo.
       if (message && !ehSaudacaoNeutra(message)) {
-        if (pareceAssuntoDaLoja(message) || pareceRespostaCurtaContextual(message, conversas[phone])) {
+        if (pareceAssuntoDaLoja(message) || pareceRespostaCurtaContextual(message, conversas[phone]) || pareceMensagemDeCobranca(message)) {
           contadoresForaRegiao[phone] = 0;
         } else {
           contadoresForaRegiao[phone] = (contadoresForaRegiao[phone] || 0) + 1;
